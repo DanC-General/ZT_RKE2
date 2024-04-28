@@ -3,10 +3,12 @@
 #include <string.h> 
 #include <pcap/pcap.h> 
 // #include <net/ip.h> 
+#include <stdlib.h>
 #include <netinet/ip.h>
 #include <net/ethernet.h>
 #include <netinet/ether.h> 
 #include <netinet/tcp.h>
+
 
 void on_packet(u_char *user,const struct pcap_pkthdr* head,const u_char*
         content)
@@ -18,12 +20,27 @@ void on_packet(u_char *user,const struct pcap_pkthdr* head,const u_char*
     //     printf("%02X",(int)content[i+14]);
     //     i++;
     // }
+
+    // setuid(0);
     struct ether_header* eth_h = (struct ether_header*) content; 
-    printf("%s : %s\n",ether_ntoa(eth_h->ether_shost),ether_ntoa(eth_h->ether_dhost));
+    struct ether_addr* smac = (struct ether_addr*) (&eth_h->ether_shost);
+    struct ether_addr* dmac = (struct ether_addr*) (&eth_h->ether_dhost);
+    // dmac.ether_addr_octet = eth_h->ether_dhost;
+    // char *shost = malloc(100); 
+    // char *dhost = malloc(100);
+    // ether_ntohost(shost,smac);
+    // ether_ntohost(dhost, dmac);
+    // printf("%s : %s || %s : %s\n",ether_ntoa(smac),ether_ntoa(dmac),shost,dhost);
+    printf("%s : %s\n",ether_ntoa(smac),ether_ntoa(dmac));
     struct ip* ip_h = (struct ip*) (content + sizeof(struct ether_header)); 
     printf("%s : %s\n",inet_ntoa(ip_h->ip_src),inet_ntoa(ip_h->ip_dst));
     struct tcphdr* tcp_h = (struct tcphdr*) (content + sizeof(struct ether_header) + sizeof(struct ip)); 
     printf("%d : %d\n",tcp_h->th_sport,tcp_h->th_dport);
+    char* info = (char *) (content + sizeof(struct ether_header) + sizeof(struct ip) + sizeof(struct tcphdr));
+    printf("info: %zu %s\n", sizeof(struct ether_header) + sizeof(struct ip) + sizeof(struct tcphdr), info);
+    for (size_t i = sizeof(struct ether_header) + sizeof(struct ip) + sizeof(struct tcphdr); i < (size_t) head->len;i++){ 
+        printf("%c",content[i]);
+    }
     printf("\n");
 }
 int main(int argc, char *argv[])

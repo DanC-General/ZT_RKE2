@@ -1,0 +1,36 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+    kompose.cmd: kompose convert -f docker-compose.yaml -o k8s
+    kompose.version: 1.33.0 (3ce457399)
+  labels:
+    io.kompose.service: sql-db
+  name: sql-db
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      io.kompose.service: sql-db
+  template:
+    metadata:
+      annotations:
+        kompose.cmd: kompose convert -f docker-compose.yaml -o k8s
+        kompose.version: 1.33.0 (3ce457399)
+      labels:
+        io.kompose.network/app-default: "true"
+        io.kompose.service: sql-db
+    spec:
+      containers:
+        - env:
+            - name: ACCEPT_EULA
+              value: "Y"
+            - name: MSSQL_SA_PASSWORD
+              value: pas!@0jeaf0sdfji2~
+          image: mcr.microsoft.com/mssql/server:2022-latest
+          name: sql-db
+          ports:
+            - containerPort: 1433
+              hostPort: 1433
+              protocol: TCP
+      restartPolicy: Always

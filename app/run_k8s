@@ -1,0 +1,13 @@
+#!/bin/bash
+$ARG=""
+if [ $# -eq 0 ]; then 
+    echo "Applying"
+    ARG="apply"
+else
+    echo "Removing"
+    ARG="delete"
+fi
+for i in k8s/*; 
+    do echo $i; 
+    sudo kubectl $ARG -f $i
+done; 

@@ -1,0 +1,8 @@
+services:
+    http: 
+        image: python:3.10
+        volumes: 
+            - type: bind
+              source: ./
+              target: /app
+        

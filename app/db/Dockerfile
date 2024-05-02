@@ -2,7 +2,7 @@ FROM mysql:8
 
 ENV MYSQL_ROOT_PASSWORD=password123!.
 
-COPY db_init.sql /docker-entrypiont-initdb.d
+COPY db_init.sql /docker-entrypoint-initdb.d
 
 # VOLUME /var/lib/mysql
 

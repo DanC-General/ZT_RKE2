@@ -1,9 +1,6 @@
-CREATE DATABASE test; 
-use test; 
-
 CREATE TABLE abc( 
     LetterID varchar(100) NOT NULL PRIMARY KEY,
-    NumberID int NOT NULL,
+    NumberID int
 );
 
 INSERT INTO abc(LetterID, NumberID) 

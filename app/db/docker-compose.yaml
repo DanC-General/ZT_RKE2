@@ -4,10 +4,14 @@ services:
   sql: 
     image: mysql:8.4 
     volumes: 
-      - ./sql_vol:/var/lib/mysql
+      - sql_vol:/var/lib/mysql
       - ./db_init.sql:/docker-entrypoint-initdb.d/init.sql
     environment: 
       MYSQL_ROOT_PASSWORD: password_123!
+      MYSQL_DATABASE: test 
     ports:
       - "8000:33060"
       - "8001:3306"
+
+volumes: 
+  sql_vol:

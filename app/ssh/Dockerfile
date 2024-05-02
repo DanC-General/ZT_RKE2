@@ -7,6 +7,8 @@ RUN echo 'root:test' | chpasswd
 RUN sed -i 's/#PermitRootLogin prohibit-password/PermitRootLogin yes/' /etc/ssh/sshd_config
 RUN adduser --disabled-password anonymous
 RUN sed -i -re 's/^anonymous:[^:]+:/anonymous::/' /etc/passwd /etc/shadow
-EXPOSE 22
+COPY ./test_keys ~/.ssh/
+RUN cat ~/.ssh/id_rsa.pub | tee -a ~/.ssh/known_hosts
+# EXPOSE 22
 # Start SSH server
 CMD ["/usr/sbin/sshd", "-D"]

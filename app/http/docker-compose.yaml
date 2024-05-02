@@ -1,8 +1,40 @@
+version: '3'
+
 services:
-    http: 
-        image: python:3.10
-        volumes: 
-            - type: bind
-              source: ./
-              target: /app
-        
+  # db:
+  #   build:
+  #     context: .
+  #     dockerfile: ./backend/mysql.Dockerfile
+  #   ports:
+  #     - "3306:3306"
+  #   environment:
+  #     # MYSQL_ROOT_HOST: 165.232.144.187
+  #     MYSQL_ROOT_PASSWORD: pass
+  #     MYSQL_DATABASE: database
+  #     MYSQL_USER: username
+  #     MYSQL_PASSWORD: password
+  #   volumes:
+  #     - db_data2:/var/lib/mysql
+  #   restart: always
+
+  http:
+  # Convert this to image
+    build:
+      context: .
+      dockerfile: ./frontend/php.Dockerfile   
+    ports:
+      - "93:80"
+    environment:
+      MYSQL_ROOT_HOST: "172.23.0.2:8001"
+      MYSQL_USER: root
+      MYSQL_ROOT_PASSWORD: password_123!
+      MYSQL_DATABASE: test 
+    volumes:
+      - ./frontend/default:/etc/php/sites-available/default
+      - ./frontend/src:/var/www/html
+    # depends_on:
+    #   - db
+    restart: always
+
+# volumes:
+#   db_data2:

@@ -3,15 +3,14 @@
 $servername = $_ENV['MYSQL_ROOT_HOST'];
 
 //$servername = $_SERVER['SERVER_ADDR'];
-
 // Create connection
-$conn = new mysqli($servername, $_ENV['MYSQL_USER'], $_ENV['MYSQL_PASSWORD'], $_ENV['MYSQL_DATABASE']);
+$conn = new mysqli("app-sql-1", "root", "password_123!", "test");
 
 // Check connection
 if ($conn->connect_error) {
-    die("Connection failed: " . $conn->connect_error);
+    die("Connection failed: " . $conn->connect_error . "\n");
 }
-
+// echo "Successful connection"; 
 // Get signup form data
 $susername = $_POST['signupUsername'];
 $spassword = $_POST['signupPassword'];

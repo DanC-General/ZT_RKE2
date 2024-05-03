@@ -2,16 +2,17 @@
 // Database configuration
 
 //$servername = $_SERVER['SERVER_ADDR'];
-$servername = $_ENV['MYSQL_ROOT_HOST'];
+$servername = $_ENV['MYSQL_HOST'];
 
 // Create connection
+// echo $servername , $_ENV['MYSQL_USER'] , $_ENV['MYSQL_PASSWORD'] , $_ENV['MYSQL_DATABASE'];
 $conn = new mysqli($servername, $_ENV['MYSQL_USER'], $_ENV['MYSQL_PASSWORD'], $_ENV['MYSQL_DATABASE']);
 
 // Check connection
 if ($conn->connect_error) {
     die("Connection failed: " . $conn->connect_error);
 }
-
+// echo "Successful session";
 // Check if form is submitted
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     // Get login form data

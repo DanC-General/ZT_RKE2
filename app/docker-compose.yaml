@@ -9,7 +9,7 @@ services:
     # Convert this to image
     build:
       context: ./http
-      dockerfile: ./frontend/php.Dockerfile   
+      dockerfile: ./frontend/Dockerfile   
     ports:
       - "93:80"
     environment:
@@ -29,11 +29,14 @@ services:
 
   sql: 
     image: mysql:8.4 
+    # build: 
+    #   context: ./db
+    #   dockerfile: ./Dockerfile
     volumes: 
       - sql_vol:/var/lib/mysql
       - ./db/db_init.sql:/docker-entrypoint-initdb.d/init.sql
     environment: 
-      MYSQL_PASSWORD: password_123!
+      MYSQL_ROOT_PASSWORD: password_123!
       MYSQL_DATABASE: test 
     ports:
       - "8000:33060"

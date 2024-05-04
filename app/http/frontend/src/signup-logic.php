@@ -1,7 +1,7 @@
 <?php
 // Database configuration
-$servername = $_ENV['MYSQL_ROOT_HOST'];
-
+$servername = $_ENV['MYSQL_HOST'];
+$servername = "sql";
 //$servername = $_SERVER['SERVER_ADDR'];
 // Create connection
 $conn = new mysqli($servername, $_ENV['MYSQL_USER'], $_ENV['MYSQL_PASSWORD'], $_ENV['MYSQL_DATABASE']);

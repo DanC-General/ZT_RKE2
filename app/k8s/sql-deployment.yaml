@@ -1,0 +1,57 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+    kompose.cmd: kompose convert -f docker-compose.yaml -o k8s/
+    kompose.version: 1.33.0 (3ce457399)
+  labels:
+    io.kompose.service: sql
+  name: sql
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      io.kompose.service: sql
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      annotations:
+        kompose.cmd: kompose convert -f docker-compose.yaml -o k8s/
+        kompose.version: 1.33.0 (3ce457399)
+      labels:
+        io.kompose.network/app-test-net: "true"
+        io.kompose.service: sql
+    spec:
+      containers:
+        - env:
+            - name: MYSQL_DATABASE
+              value: test
+            - name: MYSQL_ROOT_PASSWORD
+              value: password_123!
+          image: mysql:8.4
+          name: sql
+          ports:
+            - containerPort: 33060
+              hostPort: 8000
+              protocol: TCP
+            - containerPort: 3306
+              hostPort: 3306
+              protocol: TCP
+          volumeMounts:
+            - mountPath: /var/lib/mysql
+              name: sql-pvc-vol
+            - mountPath: /docker-entrypoint-initdb.d/init.sql
+              name: sql-cm1
+              subPath: init.sql
+      restartPolicy: Always
+      volumes:
+        - name: sql-pvc-vol
+          persistentVolumeClaim:
+            claimName: sql-vol
+        - configMap:
+            items:
+              - key: db_init.sql
+                path: init.sql
+            name: sql-cm1
+          name: sql-cm1

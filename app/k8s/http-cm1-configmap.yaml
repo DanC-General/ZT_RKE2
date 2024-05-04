@@ -1,0 +1,147 @@
+apiVersion: v1
+data:
+  home.php: |+
+    <?php
+    // Check if the user is authenticated
+    session_start();
+    if (!isset($_SESSION['authenticated']) || !$_SESSION['authenticated']) {
+        // User is not authenticated, redirect to login page
+        header("Location: index.php");
+        exit();
+    }
+
+    // Get the username from the session
+    $username = isset($_SESSION['username']) ? $_SESSION['username'] : 'Guest';
+    ?>
+
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Welcome to the Home Page</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f2f2f2;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+        .username {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .username span {
+            font-weight: bold;
+            color: #007bff;
+        }
+    </style>
+    </head>
+    <body>
+
+    <div class="container">
+        <h1>Welcome to the Home Page</h1>
+        <div class="username">Logged in as: <span><?php echo htmlspecialchars($username); ?></span></div>
+
+        <!-- Your home page content goes here -->
+        <p> Thank you from Team Aplha </p>
+    </div>
+
+    </body>
+    </html>
+
+  index-logic.php: "<?php\n// Database configuration\n\n//$servername = $_SERVER['SERVER_ADDR'];\n$servername = $_ENV['MYSQL_HOST'];\n\n// Create connection\n// echo $servername , $_ENV['MYSQL_USER'] , $_ENV['MYSQL_PASSWORD'] , $_ENV['MYSQL_DATABASE'];\n$conn = new mysqli($servername, $_ENV['MYSQL_USER'], $_ENV['MYSQL_PASSWORD'], $_ENV['MYSQL_DATABASE']);\n\n// Check connection\nif ($conn->connect_error) {\n    die(\"Connection failed: \" . $conn->connect_error);\n}\n// echo \"Successful session\";\n// Check if form is submitted\nif ($_SERVER[\"REQUEST_METHOD\"] == \"POST\") {\n    // Get login form data\n    $susername = $_POST['loginUsername'];\n    $spassword = $_POST['loginPassword'];\n\n    // Prepare and execute SQL statement to select user data from the database\n    $stmt = $conn->prepare(\"SELECT * FROM users WHERE username = ?\");\n    $stmt->bind_param(\"s\", $susername);\n    $stmt->execute();\n    $result = $stmt->get_result();\n\n    if ($result->num_rows == 1) {\n        // User found, verify password\n\t    $row = $result->fetch_assoc();\n\t    if ($spassword == $row['password']) {\n            // Password is correct, login successful\n\t\t    // echo \"Login successful\";\n            session_start();\n\t    $_SESSION['authenticated'] = true;\n\t    $_SESSION['username'] = $susername;\n            header(\"Location: home.php\"); \n                exit();\n        } else {\n            // Incorrect password\n            echo \"Invalid username or password\";\n        }\n        } \n        else {\n             // User not found\n        echo \"Invalid user\";\n    }\n}\n\n"
+  index.php: "<html>\n<head>\n<meta charset=\"UTF-8\">\n<meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n<title>Login and Signup Page</title>\n<link rel=\"stylesheet\" href=\"styles.css\">\n</head>\n<body>\n\n<div class=\"container\">\n    <div class=\"form-container\">\n        <form id=\"loginForm\" class=\"login-form\" action=\"index-logic.php\" method=\"POST\" >\n            <h2>Login</h2>\n            <input type=\"text\" id=\"loginUsername\" name=\"loginUsername\" placeholder=\"Username\" required autocomplete=\"off\">\n            <input type=\"password\" id=\"loginPassword\" name=\"loginPassword\" placeholder=\"Password\" required>\n            <button type=\"submit\">Login</button>\n            <p class=\"message\">Not registered? <a href=\"signup.php\">Create an account</a></p>\n        </form>\n    </div>\n</div>\n\n<footer>\n    <div class=\"footer-container\">\n       \n        <div class=\"copyright\">\n            <p>&copy; Team Alpha. All rights reserved.</p>\n        </div>\n        <div class=\"source-code\">\n            <p>Source Code available on <a href=\"https://github.com/anveshmuppeda/docker-login-page\" target=\"_blank\" style=\"color: red;\">GitHub</a></p>\n        </div>\n       \n    </div>\n</footer>\n\n\n</body>\n</html>\n"
+  signup-logic.php: "<?php\n// Database configuration\n$servername = $_ENV['MYSQL_HOST'];\n\n//$servername = $_SERVER['SERVER_ADDR'];\n// Create connection\n$conn = new mysqli($servername, $_ENV['MYSQL_USER'], $_ENV['MYSQL_PASSWORD'], $_ENV['MYSQL_DATABASE']);\n// Check connection\nif ($conn->connect_error) {\n    die(\"Connection failed: \" . $conn->connect_error . \"\\n\");\n}\n// echo \"Successful connection\"; \n// Get signup form data\n$susername = $_POST['signupUsername'];\n$spassword = $_POST['signupPassword'];\n\n// Prepare and execute SQL statement to insert user data into the database\n$stmt = $conn->prepare(\"INSERT INTO users (username, password) VALUES (?, ?)\");\n\nif ($stmt === false) {\n    die(\"Error in SQL query: \" . $conn->error);\n}\n\n$stmt->bind_param(\"ss\", $susername, $spassword);\n\nif ($stmt->execute()) {\n    //echo \"Signup successful\";\n    header(\"Location: index.php\");\n} else {\n    echo \"Error: \" . $stmt->error;\n}\n\necho \"<p>Today's date is \" . date(\"Y-m-d\") . \"</p>\";\n\n$stmt->close();\n$conn->close();\n?>\n\n"
+  signup.php: "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n<meta charset=\"UTF-8\">\n<meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n<title>Sign Up</title>\n<link rel=\"stylesheet\" href=\"styles.css\">\n</head>\n<body>\n\n<div class=\"container\">\n    <div class=\"form-container\">\n        <form id=\"signupForm\" class=\"signup-form\" action=\"signup-logic.php\" method=\"POST\" >    \n\t    <h2>Sign Up</h2>\n            <input type=\"text\" id=\"signupUsername\"  name =\" signupUsername\" placeholder=\"Username\" required autocomplete=\"off\">\n            <input type=\"password\" id=\"signupPassword\"name =\"signupPassword\" placeholder=\"Password\" required>\n            <button type=\"submit\">Sign Up</button>\n            <p class=\"message\">Already registered? <a href=\"index.php\">Login</a></p>\n        </form>\n    </div>\n</div>\n\n\n<footer>\n    <div class=\"footer-container\">\n       \n        <div class=\"copyright\">\n            <p>&copy; Team Alpha. All rights reserved.</p>\n        </div>\n        <div class=\"source-code\">\n            <p>Source Code available on <a href=\"https://github.com/anveshmuppeda/docker-login-page\" target=\"_blank\" style=\"color: red;\">GitHub</a></p>\n        </div>\n       \n    </div>\n</footer>\n\n\n\n\n</body>\n</html>\t\n"
+  styles.css: |+
+    body {
+        background: #f2f2f2;
+        font-family: Arial, sans-serif;
+    }
+
+    .container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+    }
+
+    .form-container {
+        background: #fff;
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0px 0px 10px 0px rgba(0,0,0,0.1);
+    }
+
+    .form-container form {
+        max-width: 300px;
+        margin: 0 auto;
+    }
+
+    .form-container h2 {
+        text-align: center;
+        margin-bottom: 20px;
+    }
+
+    .form-container input[type="text"],
+    .form-container input[type="password"],
+    .form-container button {
+        width: 100%;
+        padding: 10px;
+        margin-bottom: 10px;
+        box-sizing: border-box;
+    }
+
+    .form-container button {
+        background-color: #4CAF50;
+        color: white;
+        border: none;
+        cursor: pointer;
+    }
+
+    .form-container button:hover {
+        background-color: #45a049;
+    }
+
+    .form-container .message {
+        text-align: center;
+    }
+
+    .form-container .message a {
+        color: #4CAF50;
+        text-decoration: none;
+    }
+
+    .form-container .message a:hover {
+        text-decoration: underline;
+    }
+
+
+    footer {
+        position: absolute; /* Add this */
+        bottom: 0; /* Add this */
+        width: 100%;
+        background-color: #f2f2f2;
+        padding: 20px;
+        text-align: center;
+    }
+
+
+kind: ConfigMap
+metadata:
+  labels:
+    io.kompose.service: http
+  name: http-cm1

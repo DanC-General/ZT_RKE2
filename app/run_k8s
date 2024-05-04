@@ -1,5 +1,5 @@
 #!/bin/bash
-$ARG=""
+ARG=""
 if [ $# -eq 0 ]; then 
     echo "Applying"
     ARG="apply"
@@ -7,7 +7,11 @@ else
     echo "Removing"
     ARG="delete"
 fi
-for i in k8s/*; 
-    do echo $i; 
+# for i in k8s/*; 
+#     do echo $i; 
+#     # change to exclude pvc's on delete to remain persistent dbs 
+#     sudo kubectl $ARG -f $i
+# done; 
+for i in $(find ./k8s -name "*deployment*" -o -name "*service*"); do 
     sudo kubectl $ARG -f $i
 done; 

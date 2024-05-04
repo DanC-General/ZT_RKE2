@@ -1,0 +1,7 @@
+for i in $(find . -name "*configmap.yaml"); do echo "Name $i"; sudo kubectl apply -f $i; done 
+sudo kubectl $1 -f sql-storage.yaml
+sudo kubectl $1 -f sql-pv.yaml
+sudo kubectl $1 -f sql-vol-persistentvolumeclaim.yaml
+sudo kubectl $1 -f sql-deployment.yaml
+sudo kubectl $1 -f sql-service.yaml
+cd .. && ./run_k8s $(echo $1  | grep "delete")

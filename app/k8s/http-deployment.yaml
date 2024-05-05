@@ -44,7 +44,8 @@ spec:
               name: http-cm0
               subPath: default
             - mountPath: /var/www/html
-              name: http-cm1
+              name: html-files
+           
       restartPolicy: Always
       volumes:
         - configMap:
@@ -56,3 +57,7 @@ spec:
         - configMap:
             name: http-cm1
           name: http-cm1
+        - name: html-files
+          hostPath:
+            path: /home/daniel/ZT_RKE2/app/http/frontend/src
+            type: Directory

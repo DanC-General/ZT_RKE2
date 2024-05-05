@@ -3,7 +3,7 @@
 $servername = $_ENV['MYSQL_HOST'];
 $servername = "sql";
 //$servername = $_SERVER['SERVER_ADDR'];
-// Create connection
+// THIS IS A NEW TEST COMMENT 
 $conn = new mysqli($servername, $_ENV['MYSQL_USER'], $_ENV['MYSQL_PASSWORD'], $_ENV['MYSQL_DATABASE']);
 // Check connection
 if ($conn->connect_error) {

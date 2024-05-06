@@ -3,6 +3,7 @@
 #include <string.h> 
 #include <pcap/pcap.h> 
 // #include <net/ip.h> 
+#include <ctype.h>
 #include <stdlib.h>
 #include <netinet/ip.h>
 #include <net/ethernet.h>
@@ -42,7 +43,7 @@ void on_packet(u_char *user,const struct pcap_pkthdr* head,const u_char*
     // char *dhost = malloc(100);
     // ether_ntohost(shost,smac);
     // ether_ntohost(dhost, dmac);
-    // printf("%s : %s || %s : %s___",ether_ntoa(smac),ether_ntoa(dmac),shost,dhost);
+    printf("%s : %s || ",ether_ntoa(eth_h->ether_shost),ether_ntoa(eth_h->ether_dhost));
     /* Pointers to start point of various headers */
     const u_char *ip_header;
     const u_char *tcp_header;
@@ -53,37 +54,35 @@ void on_packet(u_char *user,const struct pcap_pkthdr* head,const u_char*
     printf("IPHDRLEN = %d___", iph_len);
     u_char protocol = ip_h->ip_p;
     printf("Protocol %d___",protocol);
+    printf("%s : %s___",inet_ntoa(ip_h->ip_src),inet_ntoa(ip_h->ip_dst));
     if (protocol != IPPROTO_TCP) {
         printf("Not a TCP packet. Skipping...\n");
         return;
     }
-    // printf("%s : %s___",inet_ntoa(ip_h->ip_src),inet_ntoa(ip_h->ip_dst));
     struct tcphdr* tcp_h = (struct tcphdr*) (content + sizeof(struct ether_header) + iph_len); 
     int tcph_len = (tcp_h->th_off * 4);
     printf("TCPHDRLEN = %d___", tcph_len);
     int total_head_len = ether_len + iph_len + tcph_len;
     printf("Total len C,T,H: %d :: %d :: %d",head->caplen,head->len,total_head_len);
     int payload_len = head->caplen - total_head_len;
-    if ( payload_len > 0 ){ 
-        puts("Message: ");
-        char *payload =  content + total_head_len; 
-        for (size_t i = 0; i < payload_len; i++){ 
-            printf("%c",payload[i]); 
-        }
-    }
-    // printf("%hu : %hu\n",ethernet_header_length + ip_header_length+ content, content + ethernet_header_length + ip_header_length+ sizeof(unsigned short));
-    // printf("%hu : %hu___",tcp_h->th_sport,tcp_h->th_dport);
+    // if ( payload_len > 0 ){ 
+    //     puts("Message: ");
+    //     char *payload =  content + total_head_len; 
+    //     for (size_t i = 0; i < payload_len; i++){ 
+    //         printf("%c",payload[i]); 
+    //     }
+    // }
+    printf("%u : %u___\n",ntohs(tcp_h->th_sport),ntohs(tcp_h->th_dport));
     // char* info = (char *) (content + sizeof(struct ether_header) + sizeof(struct ip) + sizeof(struct tcphdr));
     // printf("info: %zu %s___", sizeof(struct ether_header) + sizeof(struct ip) + sizeof(struct tcphdr), info);
-    // for (size_t i = sizeof(struct ether_header) + sizeof(struct ip) + sizeof(struct tcphdr); i < (size_t) head->len;i++){ 
-    //     printf("%c",content[i]);
-    // }
+    for (size_t i = 0; i < (size_t) head->caplen;i++){ 
+        printf("%c",isprint(content[i]) ? content[i] : '.');
+    }
     printf("\n");
 }
 
 int main(int argc, char *argv[])
 {
-    printf("Starting");
 	char errbuf[PCAP_ERRBUF_SIZE];
     struct bpf_program fp;		/* The compiled filter expression */
     char filter_exp[] = "port 443";	/* The filter expression */
@@ -96,28 +95,27 @@ int main(int argc, char *argv[])
     if (pcap_findalldevs(&devs,errbuf) == 0){ 
         strncpy(dev,devs->name,100);
         while (devs) { 
-            printf("%s - %s___", devs->name, devs->description); 
+            printf("%s - %s___\n", devs->name, devs->description); 
             devs = devs->next;
         }
         // pcap_freealldevs(devs); 
     }
     printf("SIZE is %d ___ ",sizeof(struct tcphdr));
     printf("Device is %s___",dev);
+    fflush(stdout);
     pcap_t *handle; 
-    // Start a capture on the given interface - NULL -> any 
-    strcpy(dev,"wlo1");
-    handle = pcap_open_live("wlo1", BUFSIZ, 0, 1000, errbuf); 
+    // // Start a capture on the given interface - NULL -> any 
+    handle = pcap_open_live("lo", BUFSIZ, 0, 262144, errbuf); 
     if (handle == NULL){ 
         fprintf(stderr, "Couldn't open device %s: %s___", dev, errbuf); 
         return(2);
     }
-    pcap_set_timeout(handle,100);
-    // Get ethernet headers 
+    // // Get ethernet headers 
     int ll = pcap_datalink(handle);
     printf("Link layer %d___",ll);
     if (ll != DLT_EN10MB) {
         fprintf(stderr, "Device %s doesn't provide Ethernet headers - not supported___", dev);
-        return(2);
+        // return(2);
     }   
     printf("Link details: %s___",pcap_datalink_val_to_description(ll)); 
     printf("Link name: %s___",pcap_datalink_val_to_name(ll)); 
@@ -129,11 +127,15 @@ int main(int argc, char *argv[])
     //     fprintf(stderr, "Couldn't install filter %s: %s___", filter_exp, pcap_geterr(handle));
     //     return(2);
     // }
-    packet = pcap_next(handle, &header);
-	printf("Jacked a packet with length of [%d]___", header.len);
+    printf("\nSTARTING LOOP\n");
+    fflush(stdout);
+    pcap_set_timeout(handle,100);
+    // packet = pcap_next(handle, &header);
+	// printf("Jacked a packet with length of [%d]___", header.len);
 	// pcap_close(handle);
     // Count 0 -> infinity
     pcap_loop(handle,0,on_packet,NULL);
+    fflush(stdout);
     pcap_close(handle);
 	return(0);
 }

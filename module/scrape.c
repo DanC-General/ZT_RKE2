@@ -83,6 +83,7 @@ void on_packet(u_char *user,const struct pcap_pkthdr* head,const u_char*
 
 int main(int argc, char *argv[])
 {
+    printf("Starting");
 	char errbuf[PCAP_ERRBUF_SIZE];
     struct bpf_program fp;		/* The compiled filter expression */
     char filter_exp[] = "port 443";	/* The filter expression */
@@ -104,11 +105,13 @@ int main(int argc, char *argv[])
     printf("Device is %s___",dev);
     pcap_t *handle; 
     // Start a capture on the given interface - NULL -> any 
-    handle = pcap_open_live(dev, BUFSIZ, 0, 1000, errbuf); 
+    strcpy(dev,"wlo1");
+    handle = pcap_open_live("wlo1", BUFSIZ, 0, 1000, errbuf); 
     if (handle == NULL){ 
         fprintf(stderr, "Couldn't open device %s: %s___", dev, errbuf); 
         return(2);
     }
+    pcap_set_timeout(handle,100);
     // Get ethernet headers 
     int ll = pcap_datalink(handle);
     printf("Link layer %d___",ll);
@@ -118,14 +121,14 @@ int main(int argc, char *argv[])
     }   
     printf("Link details: %s___",pcap_datalink_val_to_description(ll)); 
     printf("Link name: %s___",pcap_datalink_val_to_name(ll)); 
-    if (pcap_compile(handle, &fp, filter_exp, 0, net) == -1) {
-        fprintf(stderr, "Couldn't parse filter %s: %s___", filter_exp, pcap_geterr(handle));
-        return(2);
-    }
-    if (pcap_setfilter(handle, &fp) == -1) {
-        fprintf(stderr, "Couldn't install filter %s: %s___", filter_exp, pcap_geterr(handle));
-        return(2);
-    }
+    // if (pcap_compile(handle, &fp, filter_exp, 0, net) == -1) {
+    //     fprintf(stderr, "Couldn't parse filter %s: %s___", filter_exp, pcap_geterr(handle));
+    //     return(2);
+    // }
+    // if (pcap_setfilter(handle, &fp) == -1) {
+    //     fprintf(stderr, "Couldn't install filter %s: %s___", filter_exp, pcap_geterr(handle));
+    //     return(2);
+    // }
     packet = pcap_next(handle, &header);
 	printf("Jacked a packet with length of [%d]___", header.len);
 	// pcap_close(handle);

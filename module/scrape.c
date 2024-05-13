@@ -4,6 +4,7 @@
 #include <pcap/pcap.h> 
 // #include <net/ip.h> 
 #include <ctype.h>
+#include <pthread.h> 
 #include <stdlib.h>
 #include <netinet/ip.h>
 #include <net/ethernet.h>
@@ -17,33 +18,38 @@ struct tcp_head {
     unsigned int ack; 
     unsigned char thl : 4; 
     unsigned char reserved: 4; 
-    // unsigned char 
+};
 
+struct outputs { 
+    char *s_mac;
+    char *d_mac; 
+    char *s_ip;
+    char *d_ip; 
+    // char *s_port;
+    // char *d_port;
+};
+struct pack_inputs { 
+    char *dev;
+    char **cap_store;
+    int *num;
+    struct outputs **output;
 };
 
 void on_packet(u_char *user,const struct pcap_pkthdr* head,const u_char*
         content)
 {
-	// printf("Jacked a packet with length of [%d]:___", head->len);
-    // int i = 0; 
-    // while (i < sizeof(content))
-    // {
-    //     printf("%02X",(int)content[i+14]);
-    //     i++;
-    // }
-
-    // setuid(0);
+    struct pack_inputs* input = (struct pack_inputs*) user; 
+    printf("Struct addresses: %p || %p || %p -> %d\n",&input->dev,input->cap_store,&input->num,*(input->num));
     struct ether_header* eth_h = (struct ether_header*) content; 
     int ether_len = sizeof(struct ether_header); 
     printf("%d ether_len\n",ether_len);
     struct ether_addr* smac = (struct ether_addr*) (&eth_h->ether_shost);
     struct ether_addr* dmac = (struct ether_addr*) (&eth_h->ether_dhost);
-    // dmac.ether_addr_octet = eth_h->ether_dhost;
-    // char *shost = malloc(100); 
-    // char *dhost = malloc(100);
-    // ether_ntohost(shost,smac);
-    // ether_ntohost(dhost, dmac);
-    printf("%s : %s || ",ether_ntoa(eth_h->ether_shost),ether_ntoa(eth_h->ether_dhost));
+    // (input->output[*input->num]) = malloc(sizeof(struct outputs));
+    // // struct outputs cur_out = (input->output[*input->num]); 
+    // (input->output[*input->num])->s_mac = ether_ntoa(eth_h->ether_shost);
+    // (input->output[*input->num])->d_mac = ether_ntoa(eth_h->ether_dhost);
+    printf("FROM DEVICE %s --> \n %s : %s || ",input->dev,ether_ntoa(eth_h->ether_shost),ether_ntoa(eth_h->ether_dhost));
     /* Pointers to start point of various headers */
     const u_char *ip_header;
     const u_char *tcp_header;
@@ -51,10 +57,26 @@ void on_packet(u_char *user,const struct pcap_pkthdr* head,const u_char*
 
     struct ip* ip_h = (struct ip*) (content + sizeof(struct ether_header)); 
     int iph_len = (ip_h->ip_hl * 4);  
-    printf("IPHDRLEN = %d___", iph_len);
+    // printf("IPHDRLEN = %d___", iph_len);
     u_char protocol = ip_h->ip_p;
-    printf("Protocol %d___",protocol);
+
     printf("%s : %s___",inet_ntoa(ip_h->ip_src),inet_ntoa(ip_h->ip_dst));
+    printf("Internal Addresses: %p\n",input->cap_store);
+    printf("PREVIOUSLY %d : %p\n",*input->num,((input->output)[*input->num]));
+    ((input->output)[*input->num]) = malloc(sizeof(struct outputs));
+    printf("CHANGED TO %d : %p OF SIZE %zu\n",*input->num,((input->output)[*input->num]),sizeof((input->output)[*input->num]->s_mac));
+    ((input->output)[*input->num])->s_mac = ether_ntoa(eth_h->ether_shost);
+    // printf("PREVIOUSLY %d : %p\n",*input->num,((input->cap_store)[*input->num]));
+    // strcpy(((input->output)[*input->num])->s_mac, ether_ntoa(eth_h->ether_shost));
+    printf("Smac %s\n",((input->output)[*input->num])->s_mac);
+    (input->cap_store[*input->num]) = malloc(head->caplen);
+    // printf("CHANGED TO %d : %p\n",*input->num,((input->cap_store)[*input->num]));
+    memcpy(input->cap_store[*input->num],"Hello 123",head->caplen);
+    *(input->num) = *(input->num) + 1; 
+    for (int i = 0; i<*(input->num);i++){ 
+        printf("%d : %p\n",i,((input->cap_store)[i]));
+        printf("%s || %s\n",((input->cap_store)[i]),((input->output)[i])->s_mac);
+    }
     if (protocol != IPPROTO_TCP) {
         printf("Not a TCP packet. Skipping...\n");
         return;
@@ -65,50 +87,28 @@ void on_packet(u_char *user,const struct pcap_pkthdr* head,const u_char*
     int total_head_len = ether_len + iph_len + tcph_len;
     printf("Total len C,T,H: %d :: %d :: %d",head->caplen,head->len,total_head_len);
     int payload_len = head->caplen - total_head_len;
-    // if ( payload_len > 0 ){ 
-    //     puts("Message: ");
-    //     char *payload =  content + total_head_len; 
-    //     for (size_t i = 0; i < payload_len; i++){ 
-    //         printf("%c",payload[i]); 
-    //     }
-    // }
     printf("%u : %u___\n",ntohs(tcp_h->th_sport),ntohs(tcp_h->th_dport));
-    // char* info = (char *) (content + sizeof(struct ether_header) + sizeof(struct ip) + sizeof(struct tcphdr));
-    // printf("info: %zu %s___", sizeof(struct ether_header) + sizeof(struct ip) + sizeof(struct tcphdr), info);
     for (size_t i = 0; i < (size_t) head->caplen;i++){ 
         printf("%c",isprint(content[i]) ? content[i] : '.');
     }
     printf("\n");
+    // (input->cap_store[*input->num]) = malloc(head->caplen);
+    // memcpy(input->cap_store[*input->num],content,head->caplen);
+    // printf("Internal Addresses:\n");
+    // for (int i = 0; i<10;i++){ 
+    //     printf("%d : %p\n",i,((input->cap_store)[i]));
+    // }
+    puts("");
 }
-
-int main(int argc, char *argv[])
-{
-	char errbuf[PCAP_ERRBUF_SIZE];
-    struct bpf_program fp;		/* The compiled filter expression */
-    char filter_exp[] = "port 443";	/* The filter expression */
-    bpf_u_int32 mask;		/* The netmask of our sniffing device */
-    bpf_u_int32 net;
-    struct pcap_pkthdr header;	/* The header that pcap gives us */
-	const u_char *packet;		/* The actual packet */
-    pcap_if_t *devs = NULL; 
-    char dev[100]; 
-    if (pcap_findalldevs(&devs,errbuf) == 0){ 
-        strncpy(dev,devs->name,100);
-        while (devs) { 
-            printf("%s - %s___\n", devs->name, devs->description); 
-            devs = devs->next;
-        }
-        // pcap_freealldevs(devs); 
-    }
-    printf("SIZE is %d ___ ",sizeof(struct tcphdr));
-    printf("Device is %s___",dev);
-    fflush(stdout);
+void capture_interface(char *dev){
+    char errbuf[PCAP_ERRBUF_SIZE];
     pcap_t *handle; 
-    // // Start a capture on the given interface - NULL -> any 
-    handle = pcap_open_live("lo", BUFSIZ, 0, 262144, errbuf); 
+    printf("Device is %s\n",dev);
+    // Start a capture on the given interface - NULL -> any 
+    handle = pcap_open_live(dev, BUFSIZ, 0, 262144, errbuf); 
     if (handle == NULL){ 
         fprintf(stderr, "Couldn't open device %s: %s___", dev, errbuf); 
-        return(2);
+        exit(EXIT_FAILURE);
     }
     // // Get ethernet headers 
     int ll = pcap_datalink(handle);
@@ -133,60 +133,64 @@ int main(int argc, char *argv[])
     // packet = pcap_next(handle, &header);
 	// printf("Jacked a packet with length of [%d]___", header.len);
 	// pcap_close(handle);
+    int BATCH_SIZE = 10; 
+    // while (true){}
+    // This struct should have static references - all 10 packs should access same addresses
+    int *num = malloc(sizeof(int));
+    *num = 0;
+    char *captured_contents[BATCH_SIZE];
+    struct outputs* results[BATCH_SIZE]; 
+    printf("Results is %zu bytes of %zu struct size\n",sizeof(results));
+    printf("Addresses of %p:\n",&captured_contents);
+    for (int i = 0; i<10;i++){ 
+        // if ((captured_contents[i] = malloc(sizeof(char) * 4)) == NULL) perror("malloc:");
+        printf("%d : %p\n",i,(captured_contents[i]));
+    }
+    puts("");
+    struct pack_inputs input = { .dev=dev, .cap_store=captured_contents, .num=num, .output=results};
     // Count 0 -> infinity
-    pcap_loop(handle,0,on_packet,NULL);
+    pcap_loop(handle,BATCH_SIZE,on_packet,&input);
     fflush(stdout);
     pcap_close(handle);
+    for (int i = 0; i < BATCH_SIZE; i++){ 
+        struct outputs* cur = (results[i]);
+        printf("%d address at %p::%p -> %s\n\t",i,(results[i]), &(results[i])->s_mac, (results[i])->s_mac);
+        
+        // printf("%s : %s : %s : %s\n",cur->s_mac,cur->d_mac,cur->s_ip,cur->d_ip);
+    }
+}
+int main(int argc, char *argv[])
+{
+	char errbuf[PCAP_ERRBUF_SIZE];
+    struct bpf_program fp;		/* The compiled filter expression */
+    char filter_exp[] = "port 443";	/* The filter expression */
+    bpf_u_int32 mask;		/* The netmask of our sniffing device */
+    bpf_u_int32 net;
+    struct pcap_pkthdr header;	/* The header that pcap gives us */
+	const u_char *packet;		/* The actual packet */
+    pcap_if_t *devs = NULL; 
+    pthread_t *threads; 
+    char *interfaces[] = {
+        // "lo",
+        "eth0",
+    };
+    int NUM_THREADS = sizeof(interfaces) / sizeof(char *); 
+    printf("There are %d threads.\n",NUM_THREADS);
+    // Create thread for each k8s network
+    if ((threads = malloc(NUM_THREADS * sizeof(pthread_t))) == NULL) { 
+        perror("Failure in thread initialisation:");
+        return(1); 
+    };
+    // Initialise threads 
+    int ret;
+    for (int i = 0; i < NUM_THREADS; i++){ 
+        printf("Creating thread for device %s at %p: i is %d\n",interfaces[i],&threads[i],i);
+        ret = pthread_create( &threads[i], NULL, capture_interface, interfaces[i]);
+    }
+    for (int i = 0; i < NUM_THREADS; i++){ 
+        pthread_join( threads[i], NULL);
+    }
+
 	return(0);
 }
 
-
-    /* Header lengths in bytes */
-    // int ethernet_header_length = 14; /* Doesn't change */
-    // int ip_header_length;
-    // int tcp_header_length;
-    // int payload_length;
-
-    /* Find start of IP header */
-    // ip_header = content + ethernet_header_length;
-    /* The second-half of the first byte in ip_header
-       contains the IP header length (IHL). */
-    // ip_header_length = ((*ip_header) & 0x0F);
-    /* The IHL is number of 32-bit segments. Multiply
-       by four to get a byte count for pointer arithmetic */
-    // ip_header_length = ip_header_length * 4;
-    // printf("IP header length (IHL) in bytes: %d___", ip_header_length);
-
-    /* Now that we know where the IP header is, we can 
-       inspect the IP header for a protocol number to 
-       make sure it is TCP before going any further. 
-       Protocol is always the 10th byte of the IP header */
-    // u_char protocol = *(ip_header + 9);
-    // printf("Protocol %d___",protocol);
-    // if (protocol != IPPROTO_TCP) {
-    //     printf("Not a TCP packet. Skipping...\n");
-    //     return;
-    // }
-
-    /* Add the ethernet and ip header length to the start of the packet
-       to find the beginning of the TCP header */
-    // tcp_header = content + ethernet_header_length + ip_header_length;
-    /* TCP header length is stored in the first half 
-       of the 12th byte in the TCP header. Because we only want
-       the value of the top half of the byte, we have to shift it
-       down to the bottom half otherwise it is using the most 
-       significant bits instead of the least significant bits */
-    // tcp_header_length = ((*(tcp_header + 12)) & 0xF0) >> 4;
-    /* The TCP header length stored in those 4 bits represents
-       how many 32-bit words there are in the header, just like
-       the IP header length. We multiply by four again to get a
-       byte count. */
-    // tcp_header_length = tcp_header_length * 4;
-    // printf("TCP header length in bytes: %d___", tcp_header_length);
-
-    /* Add up all the header sizes to find the payload offset */
-    // int total_headers_size = ethernet_header_length+ip_header_length+tcp_header_length;
-    // payload_length = head->caplen - (ethernet_header_length + ip_header_length + tcp_header_length);
-    // printf("Payload size: %d bytes___", payload_length);
-    // payload = content + total_headers_size;
-    // printf("%s : %s___",ether_ntoa(smac),ether_ntoa(dmac));

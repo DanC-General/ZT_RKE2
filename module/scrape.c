@@ -21,7 +21,7 @@ struct tcp_head {
 };
 
 struct outputs { 
-    char *s_mac;
+    char s_mac[17];
     char *d_mac; 
     char *s_ip;
     char *d_ip; 
@@ -64,14 +64,15 @@ void on_packet(u_char *user,const struct pcap_pkthdr* head,const u_char*
     printf("Internal Addresses: %p\n",input->cap_store);
     printf("PREVIOUSLY %d : %p\n",*input->num,((input->output)[*input->num]));
     ((input->output)[*input->num]) = malloc(sizeof(struct outputs));
-    printf("CHANGED TO %d : %p OF SIZE %zu\n",*input->num,((input->output)[*input->num]),sizeof((input->output)[*input->num]->s_mac));
-    ((input->output)[*input->num])->s_mac = ether_ntoa(eth_h->ether_shost);
+    printf("CHANGED TO %d : %p OF SIZE %zu STRLEN %zu\n",*input->num,((input->output)[*input->num]),sizeof((input->output)[*input->num]->s_mac),strlen(ether_ntoa(eth_h->ether_shost)));
+    strncpy(((input->output)[*input->num])->s_mac, ether_ntoa(eth_h->ether_shost),16);
+    // ((input->output)[*input->num])->s_mac = ether_ntoa(eth_h->ether_shost);
     // printf("PREVIOUSLY %d : %p\n",*input->num,((input->cap_store)[*input->num]));
     // strcpy(((input->output)[*input->num])->s_mac, ether_ntoa(eth_h->ether_shost));
     printf("Smac %s\n",((input->output)[*input->num])->s_mac);
     (input->cap_store[*input->num]) = malloc(head->caplen);
     // printf("CHANGED TO %d : %p\n",*input->num,((input->cap_store)[*input->num]));
-    memcpy(input->cap_store[*input->num],"Hello 123",head->caplen);
+    memcpy(input->cap_store[*input->num],ether_ntoa(eth_h->ether_dhost),head->caplen);
     *(input->num) = *(input->num) + 1; 
     for (int i = 0; i<*(input->num);i++){ 
         printf("%d : %p\n",i,((input->cap_store)[i]));

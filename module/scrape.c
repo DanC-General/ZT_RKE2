@@ -21,10 +21,12 @@ struct tcp_head {
 };
 
 struct outputs { 
+    // MAC addresses should be max 16 char representation
     char s_mac[17];
-    char *d_mac; 
-    char *s_ip;
-    char *d_ip; 
+    char d_mac[17]; 
+    // IPv4 addresses should be max 15 char representation.
+    char s_ip[16];
+    char d_ip[16]; 
     // char *s_port;
     // char *d_port;
 };
@@ -45,10 +47,6 @@ void on_packet(u_char *user,const struct pcap_pkthdr* head,const u_char*
     printf("%d ether_len\n",ether_len);
     struct ether_addr* smac = (struct ether_addr*) (&eth_h->ether_shost);
     struct ether_addr* dmac = (struct ether_addr*) (&eth_h->ether_dhost);
-    // (input->output[*input->num]) = malloc(sizeof(struct outputs));
-    // // struct outputs cur_out = (input->output[*input->num]); 
-    // (input->output[*input->num])->s_mac = ether_ntoa(eth_h->ether_shost);
-    // (input->output[*input->num])->d_mac = ether_ntoa(eth_h->ether_dhost);
     printf("FROM DEVICE %s --> \n %s : %s || ",input->dev,ether_ntoa(eth_h->ether_shost),ether_ntoa(eth_h->ether_dhost));
     /* Pointers to start point of various headers */
     const u_char *ip_header;
@@ -59,24 +57,22 @@ void on_packet(u_char *user,const struct pcap_pkthdr* head,const u_char*
     int iph_len = (ip_h->ip_hl * 4);  
     // printf("IPHDRLEN = %d___", iph_len);
     u_char protocol = ip_h->ip_p;
-
-    printf("%s : %s___",inet_ntoa(ip_h->ip_src),inet_ntoa(ip_h->ip_dst));
-    printf("Internal Addresses: %p\n",input->cap_store);
-    printf("PREVIOUSLY %d : %p\n",*input->num,((input->output)[*input->num]));
     ((input->output)[*input->num]) = malloc(sizeof(struct outputs));
-    printf("CHANGED TO %d : %p OF SIZE %zu STRLEN %zu\n",*input->num,((input->output)[*input->num]),sizeof((input->output)[*input->num]->s_mac),strlen(ether_ntoa(eth_h->ether_shost)));
-    strncpy(((input->output)[*input->num])->s_mac, ether_ntoa(eth_h->ether_shost),16);
-    // ((input->output)[*input->num])->s_mac = ether_ntoa(eth_h->ether_shost);
-    // printf("PREVIOUSLY %d : %p\n",*input->num,((input->cap_store)[*input->num]));
-    // strcpy(((input->output)[*input->num])->s_mac, ether_ntoa(eth_h->ether_shost));
-    printf("Smac %s\n",((input->output)[*input->num])->s_mac);
+
+    strncpy(((input->output)[*input->num])->s_mac,ether_ntoa(eth_h->ether_shost),16);
+    strncpy(((input->output)[*input->num])->d_mac,ether_ntoa(eth_h->ether_dhost),16);
+    strncpy(((input->output)[*input->num])->s_ip,inet_ntoa(ip_h->ip_src),15);
+    strncpy(((input->output)[*input->num])->d_ip,inet_ntoa(ip_h->ip_dst),15);
+
+
+    // inet_ntoa(ip_h->ip_src),inet_ntoa(ip_h->ip_dst)
+
     (input->cap_store[*input->num]) = malloc(head->caplen);
-    // printf("CHANGED TO %d : %p\n",*input->num,((input->cap_store)[*input->num]));
-    memcpy(input->cap_store[*input->num],ether_ntoa(eth_h->ether_dhost),head->caplen);
+    memcpy(input->cap_store[*input->num],ether_ntoa(eth_h->ether_shost),head->caplen);
     *(input->num) = *(input->num) + 1; 
     for (int i = 0; i<*(input->num);i++){ 
         printf("%d : %p\n",i,((input->cap_store)[i]));
-        printf("%s || %s\n",((input->cap_store)[i]),((input->output)[i])->s_mac);
+        printf("%s || %d\n",(inet_ntoa(ip_h->ip_dst)),strlen(inet_ntoa(ip_h->ip_dst)));
     }
     if (protocol != IPPROTO_TCP) {
         printf("Not a TCP packet. Skipping...\n");
@@ -93,12 +89,6 @@ void on_packet(u_char *user,const struct pcap_pkthdr* head,const u_char*
         printf("%c",isprint(content[i]) ? content[i] : '.');
     }
     printf("\n");
-    // (input->cap_store[*input->num]) = malloc(head->caplen);
-    // memcpy(input->cap_store[*input->num],content,head->caplen);
-    // printf("Internal Addresses:\n");
-    // for (int i = 0; i<10;i++){ 
-    //     printf("%d : %p\n",i,((input->cap_store)[i]));
-    // }
     puts("");
 }
 void capture_interface(char *dev){
@@ -155,9 +145,7 @@ void capture_interface(char *dev){
     pcap_close(handle);
     for (int i = 0; i < BATCH_SIZE; i++){ 
         struct outputs* cur = (results[i]);
-        printf("%d address at %p::%p -> %s\n\t",i,(results[i]), &(results[i])->s_mac, (results[i])->s_mac);
-        
-        // printf("%s : %s : %s : %s\n",cur->s_mac,cur->d_mac,cur->s_ip,cur->d_ip);
+        printf("%d address at %p\n\t %s -> %s\n\t %s -> %s\n",i,(results[i]),(results[i])->s_mac,results[i]->d_mac,results[i]->s_ip,results[i]->d_ip);        
     }
 }
 int main(int argc, char *argv[])

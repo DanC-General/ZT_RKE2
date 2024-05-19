@@ -24,8 +24,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $stmt->bind_param("s", $susername);
     $stmt->execute();
     $result = $stmt->get_result();
+    // echo " $susername $spassword";
 
-    if ($result->num_rows == 1) {
+    if ($result->num_rows != 0) {
         // User found, verify password
 	    $row = $result->fetch_assoc();
 	    if ($spassword == $row['password']) {

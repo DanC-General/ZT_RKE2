@@ -1,5 +1,6 @@
 # My excludes 
 /app/db/sql_vol
+/module/scrape
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]

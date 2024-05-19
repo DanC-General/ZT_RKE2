@@ -105,7 +105,7 @@ int main(int argc, char *argv[])
     fflush(stdout);
     pcap_t *handle; 
     // // Start a capture on the given interface - NULL -> any 
-    handle = pcap_open_live("lo", BUFSIZ, 0, 262144, errbuf); 
+    handle = pcap_open_live("calid26e69277b8", BUFSIZ, 0, 262144, errbuf); 
     if (handle == NULL){ 
         fprintf(stderr, "Couldn't open device %s: %s___", dev, errbuf); 
         return(2);

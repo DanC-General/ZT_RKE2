@@ -1,7 +1,6 @@
 <?php
 // Database configuration
 $servername = $_ENV['MYSQL_HOST'];
-$servername = "sql";
 //$servername = $_SERVER['SERVER_ADDR'];
 // THIS IS A NEW TEST COMMENT 
 $conn = new mysqli($servername, $_ENV['MYSQL_USER'], $_ENV['MYSQL_PASSWORD'], $_ENV['MYSQL_DATABASE']);

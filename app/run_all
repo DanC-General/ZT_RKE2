@@ -6,7 +6,7 @@ else
     echo "Removing"
     ARG="delete"
 fi
-for i in k8s/*; 
+for i in k8s/*.yaml; 
     do echo $i; 
     # change to exclude pvc's on delete to remain persistent dbs 
     sudo kubectl $ARG -f $i

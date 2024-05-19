@@ -53,7 +53,7 @@ $username = isset($_SESSION['username']) ? $_SESSION['username'] : 'Guest';
     <div class="username">Logged in as: <span><?php echo htmlspecialchars($username); ?></span></div>
 
     <!-- Your home page content goes here -->
-    <p> Thank you from Team Aplha </p>
+    <p> Thank you from Team Alpha </p>
 </div>
 
 </body>

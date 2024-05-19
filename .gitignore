@@ -1,6 +1,8 @@
 # My excludes 
 /app/db/sql_vol
 /module/scrape
+# Relative paths 
+/app/k8s/http-deployment.yaml
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]

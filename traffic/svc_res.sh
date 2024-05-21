@@ -1,0 +1,1 @@
+../app/get_svc_pod_ip_dns.sh

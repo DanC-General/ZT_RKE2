@@ -145,6 +145,14 @@ void on_packet(u_char *user,const struct pcap_pkthdr* head,const u_char*
 void capture_interface(struct mapping *map){
     char errbuf[PCAP_ERRBUF_SIZE];
     pcap_t *handle; 
+    char fname[250];
+    snprintf(fname,250,"%s_svc.log",map->svc);
+    printf("Writing to %s\n",fname);
+    FILE* log_file = fopen(fname,"a");
+    if (log_file == NULL) { 
+        perror("Failed to open log file."); 
+        exit(1); 
+    };
     printf("Args to interface thread: %s, %s\n",map->svc,map->if_name);
     // Start a capture on the given interface - NULL -> any 
     handle = pcap_open_live(map->if_name, BUFSIZ, 0, 262144, errbuf); 
@@ -171,12 +179,12 @@ void capture_interface(struct mapping *map){
     *num = 0;
     char *captured_contents[BATCH_SIZE];
     struct outputs* results[BATCH_SIZE]; 
-    printf("Results is %zu bytes of %zu struct size\n",sizeof(results));
-    printf("Addresses of %p:\n",&captured_contents);
-    for (int i = 0; i<10;i++){ 
-        // if ((captured_contents[i] = malloc(sizeof(char) * 4)) == NULL) perror("malloc:");
-        printf("%d : %p\n",i,(captured_contents[i]));
-    }
+    // printf("Results is %zu bytes of %zu struct size\n",sizeof(results));
+    // printf("Addresses of %p:\n",&captured_contents);
+    // for (int i = 0; i<10;i++){ 
+    //     // if ((captured_contents[i] = malloc(sizeof(char) * 4)) == NULL) perror("malloc:");
+    //     printf("%d : %p\n",i,(captured_contents[i]));
+    // }
     puts("");
     struct pack_inputs input = { .svc=map->svc, .cap_store=captured_contents, .num=num, .output=results};
     // Count 0 -> infinity
@@ -185,8 +193,11 @@ void capture_interface(struct mapping *map){
     pcap_close(handle);
     for (int i = 0; i < BATCH_SIZE; i++){ 
         struct outputs* cur = (results[i]);
+        fprintf(log_file,"%s|%s|%s|%s\n",results[i]->s_mac,results[i]->d_mac,results[i]->s_ip,results[i]->d_ip);
         printf("%d address at %p\n\t %s -> %s\n\t %s -> %s\n",i,(results[i]),(results[i])->s_mac,results[i]->d_mac,results[i]->s_ip,results[i]->d_ip);        
     }
+    fclose(log_file);
+
 }
 
 int main(int argc, char *argv[])

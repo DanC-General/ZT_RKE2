@@ -2,7 +2,7 @@
 
 install mysql-server or client on the connecting machine 
 Need to connect to container with either protocol=tcp or -h 127.0.0.1 : 'localhost' will not work
-`mysql -h localhost -u root -ppassword_123!`
+`mysql -h 127.0.0.1 -u root -ppassword_123!`
 
 ## SSH 
 https://satvikakolisetty.medium.com/running-ssh-server-in-a-docker-container-55eb2a3add35

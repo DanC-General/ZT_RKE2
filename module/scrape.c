@@ -31,23 +31,74 @@ struct outputs {
     // char *d_port;
 };
 struct pack_inputs { 
-    char *dev;
+    char *svc;
     char **cap_store;
     int *num;
     struct outputs **output;
 };
-
+struct mapping { 
+    char *svc; 
+    char *if_name;
+};
+struct mapping** get_svc_mappings(int *size){
+    FILE *fp; 
+    printf("Entered the function");
+    char line[1000];
+    // figure out how to arbitrarily add details to mapping 
+    fp = popen("./svc_res.sh | grep '^|' | sed 's/^|//' | sort -u","r");
+    if (fp == NULL) { 
+        printf("Could not resolve mappings."); 
+        exit(1); 
+    }
+    // Read header size 
+    if (fgets(line,sizeof(line),fp) != NULL) { 
+        *size = atoi(line);
+    }
+    struct mapping **maps = malloc(sizeof(struct mapping*) * *size);
+    printf("There are %d elements\n",*size);
+    int i = 0;
+    while (fgets(line,sizeof(line),fp) != NULL) {
+        printf("Mapping %d: %s",i,line);
+        char *token = strtok(line, "|");
+        struct mapping* cur = malloc(sizeof(struct mapping)); 
+        printf("%p address of cur\n",cur);
+        int j = 0;
+        while (token != NULL) {
+            switch (j){
+                // TODO check malloc success
+                case 0: 
+                    cur->svc = malloc(strlen(token));
+                    strcpy(cur->svc,token);    
+                    printf("%p -> %s\n",cur->svc,token);
+                    break;
+                case 1:
+                    cur->if_name = malloc(strlen(token));
+                    strcpy(cur->if_name,token); 
+                    cur->if_name[strcspn(cur->if_name,"\n")] = 0;
+                    printf("%p -> %s\n",cur->svc,token);
+                    break;
+            }
+            printf("%d : %s\n",j,token);
+            token = strtok(NULL, " ");
+            j++;
+        }
+        printf("cur %p:\nsvc %p -> %s:\nif %p -> %s\n\n",cur,cur->svc,cur->svc,cur->if_name,cur->if_name);
+        maps[i++] = cur;
+        // TODO could convert to hashmap 
+    }
+    return maps;
+}
 void on_packet(u_char *user,const struct pcap_pkthdr* head,const u_char*
         content)
 {
     struct pack_inputs* input = (struct pack_inputs*) user; 
-    printf("Struct addresses: %p || %p || %p -> %d\n",&input->dev,input->cap_store,&input->num,*(input->num));
+    printf("Struct addresses: %p || %p || %p -> %d\n",&input->svc,input->cap_store,&input->num,*(input->num));
     struct ether_header* eth_h = (struct ether_header*) content; 
     int ether_len = sizeof(struct ether_header); 
     printf("%d ether_len\n",ether_len);
     struct ether_addr* smac = (struct ether_addr*) (&eth_h->ether_shost);
     struct ether_addr* dmac = (struct ether_addr*) (&eth_h->ether_dhost);
-    printf("FROM DEVICE %s --> \n %s : %s || ",input->dev,ether_ntoa(eth_h->ether_shost),ether_ntoa(eth_h->ether_dhost));
+    printf("FROM DEVICE %s --> \n %s : %s || ",input->svc,ether_ntoa(eth_h->ether_shost),ether_ntoa(eth_h->ether_dhost));
     /* Pointers to start point of various headers */
     const u_char *ip_header;
     const u_char *tcp_header;
@@ -63,7 +114,6 @@ void on_packet(u_char *user,const struct pcap_pkthdr* head,const u_char*
     strncpy(((input->output)[*input->num])->d_mac,ether_ntoa(eth_h->ether_dhost),16);
     strncpy(((input->output)[*input->num])->s_ip,inet_ntoa(ip_h->ip_src),15);
     strncpy(((input->output)[*input->num])->d_ip,inet_ntoa(ip_h->ip_dst),15);
-
 
     // inet_ntoa(ip_h->ip_src),inet_ntoa(ip_h->ip_dst)
 
@@ -91,39 +141,29 @@ void on_packet(u_char *user,const struct pcap_pkthdr* head,const u_char*
     printf("\n");
     puts("");
 }
-void capture_interface(char *dev){
+
+void capture_interface(struct mapping *map){
     char errbuf[PCAP_ERRBUF_SIZE];
     pcap_t *handle; 
-    printf("Device is %s\n",dev);
+    printf("Args to interface thread: %s, %s\n",map->svc,map->if_name);
     // Start a capture on the given interface - NULL -> any 
-    handle = pcap_open_live(dev, BUFSIZ, 0, 262144, errbuf); 
+    handle = pcap_open_live(map->if_name, BUFSIZ, 0, 262144, errbuf); 
     if (handle == NULL){ 
-        fprintf(stderr, "Couldn't open device %s: %s___", dev, errbuf); 
+        fprintf(stderr, "Couldn't open device %s: %s___", map->if_name, errbuf); 
         exit(EXIT_FAILURE);
     }
     // // Get ethernet headers 
     int ll = pcap_datalink(handle);
     printf("Link layer %d___",ll);
     if (ll != DLT_EN10MB) {
-        fprintf(stderr, "Device %s doesn't provide Ethernet headers - not supported___", dev);
+        fprintf(stderr, "Device %s doesn't provide Ethernet headers - not supported___", map->if_name);
         // return(2);
     }   
     printf("Link details: %s___",pcap_datalink_val_to_description(ll)); 
     printf("Link name: %s___",pcap_datalink_val_to_name(ll)); 
-    // if (pcap_compile(handle, &fp, filter_exp, 0, net) == -1) {
-    //     fprintf(stderr, "Couldn't parse filter %s: %s___", filter_exp, pcap_geterr(handle));
-    //     return(2);
-    // }
-    // if (pcap_setfilter(handle, &fp) == -1) {
-    //     fprintf(stderr, "Couldn't install filter %s: %s___", filter_exp, pcap_geterr(handle));
-    //     return(2);
-    // }
     printf("\nSTARTING LOOP\n");
     fflush(stdout);
     pcap_set_timeout(handle,100);
-    // packet = pcap_next(handle, &header);
-	// printf("Jacked a packet with length of [%d]___", header.len);
-	// pcap_close(handle);
     int BATCH_SIZE = 10; 
     // while (true){}
     // This struct should have static references - all 10 packs should access same addresses
@@ -138,7 +178,7 @@ void capture_interface(char *dev){
         printf("%d : %p\n",i,(captured_contents[i]));
     }
     puts("");
-    struct pack_inputs input = { .dev=dev, .cap_store=captured_contents, .num=num, .output=results};
+    struct pack_inputs input = { .svc=map->svc, .cap_store=captured_contents, .num=num, .output=results};
     // Count 0 -> infinity
     pcap_loop(handle,BATCH_SIZE,on_packet,&input);
     fflush(stdout);
@@ -148,35 +188,27 @@ void capture_interface(char *dev){
         printf("%d address at %p\n\t %s -> %s\n\t %s -> %s\n",i,(results[i]),(results[i])->s_mac,results[i]->d_mac,results[i]->s_ip,results[i]->d_ip);        
     }
 }
+
 int main(int argc, char *argv[])
-{
-	char errbuf[PCAP_ERRBUF_SIZE];
-    struct bpf_program fp;		/* The compiled filter expression */
-    char filter_exp[] = "port 443";	/* The filter expression */
-    bpf_u_int32 mask;		/* The netmask of our sniffing device */
-    bpf_u_int32 net;
-    struct pcap_pkthdr header;	/* The header that pcap gives us */
-	const u_char *packet;		/* The actual packet */
-    pcap_if_t *devs = NULL; 
+{   int size;
+    struct mapping** svcs = get_svc_mappings(&size);
+    printf("SIZE is %d\n",size);
     pthread_t *threads; 
-    char *interfaces[] = {
-        // "lo",
-        "eth0",
-    };
-    int NUM_THREADS = sizeof(interfaces) / sizeof(char *); 
-    printf("There are %d threads.\n",NUM_THREADS);
     // Create thread for each k8s network
-    if ((threads = malloc(NUM_THREADS * sizeof(pthread_t))) == NULL) { 
+    if ((threads = malloc(size * sizeof(pthread_t))) == NULL) { 
         perror("Failure in thread initialisation:");
         return(1); 
     };
-    // Initialise threads 
-    int ret;
-    for (int i = 0; i < NUM_THREADS; i++){ 
-        printf("Creating thread for device %s at %p: i is %d\n",interfaces[i],&threads[i],i);
-        ret = pthread_create( &threads[i], NULL, capture_interface, interfaces[i]);
+
+    for (int i = 0; i < size; i++) { 
+        struct mapping *cur = svcs[i]; 
+        printf("map %d at %p: %s -> %s\n",i,cur,cur->svc, cur->if_name);
+        printf("Creating thread for device %s at %p: i is %d\n",cur->if_name,&threads[i],i);
+        int ret = pthread_create( &threads[i], NULL, capture_interface, cur);
     }
-    for (int i = 0; i < NUM_THREADS; i++){ 
+
+    // Initialise threads 
+    for (int i = 0; i < size; i++){ 
         pthread_join( threads[i], NULL);
     }
 

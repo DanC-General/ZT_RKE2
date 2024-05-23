@@ -213,8 +213,6 @@ int main(int argc, char *argv[])
         exit(EXIT_FAILURE);
     }
     FILE *fp = fdopen(fd,"w");
-    write(fd,"Hello! This is a test", sizeof("Hello! This is a test"));
-    write(fd,"Hello! This is a test again", sizeof("Hello! This is a test again") );
     pthread_t *threads; 
     // Create thread for each k8s network
     if ((threads = malloc(size * sizeof(pthread_t))) == NULL) { 

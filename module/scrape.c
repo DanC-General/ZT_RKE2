@@ -103,7 +103,6 @@ void on_packet(u_char *user,const struct pcap_pkthdr* head,const u_char*
 
     struct ip* ip_h = (struct ip*) (content + sizeof(struct ether_header)); 
     int iph_len = (ip_h->ip_hl * 4);  
-    // printf("IPHDRLEN = %d___", iph_len);
     u_char protocol = ip_h->ip_p;
     ((input->output)[*input->num]) = malloc(sizeof(struct outputs));
 
@@ -111,8 +110,6 @@ void on_packet(u_char *user,const struct pcap_pkthdr* head,const u_char*
     strncpy(((input->output)[*input->num])->d_mac,ether_ntoa(eth_h->ether_dhost),16);
     strncpy(((input->output)[*input->num])->s_ip,inet_ntoa(ip_h->ip_src),15);
     strncpy(((input->output)[*input->num])->d_ip,inet_ntoa(ip_h->ip_dst),15);
-
-    // inet_ntoa(ip_h->ip_src),inet_ntoa(ip_h->ip_dst)
 
     (input->cap_store[*input->num]) = malloc(head->caplen);
     memcpy(input->cap_store[*input->num],ether_ntoa(eth_h->ether_shost),head->caplen);
@@ -144,13 +141,13 @@ void capture_interface(struct mapping *map){
     char fnames[250];
     snprintf(fnames,250,"./%s_svc.log",map->svc);
     FILE* log_files = fopen(fnames,"a");
-    printf("FILE*: %p -> %s\n", &fnames, fnames);
     if (log_files == NULL) { 
         perror("Failed to open log file."); 
         exit(1); 
     };
     printf("Args to interface thread: %s, %s: %d fd\n",map->svc,map->if_name,fileno(log_files));
     // Start a capture on the given interface - NULL -> any 
+    // TODO: Should return error or remap if no device is availables
     handle = pcap_open_live(map->if_name, BUFSIZ, 0, 262144, errbuf); 
     if (handle == NULL){ 
         fprintf(stderr, "Couldn't open device %s: %s___", map->if_name, errbuf); 
@@ -161,11 +158,8 @@ void capture_interface(struct mapping *map){
     printf("Link layer %d___",ll);
     if (ll != DLT_EN10MB) {
         fprintf(stderr, "Device %s doesn't provide Ethernet headers - not supported___", map->if_name);
-        // return(2);
+        return;
     }   
-    // printf("Link details: %s___",pcap_datalink_val_to_description(ll)); 
-    // printf("Link name: %s___",pcap_datalink_val_to_name(ll)); 
-    printf("\nSTARTING LOOP\n");
     fflush(stdout);
     // pcap_set_timeout(handle,100);
     int BATCH_SIZE = 10; 
@@ -176,14 +170,7 @@ void capture_interface(struct mapping *map){
         int num = 0;
         char *captured_contents[BATCH_SIZE];
         struct outputs* results[BATCH_SIZE]; 
-        // printf("Results is %zu bytes of %zu struct size\n",sizeof(results));
-        // printf("Addresses of %p:\n",&captured_contents);
-        // for (int i = 0; i<10;i++){ 
-        //     // if ((captured_contents[i] = malloc(sizeof(char) * 4)) == NULL) perror("malloc:");
-        //     printf("%d : %p\n",i,(captured_contents[i]));
-        // }
         struct pack_inputs input = { .svc=map->svc, .cap_store=captured_contents, .num=&num, .output=results};
-        // Count 0 -> infinity
         pcap_loop(handle,BATCH_SIZE,on_packet,&input);
         fflush(stdout);
         for (int i = 0; i < BATCH_SIZE; i++){ 
@@ -206,7 +193,7 @@ int main(int argc, char *argv[])
 {   
     int size;
     struct mapping** svcs = get_svc_mappings(&size);
-    printf("SIZE is %d\n",size);
+    // printf("SIZE is %d\n",size);
     pthread_t *threads; 
     // Create thread for each k8s network
     if ((threads = malloc(size * sizeof(pthread_t))) == NULL) { 

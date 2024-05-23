@@ -2,12 +2,13 @@
 # Find user-defined services in the default namespace 
 SERVICE_DETAILS=$(sudo kubectl get services -o=custom-columns=NAME:.metadata.name,PORTS:.spec.ports[*].port | tail -n +2 | grep -v '^kubernetes ' | tr -s [:space:])
 MAPPINGS=()
+# Uses internal ports, so should work for both clusterIP's and NodePorts.
 for i in $(sudo kubectl get services -o=custom-columns=NAME:.metadata.name,PORTS:.spec.ports[*].port | tail -n +2 | grep -v '^kubernetes ' | tr -s [:space:] | tr ' ' '|') 
 	do SVC_NAME=$(echo "$i" | cut -d'|' -f 1) 
 	PORTS=$(echo "$i" | cut -d'|' -f 2)
 	for i in $(echo "$PORTS" | tr ',' ' ')
 		do 
-		# echo "$SVC_NAME:$i"
+		echo "Added map $SVC_NAME:$i"
 		MAPPINGS+=( "$SVC_NAME:$i" )
 	done
 done

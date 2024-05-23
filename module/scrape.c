@@ -1,8 +1,6 @@
 #include <stdio.h>
-// #include <pcap.h>
 #include <string.h> 
 #include <pcap/pcap.h> 
-// #include <net/ip.h> 
 #include <ctype.h>
 #include <pthread.h> 
 #include <stdlib.h>
@@ -92,13 +90,12 @@ void on_packet(u_char *user,const struct pcap_pkthdr* head,const u_char*
         content)
 {
     struct pack_inputs* input = (struct pack_inputs*) user; 
-    printf("Struct addresses: %p || %p || %p -> %d\n",&input->svc,input->cap_store,&input->num,*(input->num));
+    // printf("Struct addresses: %p || %p || %p -> %d\n",&input->svc,input->cap_store,&input->num,*(input->num));
     struct ether_header* eth_h = (struct ether_header*) content; 
     int ether_len = sizeof(struct ether_header); 
-    printf("%d ether_len\n",ether_len);
     struct ether_addr* smac = (struct ether_addr*) (&eth_h->ether_shost);
     struct ether_addr* dmac = (struct ether_addr*) (&eth_h->ether_dhost);
-    printf("FROM DEVICE %s --> \n %s : %s || ",input->svc,ether_ntoa(eth_h->ether_shost),ether_ntoa(eth_h->ether_dhost));
+    printf("FROM DEVICE %s\n",input->svc);
     /* Pointers to start point of various headers */
     const u_char *ip_header;
     const u_char *tcp_header;
@@ -120,40 +117,39 @@ void on_packet(u_char *user,const struct pcap_pkthdr* head,const u_char*
     (input->cap_store[*input->num]) = malloc(head->caplen);
     memcpy(input->cap_store[*input->num],ether_ntoa(eth_h->ether_shost),head->caplen);
     *(input->num) = *(input->num) + 1; 
-    for (int i = 0; i<*(input->num);i++){ 
-        printf("%d : %p\n",i,((input->cap_store)[i]));
-        printf("%s || %d\n",(inet_ntoa(ip_h->ip_dst)),strlen(inet_ntoa(ip_h->ip_dst)));
-    }
+    // for (int i = 0; i<*(input->num);i++){ 
+    //     printf("%d : %p\n",i,((input->cap_store)[i]));
+    //     printf("%s || %d\n",(inet_ntoa(ip_h->ip_dst)),strlen(inet_ntoa(ip_h->ip_dst)));
+    // }
     if (protocol != IPPROTO_TCP) {
         printf("Not a TCP packet. Skipping...\n");
         return;
     }
     struct tcphdr* tcp_h = (struct tcphdr*) (content + sizeof(struct ether_header) + iph_len); 
     int tcph_len = (tcp_h->th_off * 4);
-    printf("TCPHDRLEN = %d___", tcph_len);
+    // printf("TCPHDRLEN = %d___", tcph_len);
     int total_head_len = ether_len + iph_len + tcph_len;
-    printf("Total len C,T,H: %d :: %d :: %d",head->caplen,head->len,total_head_len);
+    // printf("Total len C,T,H: %d :: %d :: %d",head->caplen,head->len,total_head_len);
     int payload_len = head->caplen - total_head_len;
-    printf("%u : %u___\n",ntohs(tcp_h->th_sport),ntohs(tcp_h->th_dport));
-    for (size_t i = 0; i < (size_t) head->caplen;i++){ 
-        printf("%c",isprint(content[i]) ? content[i] : '.');
-    }
+    // printf("%u : %u___\n",ntohs(tcp_h->th_sport),ntohs(tcp_h->th_dport));
+    // for (size_t i = 0; i < (size_t) head->caplen;i++){ 
+    //     printf("%c",isprint(content[i]) ? content[i] : '.');
+    // }
     printf("\n");
-    puts("");
 }
 
 void capture_interface(struct mapping *map){
     char errbuf[PCAP_ERRBUF_SIZE];
     pcap_t *handle; 
-    char fname[250];
-    snprintf(fname,250,"%s_svc.log",map->svc);
-    printf("Writing to %s\n",fname);
-    FILE* log_file = fopen(fname,"a");
-    if (log_file == NULL) { 
+    char fnames[250];
+    snprintf(fnames,250,"./%s_svc.log",map->svc);
+    FILE* log_files = fopen(fnames,"a");
+    printf("FILE*: %p -> %s\n", &fnames, fnames);
+    if (log_files == NULL) { 
         perror("Failed to open log file."); 
         exit(1); 
     };
-    printf("Args to interface thread: %s, %s\n",map->svc,map->if_name);
+    printf("Args to interface thread: %s, %s: %d fd\n",map->svc,map->if_name,fileno(log_files));
     // Start a capture on the given interface - NULL -> any 
     handle = pcap_open_live(map->if_name, BUFSIZ, 0, 262144, errbuf); 
     if (handle == NULL){ 
@@ -167,41 +163,48 @@ void capture_interface(struct mapping *map){
         fprintf(stderr, "Device %s doesn't provide Ethernet headers - not supported___", map->if_name);
         // return(2);
     }   
-    printf("Link details: %s___",pcap_datalink_val_to_description(ll)); 
-    printf("Link name: %s___",pcap_datalink_val_to_name(ll)); 
+    // printf("Link details: %s___",pcap_datalink_val_to_description(ll)); 
+    // printf("Link name: %s___",pcap_datalink_val_to_name(ll)); 
     printf("\nSTARTING LOOP\n");
     fflush(stdout);
-    pcap_set_timeout(handle,100);
+    // pcap_set_timeout(handle,100);
     int BATCH_SIZE = 10; 
-    // while (true){}
-    // This struct should have static references - all 10 packs should access same addresses
-    int *num = malloc(sizeof(int));
-    *num = 0;
-    char *captured_contents[BATCH_SIZE];
-    struct outputs* results[BATCH_SIZE]; 
-    // printf("Results is %zu bytes of %zu struct size\n",sizeof(results));
-    // printf("Addresses of %p:\n",&captured_contents);
-    // for (int i = 0; i<10;i++){ 
-    //     // if ((captured_contents[i] = malloc(sizeof(char) * 4)) == NULL) perror("malloc:");
-    //     printf("%d : %p\n",i,(captured_contents[i]));
-    // }
-    puts("");
-    struct pack_inputs input = { .svc=map->svc, .cap_store=captured_contents, .num=num, .output=results};
-    // Count 0 -> infinity
-    pcap_loop(handle,BATCH_SIZE,on_packet,&input);
-    fflush(stdout);
-    pcap_close(handle);
-    for (int i = 0; i < BATCH_SIZE; i++){ 
-        struct outputs* cur = (results[i]);
-        fprintf(log_file,"%s|%s|%s|%s\n",results[i]->s_mac,results[i]->d_mac,results[i]->s_ip,results[i]->d_ip);
-        printf("%d address at %p\n\t %s -> %s\n\t %s -> %s\n",i,(results[i]),(results[i])->s_mac,results[i]->d_mac,results[i]->s_ip,results[i]->d_ip);        
+    // for (;;) { 
+    while (1){
+        printf("Loop %s : %d\n", map->svc,fileno(log_files));
+        // This struct should have static references - all 10 packs should access same addresses
+        int num = 0;
+        char *captured_contents[BATCH_SIZE];
+        struct outputs* results[BATCH_SIZE]; 
+        // printf("Results is %zu bytes of %zu struct size\n",sizeof(results));
+        // printf("Addresses of %p:\n",&captured_contents);
+        // for (int i = 0; i<10;i++){ 
+        //     // if ((captured_contents[i] = malloc(sizeof(char) * 4)) == NULL) perror("malloc:");
+        //     printf("%d : %p\n",i,(captured_contents[i]));
+        // }
+        struct pack_inputs input = { .svc=map->svc, .cap_store=captured_contents, .num=&num, .output=results};
+        // Count 0 -> infinity
+        pcap_loop(handle,BATCH_SIZE,on_packet,&input);
+        fflush(stdout);
+        for (int i = 0; i < BATCH_SIZE; i++){ 
+            fprintf(log_files,"%s|%s|%s|%s\n",results[i]->s_mac,results[i]->d_mac,results[i]->s_ip,results[i]->d_ip);
+            fflush(log_files);
+            if (ferror(log_files)){ 
+                printf("Write to %s failed\n",fnames);
+            } else { 
+                printf("Write to %s succeeded.\n",fnames);
+            }
+            printf("%d address at %p\n\t %s -> %s\n\t %s -> %s\n",i,(results[i]),(results[i])->s_mac,results[i]->d_mac,results[i]->s_ip,results[i]->d_ip);        
+        }
     }
-    fclose(log_file);
-
+    printf("Closing");
+    pcap_close(handle);
+    fclose(log_files);
 }
 
 int main(int argc, char *argv[])
-{   int size;
+{   
+    int size;
     struct mapping** svcs = get_svc_mappings(&size);
     printf("SIZE is %d\n",size);
     pthread_t *threads; 
@@ -213,7 +216,7 @@ int main(int argc, char *argv[])
 
     for (int i = 0; i < size; i++) { 
         struct mapping *cur = svcs[i]; 
-        printf("map %d at %p: %s -> %s\n",i,cur,cur->svc, cur->if_name);
+        printf("map %d at %p %s -> %s\n",i,cur,cur->svc, cur->if_name);
         printf("Creating thread for device %s at %p: i is %d\n",cur->if_name,&threads[i],i);
         int ret = pthread_create( &threads[i], NULL, capture_interface, cur);
     }

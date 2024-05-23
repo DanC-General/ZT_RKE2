@@ -8,6 +8,7 @@ metadata:
     io.kompose.service: ssh
   name: ssh
 spec:
+  type: NodePort
   ports:
     - name: "8003"
       port: 8003

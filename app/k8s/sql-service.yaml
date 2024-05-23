@@ -8,6 +8,7 @@ metadata:
     io.kompose.service: sql
   name: sql
 spec:
+  type: NodePort
   ports:
     - name: "8000"
       port: 8000

@@ -8,6 +8,9 @@
 #include <net/ethernet.h>
 #include <netinet/ether.h> 
 #include <netinet/tcp.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+#include <unistd.h>
 
 struct tcp_head { 
     unsigned short sport; 
@@ -33,10 +36,12 @@ struct pack_inputs {
     char **cap_store;
     int *num;
     struct outputs **output;
+    int pipe_fd; 
 };
 struct mapping { 
     char *svc; 
     char *if_name;
+    FILE *fp; 
 };
 struct mapping** get_svc_mappings(int *size){
     FILE *fp; 
@@ -138,9 +143,10 @@ void on_packet(u_char *user,const struct pcap_pkthdr* head,const u_char*
 void capture_interface(struct mapping *map){
     char errbuf[PCAP_ERRBUF_SIZE];
     pcap_t *handle; 
-    char fnames[250];
-    snprintf(fnames,250,"./%s_svc.log",map->svc);
-    FILE* log_files = fopen(fnames,"a");
+    // char fnames[250];
+    // snprintf(fnames,250,"./%s_svc.log",map->svc);
+    // FILE* log_files = fopen(fnames,"a");
+    FILE *log_files = map->fp;
     if (log_files == NULL) { 
         perror("Failed to open log file."); 
         exit(1); 
@@ -163,7 +169,6 @@ void capture_interface(struct mapping *map){
     fflush(stdout);
     // pcap_set_timeout(handle,100);
     int BATCH_SIZE = 10; 
-    // for (;;) { 
     while (1){
         printf("Loop %s : %d\n", map->svc,fileno(log_files));
         // This struct should have static references - all 10 packs should access same addresses
@@ -174,12 +179,13 @@ void capture_interface(struct mapping *map){
         pcap_loop(handle,BATCH_SIZE,on_packet,&input);
         fflush(stdout);
         for (int i = 0; i < BATCH_SIZE; i++){ 
-            fprintf(log_files,"%s|%s|%s|%s\n",results[i]->s_mac,results[i]->d_mac,results[i]->s_ip,results[i]->d_ip);
+            fprintf(log_files,"%s|%s|%s|%s|%s\n",map->svc,results[i]->s_mac,results[i]->d_mac,results[i]->s_ip,results[i]->d_ip);
             fflush(log_files);
+            // fsync(fileno(log_files));
             if (ferror(log_files)){ 
-                printf("Write to %s failed\n",fnames);
+                printf("Write to pipe failed\n");
             } else { 
-                printf("Write to %s succeeded.\n",fnames);
+                printf("Write to pipe succeeded.\n");
             }
             printf("%d address at %p\n\t %s -> %s\n\t %s -> %s\n",i,(results[i]),(results[i])->s_mac,results[i]->d_mac,results[i]->s_ip,results[i]->d_ip);        
         }
@@ -194,6 +200,21 @@ int main(int argc, char *argv[])
     int size;
     struct mapping** svcs = get_svc_mappings(&size);
     // printf("SIZE is %d\n",size);
+    // Create pipe to write to rule handler.
+    char *fifo_name = "traffic_data"; 
+    mkfifo(fifo_name,0666);
+
+    // Open write to pipe 
+    int fd = open(fifo_name,O_WRONLY);
+    // FILE *fp = fopen(fifo_name, "w"  );
+    // if (fp == NULL){ 
+    if (fd == -1){ 
+        perror("Can't open pipe:");
+        exit(EXIT_FAILURE);
+    }
+    FILE *fp = fdopen(fd,"w");
+    write(fd,"Hello! This is a test", sizeof("Hello! This is a test"));
+    write(fd,"Hello! This is a test again", sizeof("Hello! This is a test again") );
     pthread_t *threads; 
     // Create thread for each k8s network
     if ((threads = malloc(size * sizeof(pthread_t))) == NULL) { 
@@ -203,6 +224,7 @@ int main(int argc, char *argv[])
 
     for (int i = 0; i < size; i++) { 
         struct mapping *cur = svcs[i]; 
+        cur->fp = fp; 
         printf("map %d at %p %s -> %s\n",i,cur,cur->svc, cur->if_name);
         printf("Creating thread for device %s at %p: i is %d\n",cur->if_name,&threads[i],i);
         int ret = pthread_create( &threads[i], NULL, capture_interface, cur);
@@ -212,7 +234,7 @@ int main(int argc, char *argv[])
     for (int i = 0; i < size; i++){ 
         pthread_join( threads[i], NULL);
     }
-
+    close(fd);
 	return(0);
 }
 

@@ -7,6 +7,7 @@ class Packet:
         self.dmac = props[2]
         self.sip = props[3]
         self.dip = props[4]
+        self.ts = props[5]
     def __str__(self):
         ret = ""
         for k in vars(self): 

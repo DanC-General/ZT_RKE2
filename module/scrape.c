@@ -29,6 +29,7 @@ struct outputs {
     char s_ip[16];
     char d_ip[16]; 
     long time; 
+    int size; 
     // char *s_port;
     // char *d_port;
 };
@@ -117,6 +118,7 @@ void on_packet(u_char *user,const struct pcap_pkthdr* head,const u_char*
     strncpy(((input->output)[*input->num])->s_ip,inet_ntoa(ip_h->ip_src),15);
     strncpy(((input->output)[*input->num])->d_ip,inet_ntoa(ip_h->ip_dst),15);
     ((input->output)[*input->num])->time = head->ts.tv_sec * (int)1e6 + head->ts.tv_usec;
+    ((input->output)[*input->num])->size = head->caplen;
 
     (input->cap_store[*input->num]) = malloc(head->caplen);
     memcpy(input->cap_store[*input->num],content,head->caplen);
@@ -181,9 +183,9 @@ void capture_interface(struct mapping *map){
         pcap_loop(handle,BATCH_SIZE,on_packet,&input);
         fflush(stdout);
         for (int i = 0; i < BATCH_SIZE; i++){ 
-            fprintf(log_files,"%s|%s|%s|%s|%s|%ld\n",map->svc,results[i]->s_mac,results[i]->d_mac,results[i]->s_ip,results[i]->d_ip,results[i]->time);
+            fprintf(log_files,"%s|%s|%s|%s|%s|%ld|%d\n",map->svc,results[i]->s_mac,results[i]->d_mac,
+                results[i]->s_ip,results[i]->d_ip,results[i]->time,results[i]->size);
             fflush(log_files);
-            // fsync(fileno(log_files));
             if (ferror(log_files)){ 
                 printf("Write to pipe failed\n");
             } else { 

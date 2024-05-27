@@ -8,12 +8,17 @@ class Packet:
         self.sip = props[3]
         self.dip = props[4]
         self.ts = props[5]
+        self.size = props[6]
     def __str__(self):
         ret = ""
         for k in vars(self): 
             ret += k+"->"+vars(self)[k]+" | "
         return ret
-        
+
+# class Subject:
+
+# class Object: 
+#     def __init__:
 def get_lines(pipe): 
     # Check packet counts 
     with open(pipe, 'r') as f: 
@@ -21,7 +26,9 @@ def get_lines(pipe):
         while True: 
             data = f.readline()
             details = data.strip().split("|")
-            print(Packet(details))       
+            pack = Packet(details)
+            print(pack)  
+            print(time.gmtime(int(pack.ts) / 1000000 )) 
 
 def main(): 
     pipe = "traffic_data"

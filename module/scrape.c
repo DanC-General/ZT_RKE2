@@ -45,23 +45,43 @@ struct mapping {
     char *if_name;
     FILE *fp; 
 };
+
+
+/**
+ *  Resolve service <-> interface name mappings.
+ *  Resolution process documented in the svc_res.sh script. 
+ *  The mappings are stored and returned in a mappings 
+ *  struct so they are accessible from outside the function.
+ *  @param int* size: Stores the number of mappings 
+ *                    found by the script. 
+ *  @return mapping**: A structure of [size] mapping 
+ *                     structs populated with the 
+ *                     required information.
+ */
 struct mapping** get_svc_mappings(int *size){
     FILE *fp; 
     printf("Entered the function");
     char line[1000];
-    // figure out how to arbitrarily add details to mapping 
+    // Figure out how to arbitrarily add details to mapping 
     fp = popen("./svc_res.sh | grep '^|' | sed 's/^|//' | sort -u","r");
     if (fp == NULL) { 
         printf("Could not resolve mappings."); 
         exit(1); 
     }
-    // Read header size 
+    // Read header size of script output.
     if (fgets(line,sizeof(line),fp) != NULL) { 
         *size = atoi(line);
     }
+    /*  
+        The mapping struct stores the service <-> 
+        interface name mappings, with 'size' number
+        of mappings. 
+    */
     struct mapping **maps = malloc(sizeof(struct mapping*) * *size);
     printf("There are %d elements\n",*size);
     int i = 0;
+
+    // Process all the script outputs holding the relevant mappings.
     while (fgets(line,sizeof(line),fp) != NULL) {
         printf("Mapping %d: %s",i,line);
         char *token = strtok(line, "|");
@@ -71,11 +91,13 @@ struct mapping** get_svc_mappings(int *size){
         while (token != NULL) {
             switch (j){
                 // TODO check malloc success
+                // First field holds the service name.
                 case 0: 
                     cur->svc = malloc(strlen(token));
                     strcpy(cur->svc,token);    
                     printf("%p -> %s\n",cur->svc,token);
                     break;
+                // Second field holds the interface name.
                 case 1:
                     cur->if_name = malloc(strlen(token));
                     strcpy(cur->if_name,token); 
@@ -91,8 +113,22 @@ struct mapping** get_svc_mappings(int *size){
         maps[i++] = cur;
         // TODO could convert to hashmap 
     }
+    // Return the struct holding all the mapping structs.
     return maps;
 }
+
+/**
+ *  Callback for packet handling operation. Stores all the 
+ *  required information for each packet in an output structure, 
+ *  which is accessible by the calling process. All the details 
+ *  required for the function are passed through a pack_inputs 
+ *  struct, which involves dynamic storage for output access. 
+ * 
+ *  @param u_char* user: A pointer storing all user arguments - used 
+ *                          here to store the pack_inputs struct. 
+ *  @param pcap_pkthdr* head: The packet header, including sizes and timestamps
+ *  @param u_char* content: The packet body, with all the contents.  
+ */
 void on_packet(u_char *user,const struct pcap_pkthdr* head,const u_char*
         content)
 {
@@ -111,6 +147,10 @@ void on_packet(u_char *user,const struct pcap_pkthdr* head,const u_char*
     struct ip* ip_h = (struct ip*) (content + sizeof(struct ether_header)); 
     int iph_len = (ip_h->ip_hl * 4);  
     u_char protocol = ip_h->ip_p;
+
+    // Dynamically assign storage in the output[x] section so the results are 
+    // accessible outside the function 
+
     ((input->output)[*input->num]) = malloc(sizeof(struct outputs));
 
     strncpy(((input->output)[*input->num])->s_mac,ether_ntoa(eth_h->ether_shost),16);
@@ -123,6 +163,7 @@ void on_packet(u_char *user,const struct pcap_pkthdr* head,const u_char*
     (input->cap_store[*input->num]) = malloc(head->caplen);
     memcpy(input->cap_store[*input->num],content,head->caplen);
     *(input->num) = *(input->num) + 1; 
+
     // for (int i = 0; i<*(input->num);i++){ 
     //     printf("%d : %p\n",i,((input->cap_store)[i]));
     //     printf("%s || %d\n",(inet_ntoa(ip_h->ip_dst)),strlen(inet_ntoa(ip_h->ip_dst)));
@@ -144,6 +185,17 @@ void on_packet(u_char *user,const struct pcap_pkthdr* head,const u_char*
     printf("\n");
 }
 
+/**
+ *  Thread handling function responsible for capturing the traffic 
+ *  of a single interface over a single service. Opens a libpcap 
+ *  listener on each interface, and batches packets. On finishing 
+ *  a batch, the output from that batch is piped to the python 
+ *  process responsible for interpreting and marking the packets. 
+ * 
+ *  @param mapping* map: The mapping for the given interface. 
+                    Contains all information required to intialise
+                    a service capture. 
+ */
 void capture_interface(struct mapping *map){
     char errbuf[PCAP_ERRBUF_SIZE];
     pcap_t *handle; 
@@ -156,7 +208,7 @@ void capture_interface(struct mapping *map){
         exit(1); 
     };
     printf("Args to interface thread: %s, %s: %d fd\n",map->svc,map->if_name,fileno(log_files));
-    // Start a capture on the given interface - NULL -> any 
+    // Start a capture on the given interface.
     // TODO: Should return error or remap if no device is availables
     handle = pcap_open_live(map->if_name, BUFSIZ, 0, 262144, errbuf); 
     if (handle == NULL){ 
@@ -172,16 +224,19 @@ void capture_interface(struct mapping *map){
     }   
     fflush(stdout);
     // pcap_set_timeout(handle,100);
+    // Sets the number of packets to capture at a time. Packets are dealt with in batches.
     int BATCH_SIZE = 10; 
     while (1){
         printf("Loop %s : %d\n", map->svc,fileno(log_files));
-        // This struct should have static references - all 10 packs should access same addresses
+        // This struct should have static references - all 10 packets should 
+        // access same addresses for each batch. 
         int num = 0;
         char *captured_contents[BATCH_SIZE];
         struct outputs* results[BATCH_SIZE]; 
         struct pack_inputs input = { .svc=map->svc, .cap_store=captured_contents, .num=&num, .output=results};
         pcap_loop(handle,BATCH_SIZE,on_packet,&input);
         fflush(stdout);
+        // Write batch output to the pipe for IPC. 
         for (int i = 0; i < BATCH_SIZE; i++){ 
             fprintf(log_files,"%s|%s|%s|%s|%s|%ld|%d\n",map->svc,results[i]->s_mac,results[i]->d_mac,
                 results[i]->s_ip,results[i]->d_ip,results[i]->time,results[i]->size);
@@ -199,6 +254,9 @@ void capture_interface(struct mapping *map){
     fclose(log_files);
 }
 
+/**
+ *  Initialise and run threads for each service. 
+ */
 int main(int argc, char *argv[])
 {   
     int size;
@@ -218,12 +276,11 @@ int main(int argc, char *argv[])
     }
     FILE *fp = fdopen(fd,"w");
     pthread_t *threads; 
-    // Create thread for each k8s network
     if ((threads = malloc(size * sizeof(pthread_t))) == NULL) { 
         perror("Failure in thread initialisation:");
         return(1); 
     };
-
+    // Resolve mappings and create thread for each service. 
     for (int i = 0; i < size; i++) { 
         struct mapping *cur = svcs[i]; 
         cur->fp = fp; 

@@ -28,3 +28,9 @@ Should just need to change '_' in Service names to '-'
 ## Install libpcap libraries
 
 `sudo apt-get install libpcap-dev` 
+
+# Other installs 
+
+sudo apt install tcpreplay 
+
+sudo apt install gnome-terminal

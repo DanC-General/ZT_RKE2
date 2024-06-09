@@ -59,5 +59,6 @@ spec:
           name: http-cm1
         - name: html-files
           hostPath:
-            path: /home/daniel/ZT_RKE2/app/http/frontend/src
+            # path: /home/daniel/ZT_RKE2/app/http/frontend/src
+            path: /home/dc/ZT_RKE2/app/http/frontend/src
             type: Directory

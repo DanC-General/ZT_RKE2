@@ -29,6 +29,7 @@ def get_lines(pipe):
         print("looping")
         while True: 
             data = f.readline()
+            print(data)
             # Split the string into a list with the necessary 
             #   fields for class parsing.
             details = data.strip().split("|")

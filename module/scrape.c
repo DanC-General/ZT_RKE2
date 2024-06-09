@@ -28,10 +28,10 @@ struct outputs {
     // IPv4 addresses should be max 15 char representation.
     char s_ip[16];
     char d_ip[16]; 
+    char s_port[6];
+    char d_port[6];
     long time; 
     int size; 
-    // char *s_port;
-    // char *d_port;
 };
 struct pack_inputs { 
     char *svc;
@@ -162,7 +162,7 @@ void on_packet(u_char *user,const struct pcap_pkthdr* head,const u_char*
 
     (input->cap_store[*input->num]) = malloc(head->caplen);
     memcpy(input->cap_store[*input->num],content,head->caplen);
-    *(input->num) = *(input->num) + 1; 
+    // *(input->num) = *(input->num) + 1; 
 
     // for (int i = 0; i<*(input->num);i++){ 
     //     printf("%d : %p\n",i,((input->cap_store)[i]));
@@ -170,12 +170,20 @@ void on_packet(u_char *user,const struct pcap_pkthdr* head,const u_char*
     // }
     if (protocol != IPPROTO_TCP) {
         printf("Not a TCP packet. Skipping...\n");
+        *(input->num) = *(input->num) + 1; 
         return;
     }
     struct tcphdr* tcp_h = (struct tcphdr*) (content + sizeof(struct ether_header) + iph_len); 
     int tcph_len = (tcp_h->th_off * 4);
+    char sp[6];
+    sprintf(sp,"%hu",ntohs(tcp_h->source));
+    char dp[6];
+    sprintf(dp,"%hu",ntohs(tcp_h->dest));
+    printf("PORTS %s : %s\n",sp,dp);
+    strncpy(((input->output)[*input->num])->s_port,sp,5);
+    strncpy(((input->output)[*input->num])->d_port,dp,5);
     // printf("TCPHDRLEN = %d___", tcph_len);
-    int total_head_len = ether_len + iph_len + tcph_len;
+    int total_head_len = ether_len + iph_len + tcph_len;    
     // printf("Total len C,T,H: %d :: %d :: %d",head->caplen,head->len,total_head_len);
     int payload_len = head->caplen - total_head_len;
     // printf("%u : %u___\n",ntohs(tcp_h->th_sport),ntohs(tcp_h->th_dport));
@@ -183,6 +191,7 @@ void on_packet(u_char *user,const struct pcap_pkthdr* head,const u_char*
     //     printf("%c",isprint(content[i]) ? content[i] : '.');
     // }
     printf("\n");
+    *(input->num) = *(input->num) + 1; 
 }
 
 /**
@@ -202,6 +211,7 @@ void capture_interface(struct mapping *map){
     // char fnames[250];
     // snprintf(fnames,250,"./%s_svc.log",map->svc);
     // FILE* log_files = fopen(fnames,"a");
+    // UNCOMMENT BELOW
     FILE *log_files = map->fp;
     if (log_files == NULL) { 
         perror("Failed to open log file."); 
@@ -238,6 +248,7 @@ void capture_interface(struct mapping *map){
         fflush(stdout);
         // Write batch output to the pipe for IPC. 
         for (int i = 0; i < BATCH_SIZE; i++){ 
+            struct output *result = results[i];
             fprintf(log_files,"%s|%s|%s|%s|%s|%ld|%d\n",map->svc,results[i]->s_mac,results[i]->d_mac,
                 results[i]->s_ip,results[i]->d_ip,results[i]->time,results[i]->size);
             fflush(log_files);
@@ -251,7 +262,7 @@ void capture_interface(struct mapping *map){
     }
     printf("Closing");
     pcap_close(handle);
-    fclose(log_files);
+    // fclose(log_files);
 }
 
 /**

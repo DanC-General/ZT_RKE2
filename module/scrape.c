@@ -248,9 +248,10 @@ void capture_interface(struct mapping *map){
         fflush(stdout);
         // Write batch output to the pipe for IPC. 
         for (int i = 0; i < BATCH_SIZE; i++){ 
-            struct output *result = results[i];
-            fprintf(log_files,"%s|%s|%s|%s|%s|%ld|%d\n",map->svc,results[i]->s_mac,results[i]->d_mac,
-                results[i]->s_ip,results[i]->d_ip,results[i]->time,results[i]->size);
+            // Send all the relevant packet information
+            fprintf(log_files,"%s|%s|%s|%s|%s|%s|%s|%ld|%d\n",map->svc,results[i]->s_mac,results[i]->d_mac,
+                results[i]->s_ip,results[i]->d_ip,results[i]->s_port,results[i]->d_port,results[i]->time,
+                results[i]->size);
             fflush(log_files);
             if (ferror(log_files)){ 
                 printf("Write to pipe failed\n");

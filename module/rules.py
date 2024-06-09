@@ -15,8 +15,10 @@ class Packet:
         self.dmac = props[2]
         self.sip = props[3]
         self.dip = props[4]
-        self.ts = props[5]
-        self.size = props[6]
+        self.sport = props[5]
+        self.dport = props[6]
+        self.ts = props[7]
+        self.size = props[8]
     def __str__(self):
         ret = ""
         for k in vars(self): 

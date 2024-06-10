@@ -1,11 +1,11 @@
 import os
 import time
-
+import subprocess
 # class Subject:
 
 # class Object: 
 #     def __init__:
-
+svc_list = dict()
 class Packet: 
     # Initialise the variables from the 
     #   packet list.
@@ -25,10 +25,17 @@ class Packet:
             ret += k+"->"+vars(self)[k]+" | "
         return ret
 
+def terminate_connection(pack):
+    src_port = pack.sport
+    targ_port = svc_list[pack.svc]
+    print("Terminating connection on " + src_port + " <-> " + targ_port)
+    output = subprocess.run(["./terminate.sh"]+[targ_port,src_port])
+
 def get_lines(pipe): 
     # Check packet counts 
     with open(pipe, 'r') as f: 
         print("looping")
+        count = 0
         while True: 
             data = f.readline()
             print(data)
@@ -38,6 +45,24 @@ def get_lines(pipe):
             pack = Packet(details)
             print(pack)  
             print(time.gmtime(int(pack.ts) / 1000000 )) 
+            count = count + 1 
+            if count % 11 ==0: 
+                print("count 11")
+                terminate_connection(pack)
+                
+def make_svcs(): 
+    global svc_list
+    command1 = ["./svc_res.sh"]
+    command2 = ["grep", "'^|'"]  
+    p1 = subprocess.Popen(command1, stdout=subprocess.PIPE)
+    output = subprocess.check_output(('grep', '^-'), stdin=p1.stdout,universal_newlines=True)
+    parsed = [x for x in list(map(lambda x:x.replace('-',''),output.split("\n"))) if x]
+    print(parsed)
+    for x in parsed: 
+        arr = x.split(":")
+        print(arr)
+        svc_list[arr[0]] = arr[1]
+
 
 def main(): 
     # Communication with scrape.c occurs
@@ -45,6 +70,7 @@ def main():
     pipe = "traffic_data"
     while not os.path.exists(pipe):
         pass  
+    make_svcs()
     get_lines(pipe)        
     os.unlink(pipe)  
 

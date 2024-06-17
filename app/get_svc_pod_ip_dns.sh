@@ -24,7 +24,7 @@ for i in $(sudo kubectl get services -o=custom-columns=NAME:.metadata.name,PORTS
 	PORTS=$(echo "$i" | cut -d'|' -f 2)
 	for i in $(echo "$PORTS" | tr ',' ' ')
 		do 
-		echo "Added map $SVC_NAME:$i"
+		echo "-$SVC_NAME:$i"
 		MAPPINGS+=( "$SVC_NAME:$i" )
 	done
 done

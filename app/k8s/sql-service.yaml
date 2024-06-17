@@ -10,9 +10,9 @@ metadata:
 spec:
   type: NodePort
   ports:
-    - name: "8000"
-      port: 8000
-      targetPort: 33060
+    # - name: "8000"
+    #   port: 8000
+    #   targetPort: 33060
     - name: "3306"
       port: 3306
       targetPort: 3306

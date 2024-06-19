@@ -42,21 +42,53 @@ class Packet:
         self.dport = props[6]
         self.ts = props[7]
         self.size = props[8]
+        self.flags = int(props[9])
     def __str__(self):
         ret = ""
         for k in vars(self): 
             ret += k+"->"+vars(self)[k]+" | "
         return ret
+    def get_tcp_flags(self):
+        """
+        This function takes a byte value representing the TCP flags field and returns a list of the set flags.
+
+        Args:
+            flags_byte: A byte value representing the TCP flags field.
+
+        Returns:
+            A list of strings representing the set TCP flags (e.g., ["SYN", "ACK"]).
+        """
+
+        # Flag names and their corresponding bit positions
+        flag_names = {
+            1: "URG",
+            2: "SYN",
+            4: "ACK",
+            8: "PSH",
+            16: "RST",
+            32: "FIN",
+        }
+
+        set_flags = []
+        for bit_position, flag_name in flag_names.items():
+            # Check if the bit is set (value 1) using bitwise AND
+            if self.flags & bit_position:
+                set_flags.append(flag_name)
+        return set_flags
 
 def get_connection(svc,sport): 
     command1 = ["conntrack","-L"]
     command2 = ["grep",svc+".*"+sport]  
-    p1 = subprocess.Popen(command1, stdout=subprocess.PIPE)
-    output = subprocess.check_output(command2, stdin=p1.stdout,universal_newlines=True)
+    try: 
+        p1 = subprocess.Popen(command1, stdout=subprocess.PIPE)
+        output = subprocess.check_output(command2, stdin=p1.stdout,universal_newlines=True)
+    except: 
+        print("Connection failed")
+        return 1
     return output
 
-def terminate_connection(pack):
-    src_port = pack.sport
+def terminate_connection(pack,prt):
+    src_port = prt
     targ_port = svc_dict[pack.svc]
     print("Terminating connection on " + src_port + " <-> " + targ_port)
     output = subprocess.run(["./terminate.sh"]+[targ_port,src_port])
@@ -69,18 +101,17 @@ def get_lines(pipe):
         count = 0
         while True: 
             data = f.readline()
-            # print(data)
+            print(data)
             # Split the string into a list with the necessary 
             #   fields for class parsing.
             details = data.strip().split("|")
             pack = Packet(details)
+            print(pack.get_tcp_flags())
             # print(time.gmtime(int(pack.ts) / 1000000 )) 
             count = count + 1 
-            # if count % 11 ==0: 
-            #     print("count 11")
-            #     terminate_connection(pack)
             # Find original ip if external
             # print(pack)  
+            tprt = pack.sport
             if pack.sip == "10.1.1.243" or pack.dip == "10.1.1.243": 
                 sc = pack.sip == "10.1.1.243" 
                 if sc: 
@@ -94,6 +125,10 @@ def get_lines(pipe):
                     # print("PORT ",prt)
                     # print("Finding connection",svc_dict[pack.svc], " , ",prt)
                     res = get_connection(svc_dict[pack.svc],prt)
+                    print("Res is", res)
+                    if (res) == 1: 
+                        print("Passed")
+                        continue
                     kw = ["src","dst","sport","dport"] 
                     orig = list()
                     new = list()
@@ -112,13 +147,18 @@ def get_lines(pipe):
                 if sc: 
                     pack.sip = conn_dict[pack.sport].original.sip
                     pack.sport = conn_dict[pack.sport].original.sport
+                    tprt=pack.sport
                 else: 
                     pack.dip = conn_dict[pack.dport].original.sip
                     pack.dport = conn_dict[pack.dport].original.sport
+                    tprt = pack.dport
                 # print("__ New Pack __")
                 print(pack)
-                # print([f"Key: {key}, Value: {value}" for key, value in conn_dict.items()])
+                print([f"Key: {key}, Value: {value}" for key, value in conn_dict.items()])
                     
+            if count % 11 ==0: 
+                print("count 11")
+                terminate_connection(pack,tprt)
                 
 def make_svcs(): 
     global svc_dict

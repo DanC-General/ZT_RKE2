@@ -12,14 +12,14 @@
 #include <fcntl.h>
 #include <unistd.h>
 
-struct tcp_head { 
-    unsigned short sport; 
-    unsigned short dport; 
-    unsigned int seq; 
-    unsigned int ack; 
-    unsigned char thl : 4; 
-    unsigned char reserved: 4; 
-};
+// struct tcp_head { 
+//     unsigned short sport; 
+//     unsigned short dport; 
+//     unsigned int seq; 
+//     unsigned int ack; 
+//     unsigned char thl : 4; 
+//     unsigned char reserved: 4; 
+// };
 
 struct outputs { 
     // MAC addresses should be max 16 char representation
@@ -30,6 +30,8 @@ struct outputs {
     char d_ip[16]; 
     char s_port[6];
     char d_port[6];
+
+    u_char flags;
     long time; 
     int size; 
 };
@@ -179,7 +181,9 @@ void on_packet(u_char *user,const struct pcap_pkthdr* head,const u_char*
     sprintf(sp,"%hu",ntohs(tcp_h->source));
     char dp[6];
     sprintf(dp,"%hu",ntohs(tcp_h->dest));
+    (input->output[*input->num])->flags = tcp_h->th_flags;
     printf("PORTS %s : %s\n",sp,dp);
+    printf("Flags: %x\n",tcp_h->th_flags);
     strncpy(((input->output)[*input->num])->s_port,sp,5);
     strncpy(((input->output)[*input->num])->d_port,dp,5);
     // printf("TCPHDRLEN = %d___", tcph_len);
@@ -249,9 +253,9 @@ void capture_interface(struct mapping *map){
         // Write batch output to the pipe for IPC. 
         for (int i = 0; i < BATCH_SIZE; i++){ 
             // Send all the relevant packet information
-            fprintf(log_files,"%s|%s|%s|%s|%s|%s|%s|%ld|%d\n",map->svc,results[i]->s_mac,results[i]->d_mac,
+            fprintf(log_files,"%s|%s|%s|%s|%s|%s|%s|%ld|%d|%u\n",map->svc,results[i]->s_mac,results[i]->d_mac,
                 results[i]->s_ip,results[i]->d_ip,results[i]->s_port,results[i]->d_port,results[i]->time,
-                results[i]->size);
+                results[i]->size,results[i]->flags);
             fflush(log_files);
             if (ferror(log_files)){ 
                 printf("Write to pipe failed\n");

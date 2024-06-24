@@ -21,3 +21,10 @@ relevant interfaces.
 
     - Script that sends the packets in the pcap files over the relevant 
     interfaces. 
+
+
+
+Make new vms 
+Assign static addresses 
+Change from nat to bridge 
+Create a new bridge

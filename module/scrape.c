@@ -152,7 +152,6 @@ void on_packet(u_char *user,const struct pcap_pkthdr* head,const u_char*
 
     // Dynamically assign storage in the output[x] section so the results are 
     // accessible outside the function 
-
     ((input->output)[*input->num]) = malloc(sizeof(struct outputs));
 
     strncpy(((input->output)[*input->num])->s_mac,ether_ntoa(eth_h->ether_shost),16);
@@ -164,6 +163,7 @@ void on_packet(u_char *user,const struct pcap_pkthdr* head,const u_char*
 
     (input->cap_store[*input->num]) = malloc(head->caplen);
     memcpy(input->cap_store[*input->num],content,head->caplen);
+
     // *(input->num) = *(input->num) + 1; 
 
     // for (int i = 0; i<*(input->num);i++){ 
@@ -171,7 +171,8 @@ void on_packet(u_char *user,const struct pcap_pkthdr* head,const u_char*
     //     printf("%s || %d\n",(inet_ntoa(ip_h->ip_dst)),strlen(inet_ntoa(ip_h->ip_dst)));
     // }
     if (protocol != IPPROTO_TCP) {
-        printf("Not a TCP packet. Skipping...\n");
+        printf("Not a TCP packet: using %u. Skipping...\n",protocol);
+        strncpy(((input->output)[*input->num])->s_port,"-1",5);
         *(input->num) = *(input->num) + 1; 
         return;
     }
@@ -252,6 +253,10 @@ void capture_interface(struct mapping *map){
         fflush(stdout);
         // Write batch output to the pipe for IPC. 
         for (int i = 0; i < BATCH_SIZE; i++){ 
+            if (strcmp("-1",results[i]->s_port)==0){ 
+                continue;
+            }
+            printf("%d address at %p\n\t %s -> %s\n\t %s -> %s\n",i,(results[i]),(results[i])->s_mac,results[i]->d_mac,results[i]->s_ip,results[i]->d_ip);        
             // Send all the relevant packet information
             fprintf(log_files,"%s|%s|%s|%s|%s|%s|%s|%ld|%d|%u\n",map->svc,results[i]->s_mac,results[i]->d_mac,
                 results[i]->s_ip,results[i]->d_ip,results[i]->s_port,results[i]->d_port,results[i]->time,
@@ -262,7 +267,6 @@ void capture_interface(struct mapping *map){
             } else { 
                 printf("Write to pipe succeeded.\n");
             }
-            printf("%d address at %p\n\t %s -> %s\n\t %s -> %s\n",i,(results[i]),(results[i])->s_mac,results[i]->d_mac,results[i]->s_ip,results[i]->d_ip);        
         }
     }
     printf("Closing");

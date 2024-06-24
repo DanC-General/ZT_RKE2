@@ -1,10 +1,16 @@
 import os
-import time
 import subprocess
+from collections import deque
+from ipaddress import ip_interface
+from netaddr import IPNetwork, IPAddress
+import time
 import re
+import datetime
 # sport:Connection -  should ocassionally wipe
 conn_dict = dict()
 svc_dict = dict()
+stat_dict = dict()
+pod_cidr = ""
 class Conn_Detail:
     def __init__(self,arr): 
         self.sip = arr[0]
@@ -29,6 +35,7 @@ class Connection:
             ret += k+"->"+str(vars(self)[k])+" | "
         return ret
 
+    
 class Packet: 
     # Initialise the variables from the 
     #   packet list.
@@ -43,11 +50,13 @@ class Packet:
         self.ts = props[7]
         self.size = props[8]
         self.flags = int(props[9])
+
     def __str__(self):
         ret = ""
         for k in vars(self): 
-            ret += k+"->"+vars(self)[k]+" | "
+            ret += k+"->"+str(vars(self)[k])+" | "
         return ret
+    
     def get_tcp_flags(self):
         """
         This function takes a byte value representing the TCP flags field and returns a list of the set flags.
@@ -68,13 +77,64 @@ class Packet:
             16: "RST",
             32: "FIN",
         }
-
+        results = [1,2,4,8,16,32]
         set_flags = []
-        for bit_position, flag_name in flag_names.items():
+        for i,val in enumerate(results):
             # Check if the bit is set (value 1) using bitwise AND
-            if self.flags & bit_position:
-                set_flags.append(flag_name)
-        return set_flags
+            if self.flags & val:
+                set_flags.append(flag_names[val])
+                results[i] = 1
+            else:
+                results[i] = 0
+        return set_flags,results
+
+    def return_ml_data(self):
+        _, flags = self.get_tcp_flags()
+        cur_stats = stat_dict[self.svc]
+        return [self.ts,self.size, self.svc,self.sip,self.dip,self.sport,
+                self.dport] + flags + [cur_stats.mean_size, cur_stats.time_diff()[0]]
+    
+    def external_port(self): 
+        """ 
+        Returns the port used in the external communication.
+        If the source IP is the pods', return destination port 
+            and vice versa. 
+        """
+        if IPAddress(self.sip) in IPNetwork(pod_cidr):
+            print("Source is pod")
+            return self.dip, self.dport
+        elif IPAddress(self.dip) in IPNetwork(pod_cidr):
+            print("Dest is pod")
+            return self.sip, self.sport
+        else: 
+            print("Neither is pod")
+            return -1
+
+# Stores statistics for the last 100 packets
+class StatTracker: 
+
+    def __init__(self): 
+        self.packets = deque(maxlen=100)
+        self.mean_size = 0
+
+    def enqueue(self,pack: Packet): 
+        sz = int(pack.size)
+        # self.packets.append([datetime.datetime.fromtimestamp(int(pack.ts)),int(pack.size)])
+        self.packets.append([float(pack.ts), sz])
+        self._update_stats(pack)
+        
+    def _update_stats(self,pack:Packet): 
+        sz = int(pack.size)
+        if self.mean_size == 0: 
+            self.mean_size = sz
+        else: 
+            prev_mean = self.mean_size
+            self.mean_size = ((prev_mean * (len(self.packets) - 1)) + sz )/ (len(self.packets))
+
+    def time_diff(self):
+        change = self.packets[-1][0] - self.packets[0][0]
+        return change , len(self.packets)
+    
 
 def get_connection(svc,sport): 
     command1 = ["conntrack","-L"]
@@ -87,14 +147,15 @@ def get_connection(svc,sport):
         return 1
     return output
 
-def terminate_connection(pack,prt):
-    src_port = prt
-    targ_port = svc_dict[pack.svc]
-    print("Terminating connection on " + src_port + " <-> " + targ_port)
-    output = subprocess.run(["./terminate.sh"]+[targ_port,src_port])
+def terminate_connection(pack):
+    host_det = pack.external_port()
+    print(host_det)
+    print("Terminating connection on " , host_det[0] , " <-> " , host_det[1])
+    output = subprocess.run(["./terminate.sh"]+[host_det[0],host_det[1]])
 
 def get_lines(pipe): 
     global conn_dict
+    global stat_dict
     # Check packet counts 
     with open(pipe, 'r') as f: 
         print("looping")
@@ -106,62 +167,22 @@ def get_lines(pipe):
             #   fields for class parsing.
             details = data.strip().split("|")
             pack = Packet(details)
-            print(pack.get_tcp_flags())
+            stats = stat_dict[pack.svc]
+            stats.enqueue(pack) 
+            print(pack.external_port())
+            # print(stats)
+            # print(stats, stats.time_diff()[0], stats.mean_size)
             # print(time.gmtime(int(pack.ts) / 1000000 )) 
+            print(pack.return_ml_data())     
+            
             count = count + 1 
-            # Find original ip if external
-            # print(pack)  
-            tprt = pack.sport
-            if pack.sip == "10.1.1.243" or pack.dip == "10.1.1.243": 
-                sc = pack.sip == "10.1.1.243" 
-                if sc: 
-                    prt = pack.sport
-                    ip = pack.sip
-                else:
-                    prt = pack.dport
-                    ip = pack.dip
-                    
-                if prt not in conn_dict: 
-                    # print("PORT ",prt)
-                    # print("Finding connection",svc_dict[pack.svc], " , ",prt)
-                    res = get_connection(svc_dict[pack.svc],prt)
-                    print("Res is", res)
-                    if (res) == 1: 
-                        print("Passed")
-                        continue
-                    kw = ["src","dst","sport","dport"] 
-                    orig = list()
-                    new = list()
-                    for i in kw: 
-                        matches = re.finditer(i + r"=([0-9\.]*)",res)
-                        count = 0
-                        for match in matches:
-                            count += 1
-                            if count == 1:
-                                orig.append(match.group(1))
-                            if count == 2:
-                                new.append(match.group(1))
-                    conn_dict[new[3]] = Connection(Conn_Detail(orig),Conn_Detail(new))
-                    # print(res)
-                    # print(orig, "-->", new)
-                if sc: 
-                    pack.sip = conn_dict[pack.sport].original.sip
-                    pack.sport = conn_dict[pack.sport].original.sport
-                    tprt=pack.sport
-                else: 
-                    pack.dip = conn_dict[pack.dport].original.sip
-                    pack.dport = conn_dict[pack.dport].original.sport
-                    tprt = pack.dport
-                # print("__ New Pack __")
-                print(pack)
-                print([f"Key: {key}, Value: {value}" for key, value in conn_dict.items()])
-                    
-            if count % 11 ==0: 
+            if count % 100 ==0: 
                 print("count 11")
-                terminate_connection(pack,tprt)
+                terminate_connection(pack)
                 
 def make_svcs(): 
     global svc_dict
+    global stat_dict
     command1 = ["./svc_res.sh"]
     command2 = ["grep", "'^|'"]  
     p1 = subprocess.Popen(command1, stdout=subprocess.PIPE)
@@ -172,7 +193,15 @@ def make_svcs():
         arr = x.split(":")
         print(arr)
         svc_dict[arr[0]] = arr[1]
+        stat_dict[arr[0]] = StatTracker()
+    print(stat_dict)
+    print(svc_dict)
 
+def get_cidr(): 
+    global pod_cidr
+    pod_cidr = subprocess.check_output((
+        "sudo","kubectl","get","nodes","-o" ,
+        "jsonpath={.items[*].spec.podCIDR}")).decode()
 
 def main(): 
     # Communication with scrape.c occurs
@@ -180,9 +209,66 @@ def main():
     pipe = "traffic_data"
     while not os.path.exists(pipe):
         pass  
+    get_cidr()
     make_svcs()
+    print(svc_dict)
     get_lines(pipe)        
     os.unlink(pipe)  
 
-if __name__=="__main__":
+if __name__ == "__main__":
     main()
+
+
+### DEPRECATED CODE FOR REVERSING NAT
+
+
+# pack_fin = parse_packet(pack)
+# if pack_fin == 0: 
+#     continue
+# pack = pack_fin
+# Find original ip if external
+# print(pack)  
+# tprt = pack.sport
+# if pack.sip == "10.1.1.243" or pack.dip == "10.1.1.243": 
+#     sc = pack.sip == "10.1.1.243" 
+#     if sc: 
+#         prt = pack.sport
+#         ip = pack.sip
+#     else:
+#         prt = pack.dport
+#         ip = pack.dip
+        
+#     if prt not in conn_dict: 
+#         # print("PORT ",prt)
+#         # print("Finding connection",svc_dict[pack.svc], " , ",prt)
+#         res = get_connection(svc_dict[pack.svc],prt)
+#         print("Res is", res)
+#         if (res) == 1: 
+#             print("Passed")
+#             continue
+#         kw = ["src","dst","sport","dport"] 
+#         orig = list()
+#         new = list()
+#         for i in kw: 
+#             matches = re.finditer(i + r"=([0-9\.]*)",res)
+#             count = 0
+#             for match in matches:
+#                 count += 1
+#                 if count == 1:
+#                     orig.append(match.group(1))
+#                 if count == 2:
+#                     new.append(match.group(1))
+#         conn_dict[new[3]] = Connection(Conn_Detail(orig),Conn_Detail(new))
+#         # print(res)
+#         # print(orig, "-->", new)
+#     if sc: 
+#         pack.sip = conn_dict[pack.sport].original.sip
+#         pack.sport = conn_dict[pack.sport].original.sport
+#         tprt=pack.sport
+#     else: 
+#         pack.dip = conn_dict[pack.dport].original.sip
+#         pack.dport = conn_dict[pack.dport].original.sport
+#         tprt = pack.dport
+#     # print("__ New Pack __")
+#     # print(pack)
+#     # print([f"Key: {key}, Value: {value}" for key, value in conn_dict.items()])

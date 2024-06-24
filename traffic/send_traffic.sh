@@ -15,8 +15,10 @@ for i in $(./svc_res.sh | grep '^|' | tail -n +2 | sed 's/^|//g');
 	IF=$(echo $i | cut -d'|' -f 2); 
 	FILE=$(ls | grep "$SVC")
 	echo "$SVC @ $IF -> $FILE" 
-	sudo tcpreplay -i "$IF" "$FILE"
+	for i in $(find . -name "*$SVC.pcap" 2>/dev/null);
+		do echo $i
+		sudo tcpreplay -i "$IF" "$i" 
+	done
 done
-
 
 

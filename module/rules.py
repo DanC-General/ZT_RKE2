@@ -184,7 +184,6 @@ def make_svcs():
     global svc_dict
     global stat_dict
     command1 = ["./svc_res.sh"]
-    command2 = ["grep", "'^|'"]  
     p1 = subprocess.Popen(command1, stdout=subprocess.PIPE)
     output = subprocess.check_output(('grep', '^-'), stdin=p1.stdout,universal_newlines=True)
     parsed = [x for x in list(map(lambda x:x.replace('-',''),output.split("\n"))) if x]
@@ -218,57 +217,3 @@ def main():
 if __name__ == "__main__":
     main()
 
-
-### DEPRECATED CODE FOR REVERSING NAT
-
-
-# pack_fin = parse_packet(pack)
-# if pack_fin == 0: 
-#     continue
-# pack = pack_fin
-# Find original ip if external
-# print(pack)  
-# tprt = pack.sport
-# if pack.sip == "10.1.1.243" or pack.dip == "10.1.1.243": 
-#     sc = pack.sip == "10.1.1.243" 
-#     if sc: 
-#         prt = pack.sport
-#         ip = pack.sip
-#     else:
-#         prt = pack.dport
-#         ip = pack.dip
-        
-#     if prt not in conn_dict: 
-#         # print("PORT ",prt)
-#         # print("Finding connection",svc_dict[pack.svc], " , ",prt)
-#         res = get_connection(svc_dict[pack.svc],prt)
-#         print("Res is", res)
-#         if (res) == 1: 
-#             print("Passed")
-#             continue
-#         kw = ["src","dst","sport","dport"] 
-#         orig = list()
-#         new = list()
-#         for i in kw: 
-#             matches = re.finditer(i + r"=([0-9\.]*)",res)
-#             count = 0
-#             for match in matches:
-#                 count += 1
-#                 if count == 1:
-#                     orig.append(match.group(1))
-#                 if count == 2:
-#                     new.append(match.group(1))
-#         conn_dict[new[3]] = Connection(Conn_Detail(orig),Conn_Detail(new))
-#         # print(res)
-#         # print(orig, "-->", new)
-#     if sc: 
-#         pack.sip = conn_dict[pack.sport].original.sip
-#         pack.sport = conn_dict[pack.sport].original.sport
-#         tprt=pack.sport
-#     else: 
-#         pack.dip = conn_dict[pack.dport].original.sip
-#         pack.dport = conn_dict[pack.dport].original.sport
-#         tprt = pack.dport
-#     # print("__ New Pack __")
-#     # print(pack)
-#     # print([f"Key: {key}, Value: {value}" for key, value in conn_dict.items()])

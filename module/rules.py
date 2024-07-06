@@ -3,6 +3,7 @@ import subprocess
 from collections import deque
 from ipaddress import ip_interface
 from netaddr import IPNetwork, IPAddress
+from Kitsune import Kitsune
 import time
 import re
 import datetime
@@ -10,6 +11,7 @@ import datetime
 conn_dict = dict()
 svc_dict = dict()
 stat_dict = dict()
+ml_dict = dict()
 pod_cidr = ""
 class Conn_Detail:
     def __init__(self,arr): 
@@ -109,7 +111,7 @@ class Packet:
         else: 
             print("Neither is pod")
             return -1
-
+        
 # Stores statistics for the last 100 packets
 class StatTracker: 
 
@@ -183,6 +185,7 @@ def get_lines(pipe):
 def make_svcs(): 
     global svc_dict
     global stat_dict
+    global ml_dict
     command1 = ["./svc_res.sh"]
     p1 = subprocess.Popen(command1, stdout=subprocess.PIPE)
     output = subprocess.check_output(('grep', '^-'), stdin=p1.stdout,universal_newlines=True)
@@ -193,6 +196,7 @@ def make_svcs():
         print(arr)
         svc_dict[arr[0]] = arr[1]
         stat_dict[arr[0]] = StatTracker()
+        ml_dict[arr[0]] = Kitsune
     print(stat_dict)
     print(svc_dict)
 

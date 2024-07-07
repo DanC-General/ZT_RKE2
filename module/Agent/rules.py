@@ -36,6 +36,125 @@ class Connection:
         return ret
 
     
+        
+# Stores statistics for the last 100 packets
+class StatTracker: 
+
+    def __init__(self): 
+        self.packets = deque(maxlen=100)
+        self.mean_size = 0
+
+    def enqueue(self,pack: Packet): 
+        sz = int(pack.size)
+        # self.packets.append([datetime.datetime.fromtimestamp(int(pack.ts)),int(pack.size)])
+        self.packets.append([float(pack.ts), sz])
+        self._update_stats(pack)
+        
+    def _update_stats(self,pack:Packet): 
+        sz = int(pack.size)
+        if self.mean_size == 0: 
+            self.mean_size = sz
+        else: 
+            prev_mean = self.mean_size
+            self.mean_size = ((prev_mean * (len(self.packets) - 1)) + sz )/ (len(self.packets))
+
+    def time_diff(self):
+        change = self.packets[-1][0] - self.packets[0][0]
+        return change , len(self.packets)
+    
+
+def get_connection(svc,sport): 
+    command1 = ["conntrack","-L"]
+    command2 = ["grep",svc+".*"+sport]  
+    try: 
+        p1 = subprocess.Popen(command1, stdout=subprocess.PIPE)
+        output = subprocess.check_output(command2, stdin=p1.stdout,universal_newlines=True)
+    except: 
+        print("Connection failed")
+        return 1
+    return output
+
+def terminate_connection(pack):
+    host_det = pack.external_port(pod_cidr)
+    print(host_det)
+    print("Terminating connection on " , host_det[0] , " <-> " , host_det[1])
+    output = subprocess.run(["./terminate.sh"]+[host_det[0],host_det[1]])
+
+def get_lines(pipe): 
+    global conn_dict
+    global stat_dict
+    # Check packet counts 
+    with open(pipe, 'r') as f: 
+        print("looping")
+        count = 0
+        while True: 
+            data = f.readline()
+            print(data)
+            # Split the string into a list with the necessary 
+            #   fields for class parsing.
+            details = data.strip().split("|")
+            pack = Packet(details)
+            stats = stat_dict[pack.svc]
+            stats.enqueue(pack) 
+            # print(pack.external_port(pod_cidr))
+            # print(stats)
+            # print(stats, stats.time_diff()[0], stats.mean_size)
+            # print(time.gmtime(int(pack.ts) / 1000000 )) 
+            # print(pack.return_ml_data(stat_dict))     
+            ml_dict[pack.svc].FE.packets.append(pack)
+            # print("Kitsune event ", pack.svc)
+            print("RMSE for " + pack.svc + ml_dict[pack.svc].FE.curPacketIndx, + ":" +ml_dict[pack.svc].proc_next_packet())
+            count = count + 1 
+            if count % 100 ==0: 
+                print("count 100")
+                # terminate_connection(pack)
+                
+def make_svcs(): 
+    global svc_dict
+    global stat_dict
+    global ml_dict
+    command1 = ["../scripts/svc_res.sh"]
+    p1 = subprocess.Popen(command1, stdout=subprocess.PIPE)
+    output = subprocess.check_output(('grep', '^-'), stdin=p1.stdout,universal_newlines=True)
+    parsed = [x for x in list(map(lambda x:x.replace('-',''),output.split("\n"))) if x]
+    print(parsed)
+    # KitNET params:
+    maxAE = 10 #maximum size for any autoencoder in the ensemble layer
+    FMgrace = 100 #the number of instances taken to learn the feature mapping (the ensemble's architecture)
+    ADgrace = 1000 #the number of instances used to train the anomaly detector (ensemble itself)
+
+    for x in parsed: 
+        arr = x.split(":")
+        print(arr)
+        svc_dict[arr[0]] = arr[1]
+        stat_dict[arr[0]] = StatTracker()
+        ml_dict[arr[0]] = Kitsune(None,None,maxAE,FMgrace,ADgrace)
+    print(stat_dict)
+    print(svc_dict)
+
+def get_cidr(): 
+    global pod_cidr
+    pod_cidr = subprocess.check_output((
+        "sudo","kubectl","get","nodes","-o" ,
+        "jsonpath={.items[*].spec.podCIDR}")).decode()
+
+def main(): 
+    # Communication with scrape.c occurs
+    #   through the "traffic_data" pipe. 
+    pipe = "../traffic_data"
+    while not os.path.exists(pipe):
+        pass  
+    get_cidr()
+    make_svcs()
+    print(svc_dict)
+    get_lines(pipe)        
+    os.unlink(pipe)  
+
+if __name__ == "__main__":
+    print(os.getcwd())
+    main()
+
+
 # class Packet: 
 #     # Initialise the variables from the 
 #     #   packet list.
@@ -109,121 +228,3 @@ class Connection:
 #         else: 
 #             print("Neither is pod")
 #             return -1
-        
-# Stores statistics for the last 100 packets
-class StatTracker: 
-
-    def __init__(self): 
-        self.packets = deque(maxlen=100)
-        self.mean_size = 0
-
-    def enqueue(self,pack: Packet): 
-        sz = int(pack.size)
-        # self.packets.append([datetime.datetime.fromtimestamp(int(pack.ts)),int(pack.size)])
-        self.packets.append([float(pack.ts), sz])
-        self._update_stats(pack)
-        
-    def _update_stats(self,pack:Packet): 
-        sz = int(pack.size)
-        if self.mean_size == 0: 
-            self.mean_size = sz
-        else: 
-            prev_mean = self.mean_size
-            self.mean_size = ((prev_mean * (len(self.packets) - 1)) + sz )/ (len(self.packets))
-
-    def time_diff(self):
-        change = self.packets[-1][0] - self.packets[0][0]
-        return change , len(self.packets)
-    
-
-def get_connection(svc,sport): 
-    command1 = ["conntrack","-L"]
-    command2 = ["grep",svc+".*"+sport]  
-    try: 
-        p1 = subprocess.Popen(command1, stdout=subprocess.PIPE)
-        output = subprocess.check_output(command2, stdin=p1.stdout,universal_newlines=True)
-    except: 
-        print("Connection failed")
-        return 1
-    return output
-
-def terminate_connection(pack):
-    host_det = pack.external_port(pod_cidr)
-    print(host_det)
-    print("Terminating connection on " , host_det[0] , " <-> " , host_det[1])
-    output = subprocess.run(["./terminate.sh"]+[host_det[0],host_det[1]])
-
-def get_lines(pipe): 
-    global conn_dict
-    global stat_dict
-    # Check packet counts 
-    with open(pipe, 'r') as f: 
-        print("looping")
-        count = 0
-        while True: 
-            data = f.readline()
-            print(data)
-            # Split the string into a list with the necessary 
-            #   fields for class parsing.
-            details = data.strip().split("|")
-            pack = Packet(details)
-            stats = stat_dict[pack.svc]
-            stats.enqueue(pack) 
-            print(pack.external_port(pod_cidr))
-            # print(stats)
-            # print(stats, stats.time_diff()[0], stats.mean_size)
-            # print(time.gmtime(int(pack.ts) / 1000000 )) 
-            print(pack.return_ml_data(stat_dict))     
-            ml_dict[pack.svc].FE.packets.append(pack)
-            print("Kitsune event ", pack.svc)
-            ml_dict[pack.svc].proc_next_packet()
-            count = count + 1 
-            if count % 100 ==0: 
-                print("count 100")
-                # terminate_connection(pack)
-                
-def make_svcs(): 
-    global svc_dict
-    global stat_dict
-    global ml_dict
-    command1 = ["../scripts/svc_res.sh"]
-    p1 = subprocess.Popen(command1, stdout=subprocess.PIPE)
-    output = subprocess.check_output(('grep', '^-'), stdin=p1.stdout,universal_newlines=True)
-    parsed = [x for x in list(map(lambda x:x.replace('-',''),output.split("\n"))) if x]
-    print(parsed)
-    # KitNET params:
-    maxAE = 10 #maximum size for any autoencoder in the ensemble layer
-    FMgrace = 5000 #the number of instances taken to learn the feature mapping (the ensemble's architecture)
-    ADgrace = 50000 #the number of instances used to train the anomaly detector (ensemble itself)
-
-    for x in parsed: 
-        arr = x.split(":")
-        print(arr)
-        svc_dict[arr[0]] = arr[1]
-        stat_dict[arr[0]] = StatTracker()
-        ml_dict[arr[0]] = Kitsune(None,None,maxAE,FMgrace,ADgrace)
-    print(stat_dict)
-    print(svc_dict)
-
-def get_cidr(): 
-    global pod_cidr
-    pod_cidr = subprocess.check_output((
-        "sudo","kubectl","get","nodes","-o" ,
-        "jsonpath={.items[*].spec.podCIDR}")).decode()
-
-def main(): 
-    # Communication with scrape.c occurs
-    #   through the "traffic_data" pipe. 
-    pipe = "../traffic_data"
-    while not os.path.exists(pipe):
-        pass  
-    get_cidr()
-    make_svcs()
-    print(svc_dict)
-    get_lines(pipe)        
-    os.unlink(pipe)  
-
-if __name__ == "__main__":
-    print(os.getcwd())
-    main()
-

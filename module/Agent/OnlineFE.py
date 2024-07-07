@@ -56,5 +56,5 @@ class OnlineFE:
             return []
 
     def get_num_features(self):
-        print(self.nstat.getNetStatHeaders())
+        # print(self.nstat.getNetStatHeaders())
         return len(self.nstat.getNetStatHeaders())

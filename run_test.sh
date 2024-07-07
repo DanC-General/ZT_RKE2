@@ -2,9 +2,9 @@
 
 sudo gnome-terminal -- sh -c "bash -c \"cd module && make && ./scrape; bash\""
 
-sudo gnome-terminal -- sh -c "bash -c \"cd module && source venv/bin/activate && python3 rules.py; bash\""
+sudo gnome-terminal -- sh -c "bash -c \"cd module && source venv/bin/activate && cd Agent && python3 rules.py; bash\""
 sleep 1 
-# cd traffic && ./send_traffic.sh; cd ..
+cd traffic && ./send_traffic.sh; cd ..
 read -p "Continue?" 
 for i in $(ps -ef | grep gnome-terminal | tr -s [:space:] | cut -d' ' -f 2 ); 
 	do sudo kill -INT $i; 

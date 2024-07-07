@@ -65,7 +65,7 @@ struct mapping** get_svc_mappings(int *size){
     printf("Entered the function");
     char line[1000];
     // Figure out how to arbitrarily add details to mapping 
-    fp = popen("./svc_res.sh | grep '^|' | sed 's/^|//' | sort -u","r");
+    fp = popen("./scripts/svc_res.sh | grep '^|' | sed 's/^|//' | sort -u","r");
     if (fp == NULL) { 
         printf("Could not resolve mappings."); 
         exit(1); 

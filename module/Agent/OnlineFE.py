@@ -40,11 +40,11 @@ class OnlineFE:
         # Check remove
         packet = self.packets.pop()
         self.curPacketIndx = self.curPacketIndx + 1
-        print(0, type(0), packet.smac, type(packet.smac),
-               packet.dmac, type(packet.dmac), packet.sip, type(packet.sip),
-               packet.sport, type(packet.sport), packet.dip, type(packet.dip), 
-               packet.dport, type(packet.dport), type(packet.size),
-               type(packet.ts))
+        # print(0, type(0), packet.smac, type(packet.smac),
+        #        packet.dmac, type(packet.dmac), packet.sip, type(packet.sip),
+        #        packet.sport, type(packet.sport), packet.dip, type(packet.dip), 
+        #        packet.dport, type(packet.dport), type(packet.size),
+        #        type(packet.ts))
 #  Just splices out and retrieves these details from packets 
         ### Extract Features
         try:

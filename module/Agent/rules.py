@@ -78,7 +78,7 @@ def terminate_connection(pack):
     host_det = pack.external_port(pod_cidr)
     print(host_det)
     print("Terminating connection on " , host_det[0] , " <-> " , host_det[1])
-    output = subprocess.run(["./terminate.sh"]+[host_det[0],host_det[1]])
+    output = subprocess.run(["../scripts/terminate.sh"]+[host_det[0],host_det[1]])
 
 def get_lines(pipe): 
     global conn_dict
@@ -93,6 +93,8 @@ def get_lines(pipe):
             # Split the string into a list with the necessary 
             #   fields for class parsing.
             details = data.strip().split("|")
+            if len(details) != 10: 
+                continue
             pack = Packet(details)
             stats = stat_dict[pack.svc]
             stats.enqueue(pack) 
@@ -103,10 +105,14 @@ def get_lines(pipe):
             # print(pack.return_ml_data(stat_dict))     
             ml_dict[pack.svc].FE.packets.append(pack)
             # print("Kitsune event ", pack.svc)
-            print("RMSE for " + pack.svc + ml_dict[pack.svc].FE.curPacketIndx, + ":" +ml_dict[pack.svc].proc_next_packet())
-            count = count + 1 
-            if count % 100 ==0: 
-                print("count 100")
+            rmse =  ml_dict[pack.svc].proc_next_packet()
+            print("RMSE for " , pack.svc , ml_dict[pack.svc].FE.curPacketIndx, ":" , rmse)
+            if rmse > 100: 
+                print("Abnormal RMSE: ",rmse)
+                terminate_connection(pack)
+            # count = count + 1 
+            # if count % 100 ==0: 
+            #     print("count 100")
                 # terminate_connection(pack)
                 
 def make_svcs(): 

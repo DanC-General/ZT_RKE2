@@ -42,9 +42,6 @@ class Kitsune:
     def proc_next_packet(self):
         # create feature vector
         x = self.FE.get_next_vector()
-        # print("New vector is " , x)
-        # for value in x: 
-        #     print(value, " --> ",type(value))
         if len(x) == 0:
             return -1 #Error or no packets left
 

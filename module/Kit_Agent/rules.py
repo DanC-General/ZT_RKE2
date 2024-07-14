@@ -1,4 +1,5 @@
 import os
+import chardet
 import subprocess
 from Packet import Packet
 from collections import deque
@@ -86,12 +87,22 @@ def get_lines(pipe):
     # Check packet counts 
     with open(pipe, 'r') as f: 
         print("looping")
+        log = open("../logs/py.log",'w')
         count = 0
         while True: 
             data = f.readline()
-            print(data)
+            # result = chardet.detect(data)
+            # encoding = result['encoding']
+
+            # if encoding:
+            #     print("Detected encoding:", encoding)
+            # else:
+            #     print("Encoding detection failed.")
+
+            # print(data)
             # Split the string into a list with the necessary 
             #   fields for class parsing.
+            log.write(data + "\n")
             details = data.strip().split("|")
             if len(details) != 10: 
                 continue
@@ -106,15 +117,16 @@ def get_lines(pipe):
             ml_dict[pack.svc].FE.packets.append(pack)
             # print("Kitsune event ", pack.svc)
             rmse =  ml_dict[pack.svc].proc_next_packet()
-            print("RMSE for " , pack.svc , ml_dict[pack.svc].FE.curPacketIndx, ":" , rmse)
+            # print("RMSE for " , pack.svc , ml_dict[pack.svc].FE.curPacketIndx, ":" , rmse)
+            log.write("RMSE for " + pack.svc + str(ml_dict[pack.svc].FE.curPacketIndx) +  ":" + str(rmse) +"\n")
             if rmse > 100: 
-                print("Abnormal RMSE: ",rmse)
+                # print("Abnormal RMSE: ",rmse)
                 terminate_connection(pack)
             # count = count + 1 
             # if count % 100 ==0: 
             #     print("count 100")
                 # terminate_connection(pack)
-                
+        log.close()
 def make_svcs(): 
     global svc_dict
     global stat_dict
@@ -123,7 +135,7 @@ def make_svcs():
     p1 = subprocess.Popen(command1, stdout=subprocess.PIPE)
     output = subprocess.check_output(('grep', '^-'), stdin=p1.stdout,universal_newlines=True)
     parsed = [x for x in list(map(lambda x:x.replace('-',''),output.split("\n"))) if x]
-    print(parsed)
+    # log.write(parsed)
     # KitNET params:
     maxAE = 10 #maximum size for any autoencoder in the ensemble layer
     FMgrace = 100 #the number of instances taken to learn the feature mapping (the ensemble's architecture)
@@ -131,12 +143,12 @@ def make_svcs():
 
     for x in parsed: 
         arr = x.split(":")
-        print(arr)
+        # print(arr)
         svc_dict[arr[0]] = arr[1]
         stat_dict[arr[0]] = StatTracker()
         ml_dict[arr[0]] = Kitsune(None,None,maxAE,FMgrace,ADgrace)
-    print(stat_dict)
-    print(svc_dict)
+    # print(stat_dict)
+    # print(svc_dict)
 
 def get_cidr(): 
     global pod_cidr
@@ -152,7 +164,7 @@ def main():
         pass  
     get_cidr()
     make_svcs()
-    print(svc_dict)
+    # print(svc_dict)
     get_lines(pipe)        
     os.unlink(pipe)  
 

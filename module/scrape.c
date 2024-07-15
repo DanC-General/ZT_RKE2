@@ -281,13 +281,13 @@ void capture_interface(struct mapping *map){
  */
 int main(int argc, char *argv[])
 {   
-    const char *default_locale = setlocale(LC_CTYPE, NULL);
-    if (default_locale) {
-        fprintf(log_fp,"Default locale: %s\n", default_locale);
-    } else {
-        perror("setlocale");  // Handle error if setlocale fails
-    }
-    int log_fd = open("../logs/c.log",O_WRONLY | O_CREAT | O_TRUNC); 
+    // const char *default_locale = setlocale(LC_CTYPE, NULL);
+    // if (default_locale) {
+    //     fprintf(log_fp,"Default locale: %s\n", default_locale);
+    // } else {
+    //     perror("setlocale");  // Handle error if setlocale fails
+    // }
+    int log_fd = open("./logs/c.log",O_WRONLY | O_CREAT | O_TRUNC); 
     if (log_fd == -1) { 
         perror("Log file opening failed"); 
         exit(EXIT_FAILURE); 

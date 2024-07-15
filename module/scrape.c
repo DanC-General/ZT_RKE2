@@ -306,11 +306,6 @@ int main(int argc, char *argv[])
     // Create pipe to write to rule handler.
     char *fifo_name = "traffic_data"; 
     mkfifo(fifo_name,0666);
-    log_fd = open("../logs/c.log",O_WRONLY); 
-    if (log_fd == -1) { 
-        perror("Log file opening failed"); 
-        exit(EXIT_FAILURE); 
-    }
     // Open write to pipe 
     int fd = open(fifo_name,O_WRONLY);
     // FILE *fp = fopen(fifo_name, "w"  );

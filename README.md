@@ -31,7 +31,9 @@ Should just need to change '_' in Service names to '-'
 
 # Other installs 
 
+<!-- Clean these -->
 sudo apt install tcpreplay 
-
 sudo apt install gnome-terminal
 
+<!-- Maybe make sed script for this  -->
+Change the deployment k8s/http-deployment hostPath field to use your username/ZT_RKE2 install location 

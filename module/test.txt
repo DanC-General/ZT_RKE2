@@ -1,0 +1,89 @@
+Entered the functionThere are 3 elements
+Mapping 0: http|caliebf773ebcec
+0x5c6cd44cda30 address of cur
+0x5c6cd44cda50 -> http
+0 : http
+0x5c6cd44cda50 -> caliebf773ebcec
+
+1 : caliebf773ebcec
+
+cur 0x5c6cd44cda30:
+svc 0x5c6cd44cda50 -> http:
+if 0x5c6cd44cda70 -> caliebf773ebcec
+
+Mapping 1: sql|calif2064cf7cd3
+0x5c6cd44cda90 address of cur
+0x5c6cd44cdab0 -> sql
+0 : sql
+0x5c6cd44cdab0 -> calif2064cf7cd3
+
+1 : calif2064cf7cd3
+
+cur 0x5c6cd44cda90:
+svc 0x5c6cd44cdab0 -> sql:
+if 0x5c6cd44cdad0 -> calif2064cf7cd3
+
+Mapping 2: ssh|cali0bd1f1b649d
+0x5c6cd44cdaf0 address of cur
+0x5c6cd44cdb10 -> ssh
+0 : ssh
+0x5c6cd44cdb10 -> cali0bd1f1b649d
+
+1 : cali0bd1f1b649d
+
+cur 0x5c6cd44cdaf0:
+svc 0x5c6cd44cdb10 -> ssh:
+if 0x5c6cd44cdb30 -> cali0bd1f1b649d
+
+map 0 at 0x5c6cd44cda30 http -> caliebf773ebcec
+Creating thread for device caliebf773ebcec at 0x5c6cd44cdb50: i is 0
+map 1 at 0x5c6cd44cda90 sql -> calif2064cf7cd3
+Creating thread for device calif2064cf7cd3 at 0x5c6cd44cdb58: i is 1
+map 2 at 0x5c6cd44cdaf0 ssh -> cali0bd1f1b649d
+Creating thread for device cali0bd1f1b649d at 0x5c6cd44cdb60: i is 2
+Args to interface thread: http, caliebf773ebcec: 4 fd
+Args to interface thread: sql, calif2064cf7cd3: 4 fd
+Args to interface thread: ssh, cali0bd1f1b649d: 4 fd
+Link layer 1___Loop ssh : 4
+Link layer 1___Loop sql : 4
+Link layer 1___Loop http : 4
+FROM DEVICE http
+PORTS 43164 : 80
+Flags: 2
+
+FROM DEVICE http
+PORTS 80 : 43164
+Flags: 12
+
+FROM DEVICE http
+PORTS 43164 : 80
+Flags: 10
+
+FROM DEVICE http
+PORTS 43164 : 80
+Flags: 18
+
+FROM DEVICE http
+PORTS 80 : 43164
+Flags: 10
+
+FROM DEVICE http
+PORTS 80 : 43164
+Flags: 18
+
+FROM DEVICE http
+PORTS 43164 : 80
+Flags: 10
+
+FROM DEVICE http
+PORTS 80 : 43164
+Flags: 18
+
+FROM DEVICE http
+PORTS 43164 : 80
+Flags: 10
+
+FROM DEVICE http
+PORTS 80 : 43164
+Flags: 11
+

@@ -11,6 +11,7 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <unistd.h>
+#include <locale.h>
 
 // struct tcp_head { 
 //     unsigned short sport; 
@@ -20,10 +21,7 @@
 //     unsigned char thl : 4; 
 //     unsigned char reserved: 4; 
 // };
-
-// Shared file descriptor for the log file writing
-int log_fd;
-
+FILE* log_fp;
 struct outputs { 
     // MAC addresses should be max 16 char representation
     char s_mac[18];
@@ -65,12 +63,12 @@ struct mapping {
  */
 struct mapping** get_svc_mappings(int *size){
     FILE *fp; 
-    printf("Entered the function");
+    fprintf(log_fp,"Entered the function");
     char line[1000];
     // Figure out how to arbitrarily add details to mapping 
     fp = popen("./scripts/svc_res.sh | grep '^|' | sed 's/^|//' | sort -u","r");
     if (fp == NULL) { 
-        printf("Could not resolve mappings."); 
+        fprintf(log_fp,"Could not resolve mappings."); 
         exit(1); 
     }
     // Read header size of script output.
@@ -83,15 +81,15 @@ struct mapping** get_svc_mappings(int *size){
         of mappings. 
     */
     struct mapping **maps = malloc(sizeof(struct mapping*) * *size);
-    printf("There are %d elements\n",*size);
+    fprintf(log_fp,"There are %d elements\n",*size);
     int i = 0;
 
     // Process all the script outputs holding the relevant mappings.
     while (fgets(line,sizeof(line),fp) != NULL) {
-        printf("Mapping %d: %s",i,line);
+        fprintf(log_fp,"Mapping %d: %s",i,line);
         char *token = strtok(line, "|");
         struct mapping* cur = malloc(sizeof(struct mapping)); 
-        printf("%p address of cur\n",cur);
+        fprintf(log_fp,"%p address of cur\n",cur);
         int j = 0;
         while (token != NULL) {
             switch (j){
@@ -100,21 +98,21 @@ struct mapping** get_svc_mappings(int *size){
                 case 0: 
                     cur->svc = malloc(strlen(token));
                     strcpy(cur->svc,token);    
-                    printf("%p -> %s\n",cur->svc,token);
+                    fprintf(log_fp,"%p -> %s\n",cur->svc,token);
                     break;
                 // Second field holds the interface name.
                 case 1:
                     cur->if_name = malloc(strlen(token));
                     strcpy(cur->if_name,token); 
                     cur->if_name[strcspn(cur->if_name,"\n")] = 0;
-                    printf("%p -> %s\n",cur->svc,token);
+                    fprintf(log_fp,"%p -> %s\n",cur->svc,token);
                     break;
             }
-            printf("%d : %s\n",j,token);
+            fprintf(log_fp,"%d : %s\n",j,token);
             token = strtok(NULL, " ");
             j++;
         }
-        printf("cur %p:\nsvc %p -> %s:\nif %p -> %s\n\n",cur,cur->svc,cur->svc,cur->if_name,cur->if_name);
+        fprintf(log_fp,"cur %p:\nsvc %p -> %s:\nif %p -> %s\n\n",cur,cur->svc,cur->svc,cur->if_name,cur->if_name);
         maps[i++] = cur;
         // TODO could convert to hashmap 
     }
@@ -143,7 +141,7 @@ void on_packet(u_char *user,const struct pcap_pkthdr* head,const u_char*
     int ether_len = sizeof(struct ether_header); 
     struct ether_addr* smac = (struct ether_addr*) (&eth_h->ether_shost);
     struct ether_addr* dmac = (struct ether_addr*) (&eth_h->ether_dhost);
-    printf("FROM DEVICE %s\n",input->svc);
+    fprintf(log_fp,"FROM DEVICE %s\n",input->svc);
     /* Pointers to start point of various headers */
     const u_char *ip_header;
     const u_char *tcp_header;
@@ -170,11 +168,11 @@ void on_packet(u_char *user,const struct pcap_pkthdr* head,const u_char*
     // *(input->num) = *(input->num) + 1; 
 
     // for (int i = 0; i<*(input->num);i++){ 
-    //     printf("%d : %p\n",i,((input->cap_store)[i]));
-    //     printf("%s || %d\n",(inet_ntoa(ip_h->ip_dst)),strlen(inet_ntoa(ip_h->ip_dst)));
+    //     fprintf(log_fp,"%d : %p\n",i,((input->cap_store)[i]));
+    //     fprintf(log_fp,"%s || %d\n",(inet_ntoa(ip_h->ip_dst)),strlen(inet_ntoa(ip_h->ip_dst)));
     // }
     if (protocol != IPPROTO_TCP) {
-        printf("Not a TCP packet: using %u. Skipping...\n",protocol);
+        fprintf(log_fp,"Not a TCP packet: using %u. Skipping...\n",protocol);
         strncpy(((input->output)[*input->num])->s_port,"-1",5);
         *(input->num) = *(input->num) + 1; 
         return;
@@ -186,8 +184,8 @@ void on_packet(u_char *user,const struct pcap_pkthdr* head,const u_char*
     char dp[6];
     sprintf(dp,"%hu",ntohs(tcp_h->dest));
     (input->output[*input->num])->flags = tcp_h->th_flags;
-    printf("PORTS %s : %s\n",sp,dp);
-    printf("Flags: %x\n",tcp_h->th_flags);
+    fprintf(log_fp,"PORTS %s : %s\n",sp,dp);
+    fprintf(log_fp,"Flags: %x\n",tcp_h->th_flags);
     strncpy(((input->output)[*input->num])->s_port,sp,5);
     strncpy(((input->output)[*input->num])->d_port,dp,5);
     // printf("TCPHDRLEN = %d___", tcph_len);
@@ -196,9 +194,9 @@ void on_packet(u_char *user,const struct pcap_pkthdr* head,const u_char*
     int payload_len = head->caplen - total_head_len;
     // printf("%u : %u___\n",ntohs(tcp_h->th_sport),ntohs(tcp_h->th_dport));
     // for (size_t i = 0; i < (size_t) head->caplen;i++){ 
-    //     printf("%c",isprint(content[i]) ? content[i] : '.');
+    //     fprintf(log_fp,"%c",isprint(content[i]) ? content[i] : '.');
     // }
-    printf("\n");
+    fprintf(log_fp,"\n");
     *(input->num) = *(input->num) + 1; 
 }
 
@@ -225,7 +223,7 @@ void capture_interface(struct mapping *map){
         perror("Failed to open log file."); 
         exit(1); 
     };
-    printf("Args to interface thread: %s, %s: %d fd\n",map->svc,map->if_name,fileno(log_files));
+    fprintf(log_fp,"Args to interface thread: %s, %s: %d fd\n",map->svc,map->if_name,fileno(log_files));
     // Start a capture on the given interface.
     // TODO: Should return error or remap if no device is availables
     handle = pcap_open_live(map->if_name, BUFSIZ, 0, 262144, errbuf); 
@@ -235,7 +233,7 @@ void capture_interface(struct mapping *map){
     }
     // // Get ethernet headers 
     int ll = pcap_datalink(handle);
-    printf("Link layer %d___",ll);
+    fprintf(log_fp,"Link layer %d___",ll);
     if (ll != DLT_EN10MB) {
         fprintf(stderr, "Device %s doesn't provide Ethernet headers - not supported___", map->if_name);
         return;
@@ -245,7 +243,7 @@ void capture_interface(struct mapping *map){
     // Sets the number of packets to capture at a time. Packets are dealt with in batches.
     int BATCH_SIZE = 10; 
     while (1){
-        printf("Loop %s : %d\n", map->svc,fileno(log_files));
+        fprintf(log_fp,"Loop %s : %d\n", map->svc,fileno(log_files));
         // This struct should have static references - all 10 packets should 
         // access same addresses for each batch. 
         int num = 0;
@@ -259,29 +257,49 @@ void capture_interface(struct mapping *map){
             if (strcmp("-1",results[i]->s_port)==0){ 
                 continue;
             }
-            printf("%d address at %p\n\t %s -> %s\n\t %s -> %s\n",i,(results[i]),(results[i])->s_mac,results[i]->d_mac,results[i]->s_ip,results[i]->d_ip);        
+            fprintf(log_fp,"%d address at %p\n\t %s -> %s\n\t %s -> %s\n",i,(results[i]),(results[i])->s_mac,results[i]->d_mac,results[i]->s_ip,results[i]->d_ip);        
             // Send all the relevant packet information
             fprintf(log_files,"%s|%s|%s|%s|%s|%s|%s|%ld|%d|%u\n",map->svc,results[i]->s_mac,results[i]->d_mac,
                 results[i]->s_ip,results[i]->d_ip,results[i]->s_port,results[i]->d_port,results[i]->time,
                 results[i]->size,results[i]->flags);
             fflush(log_files);
             if (ferror(log_files)){ 
-                printf("Write to pipe failed\n");
+                fprintf(log_fp,"Write to pipe failed\n");
             } else { 
-                printf("Write to pipe succeeded.\n");
+                fprintf(log_fp,"Write to pipe succeeded.\n");
             }
         }
     }
-    printf("Closing");
+    fprintf(log_fp,"Closing");
     pcap_close(handle);
     // fclose(log_files);
 }
+
 /**
  *  Initialise and run threads for each service. 
  */
 int main(int argc, char *argv[])
 {   
-    int
+    const char *default_locale = setlocale(LC_CTYPE, NULL);
+    if (default_locale) {
+        fprintf(log_fp,"Default locale: %s\n", default_locale);
+    } else {
+        perror("setlocale");  // Handle error if setlocale fails
+    }
+    int log_fd = open("../logs/c.log",O_WRONLY | O_CREAT | O_TRUNC); 
+    if (log_fd == -1) { 
+        perror("Log file opening failed"); 
+        exit(EXIT_FAILURE); 
+    }
+    
+    log_fp = fdopen(log_fd, "w");  // Attempt to associate a stream (read mode)
+
+    if (log_fp == NULL) {
+        perror("fdopen");
+        close(log_fd);  // Close fd even on error
+        exit(EXIT_FAILURE);
+        return 1;
+    }
     int size;
     struct mapping** svcs = get_svc_mappings(&size);
     // printf("SIZE is %d\n",size);
@@ -311,8 +329,8 @@ int main(int argc, char *argv[])
     for (int i = 0; i < size; i++) { 
         struct mapping *cur = svcs[i]; 
         cur->fp = fp; 
-        printf("map %d at %p %s -> %s\n",i,cur,cur->svc, cur->if_name);
-        printf("Creating thread for device %s at %p: i is %d\n",cur->if_name,&threads[i],i);
+        fprintf(log_fp,"map %d at %p %s -> %s\n",i,cur,cur->svc, cur->if_name);
+        fprintf(log_fp,"Creating thread for device %s at %p: i is %d\n",cur->if_name,&threads[i],i);
         int ret = pthread_create( &threads[i], NULL, capture_interface, cur);
     }
 
@@ -320,7 +338,6 @@ int main(int argc, char *argv[])
     for (int i = 0; i < size; i++){ 
         pthread_join( threads[i], NULL);
     }
-    close(fd);
 	return(0);
 }
 

@@ -60,5 +60,5 @@ spec:
         - name: html-files
           hostPath:
             # path: /home/daniel/ZT_RKE2/app/http/frontend/src
-            path: /home/dc/ZT_RKE2/app/http/frontend/src
+            path: /home/test/ZT_RKE2/app/http/frontend/src
             type: Directory

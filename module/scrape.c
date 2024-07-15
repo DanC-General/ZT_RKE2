@@ -21,10 +21,13 @@
 //     unsigned char reserved: 4; 
 // };
 
+// Shared file descriptor for the log file writing
+int log_fd;
+
 struct outputs { 
     // MAC addresses should be max 16 char representation
-    char s_mac[17];
-    char d_mac[17]; 
+    char s_mac[18];
+    char d_mac[18]; 
     // IPv4 addresses should be max 15 char representation.
     char s_ip[16];
     char d_ip[16]; 
@@ -154,8 +157,8 @@ void on_packet(u_char *user,const struct pcap_pkthdr* head,const u_char*
     // accessible outside the function 
     ((input->output)[*input->num]) = malloc(sizeof(struct outputs));
 
-    strncpy(((input->output)[*input->num])->s_mac,ether_ntoa(eth_h->ether_shost),16);
-    strncpy(((input->output)[*input->num])->d_mac,ether_ntoa(eth_h->ether_dhost),16);
+    strncpy(((input->output)[*input->num])->s_mac,ether_ntoa(eth_h->ether_shost),17);
+    strncpy(((input->output)[*input->num])->d_mac,ether_ntoa(eth_h->ether_dhost),17);
     strncpy(((input->output)[*input->num])->s_ip,inet_ntoa(ip_h->ip_src),15);
     strncpy(((input->output)[*input->num])->d_ip,inet_ntoa(ip_h->ip_dst),15);
     ((input->output)[*input->num])->time = head->ts.tv_sec * (int)1e6 + head->ts.tv_usec;
@@ -273,19 +276,23 @@ void capture_interface(struct mapping *map){
     pcap_close(handle);
     // fclose(log_files);
 }
-
 /**
  *  Initialise and run threads for each service. 
  */
 int main(int argc, char *argv[])
 {   
+    int
     int size;
     struct mapping** svcs = get_svc_mappings(&size);
     // printf("SIZE is %d\n",size);
     // Create pipe to write to rule handler.
     char *fifo_name = "traffic_data"; 
     mkfifo(fifo_name,0666);
-
+    log_fd = open("../logs/c.log",O_WRONLY); 
+    if (log_fd == -1) { 
+        perror("Log file opening failed"); 
+        exit(EXIT_FAILURE); 
+    }
     // Open write to pipe 
     int fd = open(fifo_name,O_WRONLY);
     // FILE *fp = fopen(fifo_name, "w"  );

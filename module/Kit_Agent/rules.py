@@ -90,7 +90,13 @@ def get_lines(pipe):
         log = open("../logs/py.log",'w')
         count = 0
         while True: 
-            data = f.readline()
+            # data = f.readline()
+            data = ""
+            while True: 
+                cur = f.read(1)
+                data += cur
+                if cur == '\n': 
+                    break 
             # result = chardet.detect(data)
             # encoding = result['encoding']
 

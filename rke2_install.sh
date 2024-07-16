@@ -1,4 +1,5 @@
 #!/bin/bash
+sudo apt update
 sudo apt install vim git curl python3 pip make python3.12-venv libpcap-dev tcpreplay 
 sudo mkdir -p /etc/rancher/rke2
 sudo cp ri-config.yaml /etc/rancher/rke2/config.yaml

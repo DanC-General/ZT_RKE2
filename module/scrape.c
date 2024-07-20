@@ -92,6 +92,7 @@ struct mapping** get_svc_mappings(int *size){
         fprintf(log_fp,"%p address of cur\n",cur);
         int j = 0;
         while (token != NULL) {
+            // TODO: Add validation for these, and in svc script
             switch (j){
                 // TODO check malloc success
                 // First field holds the service name.
@@ -120,6 +121,26 @@ struct mapping** get_svc_mappings(int *size){
     return maps;
 }
 
+char* wait_for_service(char* svc){ 
+    char *result;
+    printf("Waiting for service %s...\n",svc);
+    while (1) { 
+        int size;
+        struct mapping** svcs = get_svc_mappings(&size);
+        for (int i = 0; i < size; i++) { 
+            struct mapping *cur = svcs[i]; 
+            // This comparison will only work for calico interfaces.
+            if (strcmp(cur->svc,svc)==0 && 
+                strncmp(cur->if_name,"cali",4) == 0
+            ) {
+                result = malloc(strlen(cur->if_name)); 
+                strcpy(result,cur->if_name);
+                return result;
+            }
+        }
+    }
+    
+}
 /**
  *  Callback for packet handling operation. Stores all the 
  *  required information for each packet in an output structure, 
@@ -250,7 +271,17 @@ void capture_interface(struct mapping *map){
         char *captured_contents[BATCH_SIZE];
         struct outputs* results[BATCH_SIZE]; 
         struct pack_inputs input = { .svc=map->svc, .cap_store=captured_contents, .num=&num, .output=results};
-        pcap_loop(handle,BATCH_SIZE,on_packet,&input);
+        if (pcap_loop(handle,BATCH_SIZE,on_packet,&input) != 0){ 
+            printf("Interface unexpectedly closed: maybe pod died?");
+            char* new_if = wait_for_service(map->svc);
+            printf("Spinning up new capture on %s\n",new_if);
+            handle = pcap_open_live(new_if, BUFSIZ, 0, 262144, errbuf); 
+            if (handle == NULL){ 
+                fprintf(stderr, "Couldn't open device %s: %s___", map->if_name, errbuf); 
+                exit(EXIT_FAILURE);
+            }
+            continue;
+        }
         fflush(stdout);
         // Write batch output to the pipe for IPC. 
         for (int i = 0; i < BATCH_SIZE; i++){ 
@@ -300,6 +331,14 @@ int main(int argc, char *argv[])
         exit(EXIT_FAILURE);
         return 1;
     }
+
+    // while (1){ 
+    //     printf("%s\n",wait_for_service("ssh")); 
+    //     printf("%s\n",wait_for_service("sql"));
+    //     printf("%s\n",wait_for_service("http"));
+    //     puts("End loop");
+    //     sleep(5); 
+    // }
     int size;
     struct mapping** svcs = get_svc_mappings(&size);
     // printf("SIZE is %d\n",size);

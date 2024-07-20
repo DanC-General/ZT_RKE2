@@ -33,6 +33,7 @@ RULES=$(sudo iptables -t nat -L)
 IF_DETAILS=$(ip a) 
 SEARCH_STR="";
 OUTPUT=""
+count=0
 # Get details about interfaces for all relevant services.
 for i in ${MAPPINGS[@]}; do
 	IP=$(echo "$RULES" |  grep "$i" | grep all | grep -oE '([0-9]{1,4}\.){3}[0-9]{1,4}' | sort -u)
@@ -43,11 +44,16 @@ for i in ${MAPPINGS[@]}; do
 	SVC=$(echo $i | cut -d':' -f 1)
 	echo "Mapping service $SVC: $i --> $IP --> $POD_NAME --> $IF_NUM --> $IF_NAME"; 
 	# echo "|$SVC|$IF_NAME"
+	if [[ -z $(echo $IF_NAME | grep '^cali') ]]; then
+		echo "No current interface"
+		continue
+	fi 
 	if [[ $OUTPUT == "" ]]; then
 		OUTPUT="|$SVC|$IF_NAME"
 	else
 		OUTPUT="$OUTPUT"$'\n'"|$SVC|$IF_NAME"
 	fi
+	((count++))
 	#if [ -z "$SEARCH_STR" ]; then 
 	#	echo "Empty string"
 	#	SEARCH_STR="$i"
@@ -56,7 +62,8 @@ for i in ${MAPPINGS[@]}; do
 	#fi 
 done
 # Print the results starting with '|' to facilitate parsing.
-echo "|$(echo "$OUTPUT" | sort -u | wc -l)" 
+# echo "|$(echo "$OUTPUT" | sort -u | wc -l)" 
+echo "|$count"
 for i in $(echo "$OUTPUT" | sort -u); do
 	echo "$i"
 done

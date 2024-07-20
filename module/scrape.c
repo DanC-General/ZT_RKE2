@@ -339,34 +339,44 @@ int main(int argc, char *argv[])
     //     puts("End loop");
     //     sleep(5); 
     // }
+    int i = 0; 
+    printf("%d\n",i++);
     int size;
     struct mapping** svcs = get_svc_mappings(&size);
+    printf("%d\n",i++);
     // printf("SIZE is %d\n",size);
     // Create pipe to write to rule handler.
     char *fifo_name = "traffic_data"; 
     mkfifo(fifo_name,0666);
+    printf("%d,\n",i++);
     // Open write to pipe 
+    printf("%d\n",i++);
     int fd = open(fifo_name,O_WRONLY);
-    // FILE *fp = fopen(fifo_name, "w"  );
-    // if (fp == NULL){ 
     if (fd == -1){ 
         perror("Can't open pipe:");
         exit(EXIT_FAILURE);
     }
+    printf("%d\n",i++);
+    // FILE *fp = fopen(fifo_name, "w"  );
+    // if (fp == NULL){ 
+    printf("%d\n",i++);
     FILE *fp = fdopen(fd,"w");
     pthread_t *threads; 
     if ((threads = malloc(size * sizeof(pthread_t))) == NULL) { 
         perror("Failure in thread initialisation:");
         return(1); 
     };
+    printf("%d\n",i++);
     // Resolve mappings and create thread for each service. 
     for (int i = 0; i < size; i++) { 
         struct mapping *cur = svcs[i]; 
         cur->fp = fp; 
+        printf("map %d at %p %s -> %s\n",i,cur,cur->svc, cur->if_name);
         fprintf(log_fp,"map %d at %p %s -> %s\n",i,cur,cur->svc, cur->if_name);
         fprintf(log_fp,"Creating thread for device %s at %p: i is %d\n",cur->if_name,&threads[i],i);
         int ret = pthread_create( &threads[i], NULL, capture_interface, cur);
     }
+    printf("%d\n",i++);
 
     // Initialise threads 
     for (int i = 0; i < size; i++){ 

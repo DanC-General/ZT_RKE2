@@ -14,6 +14,7 @@ which is then used to get the ip of the underlying pod. This ip can be mapped ba
 pod's name, which can be used to get the name of the interface it uses.  
 
 description
+main(){ 
 # Find user-defined services in the default namespace.
 SERVICE_DETAILS=$(sudo kubectl get services -o=custom-columns=NAME:.metadata.name,PORTS:.spec.ports[*].port | tail -n +2 | grep -v '^kubernetes ' | tr -s [:space:])
 # Hold svc:port mappings.
@@ -67,4 +68,5 @@ echo "|$count"
 for i in $(echo "$OUTPUT" | sort -u); do
 	echo "$i"
 done
-
+}
+main 2>/dev/null

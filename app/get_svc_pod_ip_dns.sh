@@ -35,8 +35,13 @@ SEARCH_STR="";
 OUTPUT=""
 # Get details about interfaces for all relevant services.
 for i in ${MAPPINGS[@]}; do
-	IP=$(echo "$RULES" |  grep "$i" | grep all | grep -oE '([0-9]{1,4}\.){3}[0-9]{1,4}' | sort -u)
-	POD_NAME=$(sudo kubectl get pods -o=custom-columns=NAME:.metadata.name,IP:.status.podIP | tr -s [:space:] | tail -n +2 | grep $IP | cut -d' ' -f 1)
+	CUR_SVC=$(echo "$i" | cut -d: -f 1)
+	EP_OUT=$(sudo kubectl get endpoints -o=custom-columns=NAME:.metadata.name,EP:.subsets..addresses..ip,PNAME:.subsets..addresses..targetRef..name | grep "$CUR_SVC" | tr -s '[:space:]')
+	IP=$(echo "$EP_OUT" | cut -d' ' -f 2)
+	POD_NAME=$(echo "$EP_OUT" | cut -d' ' -f 3)
+	echo "Episode is $EP_OUT - IP is $IP - Pod name is $POD_NAME" 
+	# IP=$(echo "$RULES" |  grep "$i" | grep all | grep -oE '([0-9]{1,4}\.){3}[0-9]{1,4}' | sort -u)
+	# POD_NAME=$(sudo kubectl get pods -o=custom-columns=NAME:.metadata.name,IP:.status.podIP | tr -s [:space:] | tail -n +2 | grep $IP | cut -d' ' -f 1)
 	# Get interface name from pods. 
 	IF_NUM=$(sudo kubectl exec "$POD_NAME" -- cat /sys/class/net/eth0/iflink )
 	IF_NAME=$(echo "$IF_DETAILS" | grep "^$IF_NUM" | cut -d':' -f 2 | cut -d'@' -f 1 | tr -d '[:space:]') 

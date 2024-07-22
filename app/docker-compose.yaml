@@ -1,8 +1,8 @@
 version: "3.10" 
 
-networks: 
-  test_net:
-    driver: bridge
+# networks: 
+#   test_net:
+#     driver: bridge
 
 services: 
   http: 
@@ -10,8 +10,8 @@ services:
     build:
       context: ./http
       dockerfile: ./frontend/Dockerfile   
-    ports:
-      - "93:80"
+    # ports:
+    #   - "93:80"
     environment:
       # Set below with k8s name
       MYSQL_HOST: app-sql-1
@@ -38,17 +38,17 @@ services:
     environment: 
       MYSQL_ROOT_PASSWORD: password_123!
       MYSQL_DATABASE: test 
-    ports:
-      - "8000:33060"
-      - "3306:3306"
+    # ports:
+    #   - "8000:33060"
+    #   - "3306:3306"
     networks:
       - test_net
   ssh:
     build:
       context: ./ssh
       dockerfile: ./Dockerfile  
-    ports:
-      - "8003:22"
+    # ports:
+    #   - "8003:22"
     networks:
       - test_net
 

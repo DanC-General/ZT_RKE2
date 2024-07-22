@@ -10,8 +10,9 @@ metadata:
 spec:
   type: NodePort
   ports:
-    - name: "93"
-      port: 93
+    # - name: "93"
+    - port: 80
       targetPort: 80
+      nodePort: 30001
   selector:
     io.kompose.service: http

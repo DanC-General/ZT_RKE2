@@ -10,8 +10,9 @@ metadata:
 spec:
   type: NodePort
   ports:
-    - name: "8003"
-      port: 8003
+    # - name: "8003"
+    - port: 22
       targetPort: 22
+      nodePort: 30002
   selector:
     io.kompose.service: ssh

@@ -13,8 +13,9 @@ spec:
     # - name: "8000"
     #   port: 8000
     #   targetPort: 33060
-    - name: "3306"
-      port: 3306
+    # - name: "3306"
+    - port: 3306
       targetPort: 3306
+      nodePort: 30003
   selector:
     io.kompose.service: sql

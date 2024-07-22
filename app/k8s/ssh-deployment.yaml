@@ -24,8 +24,8 @@ spec:
       containers:
         - image: localhost:5000/ssh
           name: ssh
-          ports:
-            - containerPort: 22
-              hostPort: 8003
-              protocol: TCP
+          # ports:
+          #   - containerPort: 22
+          #     hostPort: 8003
+          #     protocol: TCP
       restartPolicy: Always

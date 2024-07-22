@@ -35,10 +35,10 @@ spec:
               value: root
           image: localhost:5000/http
           name: http
-          ports:
-            - containerPort: 80
-              hostPort: 93
-              protocol: TCP
+          # ports:
+          #   - containerPort: 80
+          #     hostPort: 93
+          #     protocol: TCP
           volumeMounts:
             - mountPath: /etc/php/sites-available/default
               name: http-cm0

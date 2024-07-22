@@ -22,8 +22,8 @@ services:
     build:
       context: .
       dockerfile: ./frontend/php.Dockerfile   
-    ports:
-      - "93:80"
+    # ports:
+    #   - "93:80"
     environment:
       MYSQL_HOST: "172.23.0.2:8001"
       MYSQL_USER: root

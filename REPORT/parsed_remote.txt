@@ -1,0 +1,66 @@
+12:51:39.350904 IP 172.24.250.239.60466 > dc.lan.93: Flags [S], seq 3867181675, win 64240, options [mss 1460,sackOK,TS val 3003182598 ecr 0,nop,wscale 7], length 0
+12:51:39.456652 IP dc.lan.93 > 172.24.250.239.60466: Flags [S.], seq 1448722396, ack 3867181676, win 64308, options [mss 1410,sackOK,TS val 1949511107 ecr 3003182598,nop,wscale 7], length 0
+12:51:39.456681 IP 172.24.250.239.60466 > dc.lan.93: Flags [.], ack 1, win 502, options [nop,nop,TS val 3003182704 ecr 1949511107], length 0
+12:51:39.456715 IP 172.24.250.239.60466 > dc.lan.93: Flags [P.], seq 1:78, ack 1, win 502, options [nop,nop,TS val 3003182704 ecr 1949511107], length 77
+12:51:39.460362 IP dc.lan.93 > 172.24.250.239.60466: Flags [.], ack 78, win 502, options [nop,nop,TS val 1949511112 ecr 3003182704], length 0
+12:51:39.466362 IP dc.lan.93 > 172.24.250.239.60466: Flags [P.], seq 1:163, ack 78, win 502, options [nop,nop,TS val 1949511112 ecr 3003182704], length 162
+12:51:39.466362 IP dc.lan.93 > 172.24.250.239.60466: Flags [FP.], seq 163:1354, ack 78, win 502, options [nop,nop,TS val 1949511112 ecr 3003182704], length 1191
+12:51:39.466367 IP 172.24.250.239.60466 > dc.lan.93: Flags [.], ack 163, win 501, options [nop,nop,TS val 3003182713 ecr 1949511112], length 0
+12:51:39.466383 IP 172.24.250.239.60466 > dc.lan.93: Flags [.], ack 1355, win 501, options [nop,nop,TS val 3003182713 ecr 1949511112], length 0
+12:51:39.466456 IP 172.24.250.239.60466 > dc.lan.93: Flags [F.], seq 78, ack 1355, win 501, options [nop,nop,TS val 3003182713 ecr 1949511112], length 0
+12:51:39.471005 IP dc.lan.93 > 172.24.250.239.60466: Flags [.], ack 79, win 502, options [nop,nop,TS val 1949511121 ecr 3003182713], length 0
+12:51:40.093360 IP 172.24.250.239.60480 > dc.lan.93: Flags [S], seq 3263119355, win 64240, options [mss 1460,sackOK,TS val 3003183340 ecr 0,nop,wscale 7], length 0
+12:51:40.171582 IP dc.lan.93 > 172.24.250.239.60480: Flags [S.], seq 4100411614, ack 3263119356, win 64308, options [mss 1410,sackOK,TS val 1949511821 ecr 3003183340,nop,wscale 7], length 0
+12:51:40.171613 IP 172.24.250.239.60480 > dc.lan.93: Flags [.], ack 1, win 502, options [nop,nop,TS val 3003183419 ecr 1949511821], length 0
+12:51:40.171651 IP 172.24.250.239.60480 > dc.lan.93: Flags [P.], seq 1:78, ack 1, win 502, options [nop,nop,TS val 3003183419 ecr 1949511821], length 77
+12:51:40.179570 IP dc.lan.93 > 172.24.250.239.60480: Flags [.], ack 78, win 502, options [nop,nop,TS val 1949511828 ecr 3003183419], length 0
+12:51:40.179571 IP dc.lan.93 > 172.24.250.239.60480: Flags [P.], seq 1:163, ack 78, win 502, options [nop,nop,TS val 1949511828 ecr 3003183419], length 162
+12:51:40.179572 IP dc.lan.93 > 172.24.250.239.60480: Flags [FP.], seq 163:1354, ack 78, win 502, options [nop,nop,TS val 1949511828 ecr 3003183419], length 1191
+12:51:40.179579 IP 172.24.250.239.60480 > dc.lan.93: Flags [.], ack 163, win 501, options [nop,nop,TS val 3003183427 ecr 1949511828], length 0
+12:51:40.179595 IP 172.24.250.239.60480 > dc.lan.93: Flags [.], ack 1355, win 501, options [nop,nop,TS val 3003183427 ecr 1949511828], length 0
+12:51:40.179675 IP 172.24.250.239.60480 > dc.lan.93: Flags [F.], seq 78, ack 1355, win 501, options [nop,nop,TS val 3003183427 ecr 1949511828], length 0
+12:51:40.184665 IP dc.lan.93 > 172.24.250.239.60480: Flags [.], ack 79, win 502, options [nop,nop,TS val 1949511836 ecr 3003183427], length 0
+12:51:40.711296 IP 172.24.250.239.60490 > dc.lan.93: Flags [S], seq 1593055859, win 64240, options [mss 1460,sackOK,TS val 3003183958 ecr 0,nop,wscale 7], length 0
+12:51:40.784458 IP dc.lan.93 > 172.24.250.239.60490: Flags [S.], seq 558188734, ack 1593055860, win 64308, options [mss 1410,sackOK,TS val 1949512435 ecr 3003183958,nop,wscale 7], length 0
+12:51:40.784486 IP 172.24.250.239.60490 > dc.lan.93: Flags [.], ack 1, win 502, options [nop,nop,TS val 3003184031 ecr 1949512435], length 0
+12:51:40.784519 IP 172.24.250.239.60490 > dc.lan.93: Flags [P.], seq 1:78, ack 1, win 502, options [nop,nop,TS val 3003184032 ecr 1949512435], length 77
+12:51:40.793134 IP dc.lan.93 > 172.24.250.239.60490: Flags [.], ack 78, win 502, options [nop,nop,TS val 1949512439 ecr 3003184032], length 0
+12:51:40.793134 IP dc.lan.93 > 172.24.250.239.60490: Flags [P.], seq 1:163, ack 78, win 502, options [nop,nop,TS val 1949512439 ecr 3003184032], length 162
+12:51:40.793135 IP dc.lan.93 > 172.24.250.239.60490: Flags [FP.], seq 163:1354, ack 78, win 502, options [nop,nop,TS val 1949512439 ecr 3003184032], length 1191
+12:51:40.793144 IP 172.24.250.239.60490 > dc.lan.93: Flags [.], ack 163, win 501, options [nop,nop,TS val 3003184040 ecr 1949512439], length 0
+12:51:40.793161 IP 172.24.250.239.60490 > dc.lan.93: Flags [.], ack 1355, win 501, options [nop,nop,TS val 3003184040 ecr 1949512439], length 0
+12:51:40.793250 IP 172.24.250.239.60490 > dc.lan.93: Flags [F.], seq 78, ack 1355, win 501, options [nop,nop,TS val 3003184040 ecr 1949512439], length 0
+12:51:40.797976 IP dc.lan.93 > 172.24.250.239.60490: Flags [.], ack 79, win 502, options [nop,nop,TS val 1949512448 ecr 3003184040], length 0
+12:51:41.692277 IP 172.24.250.239.60500 > dc.lan.93: Flags [S], seq 898263243, win 64240, options [mss 1460,sackOK,TS val 3003184939 ecr 0,nop,wscale 7], length 0
+12:51:41.706570 IP dc.lan.93 > 172.24.250.239.60500: Flags [S.], seq 1932931242, ack 898263244, win 64308, options [mss 1410,sackOK,TS val 1949513357 ecr 3003184939,nop,wscale 7], length 0
+12:51:41.706606 IP 172.24.250.239.60500 > dc.lan.93: Flags [.], ack 1, win 502, options [nop,nop,TS val 3003184954 ecr 1949513357], length 0
+12:51:41.706660 IP 172.24.250.239.60500 > dc.lan.93: Flags [P.], seq 1:78, ack 1, win 502, options [nop,nop,TS val 3003184954 ecr 1949513357], length 77
+12:51:41.710272 IP dc.lan.93 > 172.24.250.239.60500: Flags [.], ack 78, win 502, options [nop,nop,TS val 1949513360 ecr 3003184954], length 0
+12:51:41.710272 IP dc.lan.93 > 172.24.250.239.60500: Flags [P.], seq 1:163, ack 78, win 502, options [nop,nop,TS val 1949513361 ecr 3003184954], length 162
+12:51:41.710273 IP dc.lan.93 > 172.24.250.239.60500: Flags [FP.], seq 163:1354, ack 78, win 502, options [nop,nop,TS val 1949513361 ecr 3003184954], length 1191
+12:51:41.710281 IP 172.24.250.239.60500 > dc.lan.93: Flags [.], ack 163, win 501, options [nop,nop,TS val 3003184957 ecr 1949513361], length 0
+12:51:41.710298 IP 172.24.250.239.60500 > dc.lan.93: Flags [.], ack 1355, win 501, options [nop,nop,TS val 3003184957 ecr 1949513361], length 0
+12:51:41.710415 IP 172.24.250.239.60500 > dc.lan.93: Flags [F.], seq 78, ack 1355, win 501, options [nop,nop,TS val 3003184957 ecr 1949513361], length 0
+12:51:41.713738 IP dc.lan.93 > 172.24.250.239.60500: Flags [.], ack 79, win 502, options [nop,nop,TS val 1949513365 ecr 3003184957], length 0
+12:51:42.260661 IP 172.24.250.239.60516 > dc.lan.93: Flags [S], seq 4264504183, win 64240, options [mss 1460,sackOK,TS val 3003185508 ecr 0,nop,wscale 7], length 0
+12:51:42.320048 IP dc.lan.93 > 172.24.250.239.60516: Flags [S.], seq 1634750768, ack 4264504184, win 64308, options [mss 1410,sackOK,TS val 1949513971 ecr 3003185508,nop,wscale 7], length 0
+12:51:42.320089 IP 172.24.250.239.60516 > dc.lan.93: Flags [.], ack 1, win 502, options [nop,nop,TS val 3003185567 ecr 1949513971], length 0
+12:51:42.320139 IP 172.24.250.239.60516 > dc.lan.93: Flags [P.], seq 1:78, ack 1, win 502, options [nop,nop,TS val 3003185567 ecr 1949513971], length 77
+12:51:42.322107 IP dc.lan.93 > 172.24.250.239.60516: Flags [.], ack 78, win 502, options [nop,nop,TS val 1949513973 ecr 3003185567], length 0
+12:51:42.324413 IP dc.lan.93 > 172.24.250.239.60516: Flags [P.], seq 1:163, ack 78, win 502, options [nop,nop,TS val 1949513974 ecr 3003185567], length 162
+12:51:42.324413 IP dc.lan.93 > 172.24.250.239.60516: Flags [FP.], seq 163:1354, ack 78, win 502, options [nop,nop,TS val 1949513974 ecr 3003185567], length 1191
+12:51:42.324419 IP 172.24.250.239.60516 > dc.lan.93: Flags [.], ack 163, win 501, options [nop,nop,TS val 3003185571 ecr 1949513974], length 0
+12:51:42.324435 IP 172.24.250.239.60516 > dc.lan.93: Flags [.], ack 1355, win 501, options [nop,nop,TS val 3003185571 ecr 1949513974], length 0
+12:51:42.324533 IP 172.24.250.239.60516 > dc.lan.93: Flags [F.], seq 78, ack 1355, win 501, options [nop,nop,TS val 3003185572 ecr 1949513974], length 0
+12:51:42.326659 IP dc.lan.93 > 172.24.250.239.60516: Flags [.], ack 79, win 502, options [nop,nop,TS val 1949513978 ecr 3003185572], length 0
+12:51:43.072248 IP 172.24.250.239.60522 > dc.lan.93: Flags [S], seq 3290881177, win 64240, options [mss 1460,sackOK,TS val 3003186319 ecr 0,nop,wscale 7], length 0
+12:51:43.142285 IP dc.lan.93 > 172.24.250.239.60522: Flags [S.], seq 1294957649, ack 3290881178, win 64308, options [mss 1410,sackOK,TS val 1949514793 ecr 3003186319,nop,wscale 7], length 0
+12:51:43.142312 IP 172.24.250.239.60522 > dc.lan.93: Flags [.], ack 1, win 502, options [nop,nop,TS val 3003186389 ecr 1949514793], length 0
+12:51:43.142340 IP 172.24.250.239.60522 > dc.lan.93: Flags [P.], seq 1:78, ack 1, win 502, options [nop,nop,TS val 3003186389 ecr 1949514793], length 77
+12:51:43.147574 IP dc.lan.93 > 172.24.250.239.60522: Flags [.], ack 78, win 502, options [nop,nop,TS val 1949514798 ecr 3003186389], length 0
+12:51:43.147575 IP dc.lan.93 > 172.24.250.239.60522: Flags [P.], seq 1:163, ack 78, win 502, options [nop,nop,TS val 1949514798 ecr 3003186389], length 162
+12:51:43.147576 IP dc.lan.93 > 172.24.250.239.60522: Flags [FP.], seq 163:1354, ack 78, win 502, options [nop,nop,TS val 1949514799 ecr 3003186389], length 1191
+12:51:43.147582 IP 172.24.250.239.60522 > dc.lan.93: Flags [.], ack 163, win 501, options [nop,nop,TS val 3003186395 ecr 1949514798], length 0
+12:51:43.147595 IP 172.24.250.239.60522 > dc.lan.93: Flags [.], ack 1355, win 501, options [nop,nop,TS val 3003186395 ecr 1949514799], length 0
+12:51:43.147672 IP 172.24.250.239.60522 > dc.lan.93: Flags [F.], seq 78, ack 1355, win 501, options [nop,nop,TS val 3003186395 ecr 1949514799], length 0
+12:51:43.150964 IP dc.lan.93 > 172.24.250.239.60522: Flags [.], ack 79, win 502, options [nop,nop,TS val 1949514803 ecr 3003186395], length 0

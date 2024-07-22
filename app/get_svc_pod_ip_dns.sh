@@ -39,7 +39,7 @@ for i in ${MAPPINGS[@]}; do
 	EP_OUT=$(sudo kubectl get endpoints -o=custom-columns=NAME:.metadata.name,EP:.subsets..addresses..ip,PNAME:.subsets..addresses..targetRef..name | grep "$CUR_SVC" | tr -s '[:space:]')
 	IP=$(echo "$EP_OUT" | cut -d' ' -f 2)
 	POD_NAME=$(echo "$EP_OUT" | cut -d' ' -f 3)
-	echo "Episode is $EP_OUT - IP is $IP - Pod name is $POD_NAME" 
+	# echo "Episode is $EP_OUT - IP is $IP - Pod name is $POD_NAME" 
 	# IP=$(echo "$RULES" |  grep "$i" | grep all | grep -oE '([0-9]{1,4}\.){3}[0-9]{1,4}' | sort -u)
 	# POD_NAME=$(sudo kubectl get pods -o=custom-columns=NAME:.metadata.name,IP:.status.podIP | tr -s [:space:] | tail -n +2 | grep $IP | cut -d' ' -f 1)
 	# Get interface name from pods. 

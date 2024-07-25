@@ -1,6 +1,8 @@
 import os
 import chardet
+import re
 import subprocess
+from subprocess import CalledProcessError
 from Packet import Packet
 from collections import deque
 from netaddr import IPNetwork, IPAddress
@@ -63,17 +65,43 @@ class StatTracker:
         change = self.packets[-1][0] - self.packets[0][0]
         return change , len(self.packets)
     
+def parse_conntrack(conn_str,packet):
+# tcp      6 82684 ESTABLISHED src=192.168.122.10 dst=10.43.238.254 sport=51682 dport=8003 src=10.42.0.62 dst=10.1.1.243 sport=22 dport=59424 [ASSURED] mark=0 use=1
+    print("SEARCHING FOR ", conn_str)
+    patterns = ["src","dst","sport","dport"]
+    raw_det = list()
+    new_details = list()
+    for pattern in patterns: 
+        cur_pat = pattern +r"=(\S*) "
+        res = re.findall( cur_pat , conn_str)
+        raw_det.append(res)
+        print(res)
+    if packet.external_port(pod_cidr)[0] == raw_det[1][1]:
+        # External ip is first value - new values should be first values
+        if packet.external_port(pod_cidr)[0] == packet.sip: 
+            packet.sip = raw_det[0][0]
+            packet.sport = raw_det[2][0]
+        else: 
+            packet.dip = raw_det[0][0]
+            packet.dport = raw_det[2][0]
+        return packet        
+        pass
+    print("result is ", raw_det)
+    return conn_str + "\n"
 
-def get_connection(svc,sport): 
+def get_connection(pack): 
+
     command1 = ["conntrack","-L"]
-    command2 = ["grep",svc+".*"+sport]  
-    try: 
-        p1 = subprocess.Popen(command1, stdout=subprocess.PIPE)
-        output = subprocess.check_output(command2, stdin=p1.stdout,universal_newlines=True)
-    except: 
-        print("Connection failed")
-        return 1
-    return output
+    command2 = ["grep",pack.external_port(pod_cidr)[0]+".*"+pack.external_port(pod_cidr)[1]]  
+    # try: 
+    p1 = subprocess.Popen(command1, stdout=subprocess.PIPE)
+    output = subprocess.run(command2, stdin=p1.stdout,stdout=subprocess.PIPE,universal_newlines=True,check=False).stdout
+    print("OUTPUT is " + output)
+    if output is None or output == "": 
+        return pack
+    # except CalledProcessError: 
+    #     pass
+    return parse_conntrack(output,pack)
 
 def terminate_connection(pack):
     host_det = pack.external_port(pod_cidr)
@@ -113,7 +141,11 @@ def get_lines(pipe):
             if len(details) != 10: 
                 continue
             pack = Packet(details)
+            packet = get_connection(pack)
+            log.write(str(pack) + "\n")
+            # log.write(str(packet))
             stats = stat_dict[pack.svc]
+            # log.write(pack)
             stats.enqueue(pack) 
             # print(pack.external_port(pod_cidr))
             # print(stats)

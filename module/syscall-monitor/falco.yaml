@@ -1,0 +1,115 @@
+collectors:
+  docker:
+    enabled: false
+  containerd:
+    socket: /run/k3s/containerd/containerd.sock
+falco: 
+  grpc_output:
+    enabled: true
+falcosidekick: 
+  enabled: true 
+  config:
+    rabbitmq:
+      url: amqp://ztrke2:ztrke2@10.1.1.243:5673
+      queue: "events"
+tty: true 
+
+customRules:
+  falco-test.yaml: |-
+    - list: http-l
+      items: [fchownat, pivot_root, pread64, statfs, write, 
+            getrlimit, mprotect, readlinkat, setgroups, tgkill, 
+            epoll_create1, unlink, arch_prctl, fcntl, getdents64, 
+            mknodat, lstat, pipe2, read, epoll_ctl, 
+            exit_group, getcwd, getgid, getpid, rseq, 
+            sched_yield, set_tid_address, setsockopt, symlinkat, geteuid, 
+            listen, select, sendto, setgid, getppid, 
+            getsockname, lseek, ppoll, rt_sigreturn, sysinfo, 
+            close, connect, getegid, mmap, mount, 
+            rt_sigaction, capset, clone, dup3, execve, 
+            faccessat2, mkdirat, openat, prlimit64, set_robust_list, 
+            unlinkat, fstatfs, futex, madvise, nanosleep, 
+            prctl, close_range, getuid, ioctl, newfstatat, 
+            umask, setuid, stat, brk, fchdir, 
+            keyctl, recvmsg, sched_getaffinity, chdir, epoll_pwait, 
+            getrandom, munmap, unshare, access, bind, 
+            rt_sigprocmask, sigaltstack, umount2, capget, fstat, 
+            gettid, setsid, socket ]
+
+    - list: sql-l
+      items: [eventfd2, futex, getppid, symlinkat, mkdir, 
+            pread64, set_robust_list, set_tid_address, setgid, rename, 
+            uname, clone3, dup, fdatasync, getcwd, 
+            readlink, epoll_pwait, getuid, io_submit, rt_sigtimedwait, 
+            nanosleep, setpriority, clock_nanosleep, fstatfs, geteuid, 
+            getgid, io_getevents, write, chdir, epoll_ctl, 
+            exit_group, pipe, setuid, wait4, dup2, 
+            fchdir, getpgrp, poll, tgkill, mmap, 
+            openat, brk, clock_gettime, gettid, listen, 
+            lseek, arch_prctl, read, socket, times, 
+            exit, fallocate, getdents64, sched_getaffinity, sched_setaffinity, 
+            fsync, pipe2, capget, clone, close, 
+            epoll_create1, epoll_wait, newfstatat, prctl, prlimit64, 
+            capset, faccessat2, fcntl, fstat, getegid, 
+            io_setup, ioctl, pwrite64, access, bind, 
+            connect, getpriority, getrusage, rt_sigaction, setsockopt, 
+            fadvise64, mprotect, renameat, rseq, setgroups, 
+            sched_yield, sigaltstack, statfs, execve, getpid, 
+            madvise, munmap, rt_sigreturn, umask, getgroups, 
+            getrandom, rt_sigprocmask, sysinfo, unlink ]
+
+    - list: ssh-l
+      items: [faccessat2, getdents64, pread64, rt_sigreturn, setgroups, 
+            socket, write, bind, mmap, statfs, 
+            access, getuid, newfstatat, openat, prctl, 
+            setsockopt, rt_sigprocmask, epoll_pwait, getppid, nanosleep, 
+            ppoll, rseq, setgid, setuid, close_range, 
+            fstatfs, rt_sigaction, capset, futex, prlimit64, 
+            sendto, chdir, close, connect, epoll_ctl, 
+            getcwd, munmap, recvmsg, getrandom, tgkill, 
+            capget, execve, getpid, set_tid_address, umask, 
+            geteuid, getsockname, fstat, lseek, listen, 
+            mprotect, read, arch_prctl, set_robust_list, brk, 
+            fcntl ]
+
+    - rule: http-r 
+      desc: notice abnormal syscall in http
+      condition: > 
+        syscall.type != null and
+        not syscall.type in (http-l) and evt.dir = >
+        and container.id != host and 
+        container.name = "http" and 
+        container.duration > 60000000000
+      output: > 
+        | http | %container.image | %k8s.pod.name | %proc.pid
+        |SYSCALLTYPE %syscall.type DONE| %container.duration 
+      priority: ALERT
+
+
+    - rule: sql-r 
+      desc: notice abnormal syscall in sql
+      condition: > 
+        syscall.type != null and
+        not syscall.type in (sql-l) and evt.dir = >
+        and container.id != host and 
+        container.name = "sql" and 
+        container.duration > 60000000000
+      output: > 
+        | sql | %container.image | %k8s.pod.name | %proc.pid
+        |SYSCALLTYPE %syscall.type DONE| %container.duration 
+      priority: ALERT
+
+
+    - rule: ssh-r 
+      desc: notice abnormal syscall in ssh
+      condition: > 
+        syscall.type != null and
+        not syscall.type in (ssh-l) and evt.dir = >
+        and container.id != host and 
+        container.name = "ssh" and 
+        container.duration > 60000000000
+      output: > 
+        | ssh | %container.image | %k8s.pod.name | %proc.pid
+        |SYSCALLTYPE %syscall.type DONE| %container.duration 
+      priority: ALERT
+

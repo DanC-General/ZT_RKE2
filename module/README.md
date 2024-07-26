@@ -25,5 +25,11 @@ Be careful of running this as root - sudo won't have access to same env
 
 https://krew.sigs.k8s.io/docs/user-guide/quickstart/
 https://www.inspektor-gadget.io/docs/latest/getting-started/install-kubernetes/
-
+kubectl gadget deploy 
 Edit falco docs and replace with ip of running node for rabbitmq image host
+
+Helm install 
+
+curl -fsSL -o get_helm.sh https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3
+chmod 700 get_helm.sh
+./get_helm.sh

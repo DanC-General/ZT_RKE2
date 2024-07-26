@@ -25,6 +25,8 @@ var n_to_gad map[string]string
 func main() {
 	capture_syscalls()
 }
+
+// TODO: Currently capture all pod syscalls, not just service endpoint pods.
 func capture_syscalls() {
 	if n_to_gad == nil {
 		n_to_gad = make(map[string]string)
@@ -38,7 +40,7 @@ func capture_syscalls() {
 		// Handle error
 		fmt.Println("Error :(")
 	}
-	timeOut := int64(60)
+	timeOut := int64(600)
 	watchInterface, _ := clientset.CoreV1().Pods("default").Watch(context.Background(), mv1.ListOptions{TimeoutSeconds: &timeOut})
 
 	// Handle watch events in a loop

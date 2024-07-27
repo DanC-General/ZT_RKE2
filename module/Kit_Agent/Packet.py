@@ -65,10 +65,10 @@ class Packet:
             and vice versa. 
         """
         if IPAddress(self.sip) in IPNetwork(pod_cidr):
-            print("Source is pod")
+            # print("Source is pod")
             return self.dip, self.dport
         elif IPAddress(self.dip) in IPNetwork(pod_cidr):
-            print("Dest is pod")
+            # print("Dest is pod")
             return self.sip, self.sport
         else: 
             print("Neither is pod")

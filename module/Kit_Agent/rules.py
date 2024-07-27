@@ -1,19 +1,28 @@
 import os
 import chardet
 import re
+import threading
 import subprocess
 from subprocess import CalledProcessError
 from Packet import Packet
 from collections import deque
+import queue
 from netaddr import IPNetwork, IPAddress
 from Kitsune import Kitsune
-
+import sys
+from time import sleep
+import json
+sys.path.append("../syscall-monitor")
+import msg_handler as rq
 # sport:Connection -  should ocassionally wipe
 conn_dict = dict()
 svc_dict = dict()
 stat_dict = dict()
 ml_dict = dict()
 pod_cidr = ""
+msg_q = queue.Queue()
+ip_sysc_map = dict()
+prev_subj = deque(maxlen=3)
 class Conn_Detail:
     def __init__(self,arr): 
         self.sip = arr[0]
@@ -37,9 +46,7 @@ class Connection:
         for k in vars(self): 
             ret += k+"->"+str(vars(self)[k])+" | "
         return ret
-
     
-        
 # Stores statistics for the last 100 packets
 class StatTracker: 
 
@@ -67,7 +74,7 @@ class StatTracker:
     
 def parse_conntrack(conn_str,packet):
 # tcp      6 82684 ESTABLISHED src=192.168.122.10 dst=10.43.238.254 sport=51682 dport=8003 src=10.42.0.62 dst=10.1.1.243 sport=22 dport=59424 [ASSURED] mark=0 use=1
-    print("SEARCHING FOR ", conn_str)
+    # print("SEARCHING FOR ", conn_str)
     patterns = ["src","dst","sport","dport"]
     raw_det = list()
     new_details = list()
@@ -75,7 +82,7 @@ def parse_conntrack(conn_str,packet):
         cur_pat = pattern +r"=(\S*) "
         res = re.findall( cur_pat , conn_str)
         raw_det.append(res)
-        print(res)
+        # print(res)
     if packet.external_port(pod_cidr)[0] == raw_det[1][1]:
         # External ip is first value - new values should be first values
         if packet.external_port(pod_cidr)[0] == packet.sip: 
@@ -86,17 +93,16 @@ def parse_conntrack(conn_str,packet):
             packet.dport = raw_det[2][0]
         return packet        
         pass
-    print("result is ", raw_det)
+    # print("result is ", raw_det)
     return conn_str + "\n"
 
 def get_connection(pack): 
-
     command1 = ["conntrack","-L"]
     command2 = ["grep",pack.external_port(pod_cidr)[0]+".*"+pack.external_port(pod_cidr)[1]]  
     # try: 
     p1 = subprocess.Popen(command1, stdout=subprocess.PIPE)
     output = subprocess.run(command2, stdin=p1.stdout,stdout=subprocess.PIPE,universal_newlines=True,check=False).stdout
-    print("OUTPUT is " + output)
+    # print("OUTPUT is " + output)
     if output is None or output == "": 
         return pack
     # except CalledProcessError: 
@@ -105,9 +111,15 @@ def get_connection(pack):
 
 def terminate_connection(pack):
     host_det = pack.external_port(pod_cidr)
-    print(host_det)
+    # print(host_det)
     print("Terminating connection on " , host_det[0] , " <-> " , host_det[1])
     output = subprocess.run(["../scripts/terminate.sh"]+[host_det[0],host_det[1]])
+
+def handle_alert(item,log): 
+    print("Recieved an alert!!")
+    print(item)
+    log.write(str(item) + "\n")
+
 
 def get_lines(pipe): 
     global conn_dict
@@ -119,6 +131,8 @@ def get_lines(pipe):
         count = 0
         while True: 
             # data = f.readline()
+            if not msg_q.empty():
+                handle_alert(msg_q.get(block=False),log)
             data = ""
             while True: 
                 cur = f.read(1)
@@ -127,12 +141,7 @@ def get_lines(pipe):
                     break 
             # result = chardet.detect(data)
             # encoding = result['encoding']
-
-            # if encoding:
-            #     print("Detected encoding:", encoding)
-            # else:
-            #     print("Encoding detection failed.")
-
+            # msg_q.channel.get()
             # print(data)
             # Split the string into a list with the necessary 
             #   fields for class parsing.
@@ -141,12 +150,18 @@ def get_lines(pipe):
             if len(details) != 10: 
                 continue
             pack = Packet(details)
-            packet = get_connection(pack)
+            # print("PACK BEFORE IS",pack)
+            get_connection(pack)
+            # print("PACK AFTER IS",pack)
             log.write(str(pack) + "\n")
             # log.write(str(packet))
             stats = stat_dict[pack.svc]
             # log.write(pack)
             stats.enqueue(pack) 
+            subject = pack.external_port(pod_cidr)[0]
+            if subject not in prev_subj:
+                prev_subj.append(pack)
+            # print("SUBJECT FOR PACKET IS",subject)
             # print(pack.external_port(pod_cidr))
             # print(stats)
             # print(stats, stats.time_diff()[0], stats.mean_size)
@@ -160,6 +175,9 @@ def get_lines(pipe):
             if rmse > 100: 
                 # print("Abnormal RMSE: ",rmse)
                 terminate_connection(pack)
+
+
+            
             # count = count + 1 
             # if count % 100 ==0: 
             #     print("count 100")
@@ -194,9 +212,38 @@ def get_cidr():
         "sudo","kubectl","get","nodes","-o" ,
         "jsonpath={.items[*].spec.podCIDR}")).decode()
 
+def on_recv(channel,method,properties,body): 
+    global prev_time
+    fields = json.loads(body.decode())
+    # print(json.loads(body.decode()))
+    try: 
+        # print("Image: ", fields["output_fields"]["container.image.repository"], " pod name: ", fields["output_fields"]["k8s.pod.name"],fields["output_fields"]["container.name"],fields["rule"])
+        if (fields["output_fields"]["container.name"] in fields["rule"]): 
+            # print("Changing runtime...")
+            # Don't need nanosecond precision
+            print(fields)
+            msg_q.put(fields)
+            time_s = str(int(float(fields["output_fields"]["evt.time"]) / 1000000000))
+            # print(time_s)
+            print("Container up for " , float(fields["output_fields"]["container.duration"])  / 1000000000 )
+            # subprocess.run("./random_script.sh" + fields["output_fields"]["container.image.repository"] + " " + fields["output_fields"]["k8s.pod.name"] 
+            #                + " " + time_s + " " + str(fields["output_fields"]["proc.pid"]),shell=True)
+    except KeyError: 
+        return 
+    
+def retrieve(): 
+    temp = rq.AMQPConnection()
+    print("Formed AMQP Connection...")
+    sleep(10)
+    while(1):
+        temp.channel.basic_consume(queue="events",on_message_callback=on_recv,auto_ack=True)
+        temp.channel.start_consuming()
+    temp.connection.close()
+    
 def main(): 
     # Communication with scrape.c occurs
     #   through the "traffic_data" pipe. 
+    threading.Thread(target=retrieve).start()
     pipe = "../traffic_data"
     while not os.path.exists(pipe):
         pass  
@@ -209,78 +256,3 @@ def main():
 if __name__ == "__main__":
     print(os.getcwd())
     main()
-
-
-# class Packet: 
-#     # Initialise the variables from the 
-#     #   packet list.
-#     def __init__(self,props): 
-#         self.svc = props[0]
-#         self.smac = props[1]
-#         self.dmac = props[2]
-#         self.sip = props[3]
-#         self.dip = props[4]
-#         self.sport = props[5]
-#         self.dport = props[6]
-#         self.ts = props[7]
-#         self.size = props[8]
-#         self.flags = int(props[9])
-
-#     def __str__(self):
-#         ret = ""
-#         for k in vars(self): 
-#             ret += k+"->"+str(vars(self)[k])+" | "
-#         return ret
-    
-#     def get_tcp_flags(self):
-#         """
-#         This function takes a byte value representing the TCP flags field and returns a list of the set flags.
-
-#         Args:
-#             flags_byte: A byte value representing the TCP flags field.
-
-#         Returns:
-#             A list of strings representing the set TCP flags (e.g., ["SYN", "ACK"]).
-#         """
-
-#         # Flag names and their corresponding bit positions
-#         flag_names = {
-#             1: "URG",
-#             2: "SYN",
-#             4: "ACK",
-#             8: "PSH",
-#             16: "RST",
-#             32: "FIN",
-#         }
-#         results = [1,2,4,8,16,32]
-#         set_flags = []
-#         for i,val in enumerate(results):
-#             # Check if the bit is set (value 1) using bitwise AND
-#             if self.flags & val:
-#                 set_flags.append(flag_names[val])
-#                 results[i] = 1
-#             else:
-#                 results[i] = 0
-#         return set_flags,results
-
-#     def return_ml_data(self):
-#         _, flags = self.get_tcp_flags()
-#         cur_stats = stat_dict[self.svc]
-#         return [self.ts,self.size, self.svc,self.sip,self.dip,self.sport,
-#                 self.dport] + flags + [cur_stats.mean_size, cur_stats.time_diff()[0]]
-    
-#     def external_port(self): 
-#         """ 
-#         Returns the port used in the external communication.
-#         If the source IP is the pods', return destination port 
-#             and vice versa. 
-#         """
-#         if IPAddress(self.sip) in IPNetwork(pod_cidr):
-#             print("Source is pod")
-#             return self.dip, self.dport
-#         elif IPAddress(self.dip) in IPNetwork(pod_cidr):
-#             print("Dest is pod")
-#             return self.sip, self.sport
-#         else: 
-#             print("Neither is pod")
-#             return -1

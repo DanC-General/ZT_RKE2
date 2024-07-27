@@ -3,8 +3,10 @@ import pika
 import json
 import time
 import subprocess
+import threading
+import queue
 from datetime import datetime
-
+shared_queue = queue.Queue()
 prev_time = time.time()
 class AMQPConnection:
     def __init__(self):
@@ -23,6 +25,7 @@ def on_recv(channel,method,properties,body):
             # print("Changing runtime...")
             # Don't need nanosecond precision
             print(fields)
+            shared_queue.put(fields)
             time_s = str(int(float(fields["output_fields"]["evt.time"]) / 1000000000))
             # print(time_s)
             print("Container up for " , float(fields["output_fields"]["container.duration"])  / 1000000000 )
@@ -31,10 +34,25 @@ def on_recv(channel,method,properties,body):
     except KeyError: 
         return 
     # print(f"DELAY (sent: {datetime.fromtimestamp(prev_time).strftime('%H:%M:%S')} received: {datetime.fromtimestamp(cur_time).strftime('%H:%M:%S')})\n {body.decode()}\n")
-
-
-temp = AMQPConnection()
-while(1):
-    temp.channel.basic_consume(queue="events",on_message_callback=on_recv,auto_ack=True)
-    temp.channel.start_consuming()
-temp.connection.close()
+def retrieve(): 
+    temp = AMQPConnection()
+    while(1):
+        temp.channel.basic_consume(queue="events",on_message_callback=on_recv,auto_ack=True)
+        temp.channel.start_consuming()
+    temp.connection.close()
+    
+if __name__ == "__main__":  
+    # temp = AMQPConnection()
+    # while(1):
+    #     temp.channel.basic_consume(queue="events",on_message_callback=on_recv,auto_ack=True)
+    #     temp.channel.start_consuming()
+    # temp.connection.close()
+    # temp.channel.basic_get()
+    threading.Thread(target=retrieve).start()
+    # try: 
+    while True: 
+        print("Waiting...")
+        if not shared_queue.empty(): 
+            item = shared_queue.get(block=False)
+            print("Receieved item ", item)
+    

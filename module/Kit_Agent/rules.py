@@ -21,7 +21,8 @@ stat_dict = dict()
 ml_dict = dict()
 pod_cidr = ""
 msg_q = queue.Queue()
-ip_sysc_map = dict()
+subj_sysc_map = dict()
+total_ab_sys = 0
 prev_subj = deque(maxlen=3)
 class Conn_Detail:
     def __init__(self,arr): 
@@ -100,7 +101,7 @@ def get_connection(pack):
     command1 = ["conntrack","-L"]
     command2 = ["grep",pack.external_port(pod_cidr)[0]+".*"+pack.external_port(pod_cidr)[1]]  
     # try: 
-    p1 = subprocess.Popen(command1, stdout=subprocess.PIPE)
+    p1 = subprocess.Popen(command1, stdout=subprocess.PIPE,stderr=subprocess.DEVNULL)
     output = subprocess.run(command2, stdin=p1.stdout,stdout=subprocess.PIPE,universal_newlines=True,check=False).stdout
     # print("OUTPUT is " + output)
     if output is None or output == "": 
@@ -116,9 +117,19 @@ def terminate_connection(pack):
     output = subprocess.run(["../scripts/terminate.sh"]+[host_det[0],host_det[1]])
 
 def handle_alert(item,log): 
-    print("Recieved an alert!!")
-    print(item)
+    global total_ab_sys
+    global subj_sysc_map
+    total_ab_sys += 1
+    # print("Recieved an alert!!")
+    # print(item)
     log.write(str(item) + "\n")
+    for subject in prev_subj: 
+        if subject not in subj_sysc_map: 
+            subj_sysc_map[subject] = 1
+        else: 
+            subj_sysc_map[subject] += 1
+
+    log.write(str(subj_sysc_map) + "\n")
 
 
 def get_lines(pipe): 
@@ -155,7 +166,8 @@ def get_lines(pipe):
             stats.enqueue(pack) 
             subject = pack.external_port(pod_cidr)[0]
             if subject not in prev_subj:
-                prev_subj.append(pack)
+                print("APPENDING ", subject, ", ",total_ab_sys, " total syscalls.\n")
+                prev_subj.append(subject)
     
             ml_dict[pack.svc].FE.packets.append(pack)
             rmse =  ml_dict[pack.svc].proc_next_packet()
@@ -203,11 +215,11 @@ def on_recv(channel,method,properties,body):
         if (fields["output_fields"]["container.name"] in fields["rule"]): 
             # print("Changing runtime...")
             # Don't need nanosecond precision
-            print(fields)
+            # print(fields)
             msg_q.put(fields)
             time_s = str(int(float(fields["output_fields"]["evt.time"]) / 1000000000))
             # print(time_s)
-            print("Container up for " , float(fields["output_fields"]["container.duration"])  / 1000000000 )
+            # print("Container up for " , float(fields["output_fields"]["container.duration"])  / 1000000000 )
             # subprocess.run("./random_script.sh" + fields["output_fields"]["container.image.repository"] + " " + fields["output_fields"]["k8s.pod.name"] 
             #                + " " + time_s + " " + str(fields["output_fields"]["proc.pid"]),shell=True)
     except KeyError: 

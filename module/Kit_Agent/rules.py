@@ -130,7 +130,6 @@ def get_lines(pipe):
         log = open("../logs/py.log",'w')
         count = 0
         while True: 
-            # data = f.readline()
             if not msg_q.empty():
                 handle_alert(msg_q.get(block=False),log)
             data = ""
@@ -139,10 +138,6 @@ def get_lines(pipe):
                 data += cur
                 if cur == '\n': 
                     break 
-            # result = chardet.detect(data)
-            # encoding = result['encoding']
-            # msg_q.channel.get()
-            # print(data)
             # Split the string into a list with the necessary 
             #   fields for class parsing.
             log.write(data + "\n")
@@ -161,27 +156,14 @@ def get_lines(pipe):
             subject = pack.external_port(pod_cidr)[0]
             if subject not in prev_subj:
                 prev_subj.append(pack)
-            # print("SUBJECT FOR PACKET IS",subject)
-            # print(pack.external_port(pod_cidr))
-            # print(stats)
-            # print(stats, stats.time_diff()[0], stats.mean_size)
-            # print(time.gmtime(int(pack.ts) / 1000000 )) 
-            # print(pack.return_ml_data(stat_dict))     
+    
             ml_dict[pack.svc].FE.packets.append(pack)
-            # print("Kitsune event ", pack.svc)
             rmse =  ml_dict[pack.svc].proc_next_packet()
-            # print("RMSE for " , pack.svc , ml_dict[pack.svc].FE.curPacketIndx, ":" , rmse)
             log.write("RMSE for " + pack.svc + str(ml_dict[pack.svc].FE.curPacketIndx) +  ":" + str(rmse) +"\n")
             if rmse > 100: 
                 # print("Abnormal RMSE: ",rmse)
                 terminate_connection(pack)
 
-
-            
-            # count = count + 1 
-            # if count % 100 ==0: 
-            #     print("count 100")
-                # terminate_connection(pack)
         log.close()
 def make_svcs(): 
     global svc_dict

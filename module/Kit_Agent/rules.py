@@ -24,6 +24,7 @@ msg_q = queue.Queue()
 subj_sysc_map = dict()
 total_ab_sys = 0
 prev_subj = deque(maxlen=3)
+terminated = dict()
 class Conn_Detail:
     def __init__(self,arr): 
         self.sip = arr[0]
@@ -110,11 +111,10 @@ def get_connection(pack):
     #     pass
     return parse_conntrack(output,pack)
 
-def terminate_connection(pack):
-    host_det = pack.external_port(pod_cidr)
+def terminate_connection(ip,port):
     # print(host_det)
-    print("Terminating connection on " , host_det[0] , " <-> " , host_det[1])
-    output = subprocess.run(["../scripts/terminate.sh"]+[host_det[0],host_det[1]])
+    print("Terminating connection on " , ip , " <-> " , port)
+    output = subprocess.run(["../scripts/terminate.sh"]+[ip,port])
 
 def handle_alert(item,log): 
     global total_ab_sys
@@ -135,6 +135,7 @@ def handle_alert(item,log):
 def get_lines(pipe): 
     global conn_dict
     global stat_dict
+    global terminated
     # Check packet counts 
     with open(pipe, 'r') as f: 
         print("looping")
@@ -156,6 +157,7 @@ def get_lines(pipe):
             if len(details) != 10: 
                 continue
             pack = Packet(details)
+            orig_sip, orig_sport = pack.external_port(pod_cidr)
             # print("PACK BEFORE IS",pack)
             get_connection(pack)
             # print("PACK AFTER IS",pack)
@@ -172,9 +174,23 @@ def get_lines(pipe):
             ml_dict[pack.svc].FE.packets.append(pack)
             rmse =  ml_dict[pack.svc].proc_next_packet()
             log.write("RMSE for " + pack.svc + str(ml_dict[pack.svc].FE.curPacketIndx) +  ":" + str(rmse) +"\n")
-            if rmse > 100: 
+            obj_trust = rmse
+            subj_trust = -1
+            if subject in subj_sysc_map:
+                subj_trust = int(subj_sysc_map[subject]/total_ab_sys)
+                log.write("Object trust: " + str(obj_trust) + ". Subject trust for " + subject + ": " + str(subj_trust) + "\n")
+            else: 
+                log.write("Object trust: " + str(obj_trust) + ". Subject fully trusted\n")
+            if obj_trust > 100 or subj_trust > 0.8: 
                 # print("Abnormal RMSE: ",rmse)
-                terminate_connection(pack)
+                log.write("ALERTED! Object: " + str(obj_trust) + ".Subject: " + str(subj_trust) + ".\n")
+                if orig_sip not in terminated:
+                    terminated[orig_sip] = dict()
+                if orig_sport not in terminated[orig_sip]: 
+                    log.write("Terminated connection.")
+                    # Dummy value for termination
+                    terminated[orig_sip][orig_sport] = 0
+                    terminate_connection(orig_sip,orig_sport)
 
         log.close()
 def make_svcs(): 

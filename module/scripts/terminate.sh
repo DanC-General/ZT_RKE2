@@ -8,12 +8,10 @@ echo "Attempting to kill: $1 , $2"
 # For local
 find_and_kill(){ 
     PID=$(ss -p | grep "$1" | grep "$2" | cut -d"," -f 2 | cut -d= -f 2)
-    echo "$PID"
+    # echo "$PID"
     if [[ -n "$PID" ]] 
         then echo "Killing local $PID"
-        whoami
-        id -a
-        sudo ip netns exec $i kill $PID 
+        sudo kill -9 "$PID" 
         exit;
     fi
 }
@@ -21,13 +19,11 @@ find_and_kill "$1" "$2"
 for i in $(ip netns | cut -d' ' -f 1); 
     do 
     PID=$(sudo ip netns exec $i ss -p | grep "$1" | grep "$2" | cut -d, -f2 | cut -d= -f2)
-    echo "$PID"
+    # echo "$PID"
     if [[ -n "$PID" ]] 
         # then sudo kill "$PID"
-        then echo "Killing remote $PID"
-        whoami
-        id -a
-        sudo ip netns exec $i kill $PID
+        then echo "Killing remote $PID in netns $i"
+        sudo ip netns exec "$i" kill -9 $PID
         exit;
     fi
 done 

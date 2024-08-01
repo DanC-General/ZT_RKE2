@@ -125,10 +125,15 @@ def handle_alert(item,log):
     log.write(str(item) + "\n")
     for subject in prev_subj: 
         if subject not in subj_sysc_map: 
-            subj_sysc_map[subject] = 1
+            subj_sysc_map[subject] = dict()
+            subj_sysc_map[subject]["total"] = 1
+            subj_sysc_map[subject][item] = 1
         else: 
-            subj_sysc_map[subject] += 1
-
+            subj_sysc_map[subject]["total"] += 1
+            if item not in subj_sysc_map[subject]:
+                subj_sysc_map[subject][item] = 1
+            else:
+                subj_sysc_map[subject][item] += 1
     log.write(str(subj_sysc_map) + "\n")
 
 
@@ -142,8 +147,15 @@ def get_lines(pipe):
         log = open("../logs/py.log",'w')
         count = 0
         while True: 
+            # Extract message from queue if one exists
+            #   - otherwise pass.
+            cur_call = None
             if not msg_q.empty():
-                handle_alert(msg_q.get(block=False),log)
+                # TODO Could alter this to retrieve all messages from the queue
+                cur_call = msg_q.get(block=False)
+                handle_alert(cur_call,log)
+            # Read in data as bytes from pipe 
+            #    - readline had encoding issues
             data = ""
             while True: 
                 cur = f.read(1)
@@ -158,29 +170,40 @@ def get_lines(pipe):
                 continue
             pack = Packet(details)
             orig_sip, orig_sport = pack.external_port(pod_cidr)
-            # print("PACK BEFORE IS",pack)
             get_connection(pack)
-            # print("PACK AFTER IS",pack)
             log.write(str(pack) + "\n")
-            # log.write(str(packet))
+
+            # Update stored statistics
             stats = stat_dict[pack.svc]
             # log.write(pack)
             stats.enqueue(pack) 
+
+            # Add subject to list of recent for tagging
             subject = pack.external_port(pod_cidr)[0]
             if subject not in prev_subj:
                 print("APPENDING ", subject, ", ",total_ab_sys, " total syscalls.\n")
                 prev_subj.append(subject)
-    
+
+            # Train relevant ML instance
             ml_dict[pack.svc].FE.packets.append(pack)
             rmse =  ml_dict[pack.svc].proc_next_packet()
             log.write("RMSE for " + pack.svc + str(ml_dict[pack.svc].FE.curPacketIndx) +  ":" + str(rmse) +"\n")
+
+            # Evaluate system trust
             obj_trust = rmse
             subj_trust = -1
             if subject in subj_sysc_map:
-                subj_trust = int(subj_sysc_map[subject]/total_ab_sys)
+                subj_trust = int(subj_sysc_map[subject]["total"]/total_ab_sys)
                 log.write("Object trust: " + str(obj_trust) + ". Subject trust for " + subject + ": " + str(subj_trust) + "\n")
+
+                if cur_call in subj_sysc_map: 
+                    if subj_sysc_map[subject][cur_call] != 1: 
+                        print("Repeat syscall ",cur_call, ", skipping.")
+                        subj_trust = -1
             else: 
                 log.write("Object trust: " + str(obj_trust) + ". Subject fully trusted\n")
+
+            # Act on system trust
             if obj_trust > 100 or subj_trust > 0.8: 
                 # print("Abnormal RMSE: ",rmse)
                 log.write("ALERTED! Object: " + str(obj_trust) + ".Subject: " + str(subj_trust) + ".\n")
@@ -202,7 +225,7 @@ def make_svcs():
     output = subprocess.check_output(('grep', '^-'), stdin=p1.stdout,universal_newlines=True)
     parsed = [x for x in list(map(lambda x:x.replace('-',''),output.split("\n"))) if x]
     # log.write(parsed)
-    # KitNET params:
+    # KitNET params - initalisation from Kitsune:
     maxAE = 10 #maximum size for any autoencoder in the ensemble layer
     FMgrace = 100 #the number of instances taken to learn the feature mapping (the ensemble's architecture)
     ADgrace = 1000 #the number of instances used to train the anomaly detector (ensemble itself)
@@ -232,7 +255,7 @@ def on_recv(channel,method,properties,body):
             # print("Changing runtime...")
             # Don't need nanosecond precision
             # print(fields)
-            msg_q.put(fields)
+            msg_q.put(fields["output_fields"]["syscall.type"])
             time_s = str(int(float(fields["output_fields"]["evt.time"]) / 1000000000))
             # print(time_s)
             # print("Container up for " , float(fields["output_fields"]["container.duration"])  / 1000000000 )

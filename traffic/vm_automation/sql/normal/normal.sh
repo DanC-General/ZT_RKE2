@@ -1,4 +1,4 @@
-
+#!/bin/bash
 mysql -h "$IP" -u root -ppassword_123! << EOF
 use test;
 do sleep ($RANDOM % 11); 

@@ -4,10 +4,9 @@ import re
 import threading
 import subprocess
 from subprocess import CalledProcessError
-from Packet import Packet
+from DataStructs import Packet, PrioQ, StatTracker
 from collections import deque
 import queue
-from netaddr import IPNetwork, IPAddress
 from Kitsune import Kitsune
 import sys
 from time import sleep
@@ -25,54 +24,6 @@ subj_sysc_map = dict()
 total_ab_sys = 0
 prev_subj = deque(maxlen=3)
 terminated = dict()
-class Conn_Detail:
-    def __init__(self,arr): 
-        self.sip = arr[0]
-        self.dip = arr[1]
-        self.sport = arr[2]
-        self.dport = arr[3]
-    def __str__(self):
-        ret = ""
-        for k in vars(self): 
-            ret += k+"->"+vars(self)[k]+" | "
-        return ret
-
-class Connection: 
-    # Stores external mappings for conntrack 
-    # tcp      6 82684 ESTABLISHED src=192.168.122.10 dst=10.43.238.254 sport=51682 dport=8003 src=10.42.0.62 dst=10.1.1.243 sport=22 dport=59424 [ASSURED] mark=0 use=1
-    def __init__(self,original,translated): 
-        self.original = original
-        self.translated = translated
-    def __str__(self):
-        ret = ""
-        for k in vars(self): 
-            ret += k+"->"+str(vars(self)[k])+" | "
-        return ret
-    
-# Stores statistics for the last 100 packets
-class StatTracker: 
-
-    def __init__(self): 
-        self.packets = deque(maxlen=100)
-        self.mean_size = 0
-
-    def enqueue(self,pack: Packet): 
-        sz = int(pack.size)
-        # self.packets.append([datetime.datetime.fromtimestamp(int(pack.ts)),int(pack.size)])
-        self.packets.append([float(pack.ts), sz])
-        self._update_stats(pack)
-        
-    def _update_stats(self,pack:Packet): 
-        sz = int(pack.size)
-        if self.mean_size == 0: 
-            self.mean_size = sz
-        else: 
-            prev_mean = self.mean_size
-            self.mean_size = ((prev_mean * (len(self.packets) - 1)) + sz )/ (len(self.packets))
-
-    def time_diff(self):
-        change = self.packets[-1][0] - self.packets[0][0]
-        return change , len(self.packets)
     
 def parse_conntrack(conn_str,packet):
 # tcp      6 82684 ESTABLISHED src=192.168.122.10 dst=10.43.238.254 sport=51682 dport=8003 src=10.42.0.62 dst=10.1.1.243 sport=22 dport=59424 [ASSURED] mark=0 use=1
@@ -150,12 +101,12 @@ def get_lines(pipe):
             # Extract message from queue if one exists
             #   - otherwise pass.
             cur_call = None
-            if not msg_q.empty():
+            while not msg_q.empty():
                 # TODO Could alter this to retrieve all messages from the queue
                 cur_call = msg_q.get(block=False)
                 handle_alert(cur_call,log)
             # Read in data as bytes from pipe 
-            #    - readline had encoding issues
+            #    - readline had encoding issues on other OSs
             data = ""
             while True: 
                 cur = f.read(1)
@@ -202,7 +153,7 @@ def get_lines(pipe):
                         subj_trust = -1
             else: 
                 log.write("Object trust: " + str(obj_trust) + ". Subject fully trusted\n")
-
+            log.write(str(subj_sysc_map))
             # Act on system trust
             if obj_trust > 100 or subj_trust > 0.8: 
                 # print("Abnormal RMSE: ",rmse)
@@ -214,6 +165,8 @@ def get_lines(pipe):
                     # Dummy value for termination
                     terminated[orig_sip][orig_sport] = 0
                     terminate_connection(orig_sip,orig_sport)
+
+            log.flush()
 
         log.close()
 def make_svcs(): 

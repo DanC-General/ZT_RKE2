@@ -1,5 +1,5 @@
 #!/bin/bash
-mysql -h "$IP" -u root -ppassword_123! << EOF
+mysql -h "$IP" -P 30003 --protocol=tcp -u root -ppassword_123! << EOF
 use test;
 do sleep ($RANDOM % 11); 
 show tables;

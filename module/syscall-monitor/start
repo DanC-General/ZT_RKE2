@@ -1,0 +1,3 @@
+#!/bin/bash
+./start_mq.sh &
+source ../venv/bin/activate && python3 init_mq.py

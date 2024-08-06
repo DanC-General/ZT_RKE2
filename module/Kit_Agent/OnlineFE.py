@@ -13,7 +13,7 @@ import netStat as ns
 import numpy as np
 import os.path
 import subprocess
-import Packet
+import DataStructs as DataStructs
 from collections import deque
 import time
 

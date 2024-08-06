@@ -11,7 +11,7 @@ class Packet:
         self.dip = props[4]
         self.sport = props[5]
         self.dport = props[6]
-        self.ts = float(props[7])
+        self.ts = float(props[7]) / float(1000000)
         self.size = int(props[8])
         self.flags = int(props[9])
 

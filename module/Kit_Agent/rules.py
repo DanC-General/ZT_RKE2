@@ -9,7 +9,7 @@ from collections import deque
 import queue
 from Kitsune import Kitsune
 import sys
-from time import sleep
+from time import sleep, time
 import json
 sys.path.append("../syscall-monitor")
 import msg_handler as rq
@@ -22,7 +22,7 @@ pod_cidr = ""
 msg_q = queue.Queue()
 subj_sysc_map = dict()
 total_ab_sys = 0
-prev_subj = deque(maxlen=3)
+prev_subj = PrioQ()
 terminated = dict()
     
 def parse_conntrack(conn_str,packet):
@@ -74,7 +74,8 @@ def handle_alert(item,log):
     # print("Recieved an alert!!")
     # print(item)
     log.write(str(item) + "\n")
-    for subject in prev_subj: 
+    # Change to use alert ts
+    for subject in prev_subj.more_recent(time()): 
         if subject not in subj_sysc_map: 
             subj_sysc_map[subject] = dict()
             subj_sysc_map[subject]["total"] = 1
@@ -133,7 +134,7 @@ def get_lines(pipe):
             subject = pack.external_port(pod_cidr)[0]
             if subject not in prev_subj:
                 print("APPENDING ", subject, ", ",total_ab_sys, " total syscalls.\n")
-                prev_subj.append(subject)
+                prev_subj.add((pack.ts,subject))
 
             # Train relevant ML instance
             ml_dict[pack.svc].FE.packets.append(pack)
@@ -154,6 +155,7 @@ def get_lines(pipe):
             else: 
                 log.write("Object trust: " + str(obj_trust) + ". Subject fully trusted\n")
             log.write(str(subj_sysc_map))
+            
             # Act on system trust
             if obj_trust > 100 or subj_trust > 0.8: 
                 # print("Abnormal RMSE: ",rmse)

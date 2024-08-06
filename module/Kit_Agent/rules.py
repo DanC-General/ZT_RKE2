@@ -4,7 +4,7 @@ import re
 import threading
 import subprocess
 from subprocess import CalledProcessError
-from DataStructs import Packet, PrioQ, StatTracker
+from utils.DataStructs import Packet, PrioQ, StatTracker
 from collections import deque
 import queue
 from Kitsune import Kitsune
@@ -155,7 +155,7 @@ def get_lines(pipe):
             else: 
                 log.write("Object trust: " + str(obj_trust) + ". Subject fully trusted\n")
             log.write(str(subj_sysc_map))
-            
+
             # Act on system trust
             if obj_trust > 100 or subj_trust > 0.8: 
                 # print("Abnormal RMSE: ",rmse)

@@ -65,48 +65,8 @@ def get_connection(pack):
     #     pass
     return parse_conntrack(output,pack)
 
-# def terminate_connection(ip,port):
-#     # Could change this script to only search the namespaces of the relevant services.
-#     print("Terminating connection on " , ip , " <-> " , port)
-#     output = subprocess.run(["../scripts/terminate.sh"]+[ip,port])
-
-# def handle_alert(syscall,alert_ts,log): 
-#     global subj_sysc_map
-#     # print("Recieved an alert!!")
-#     # print(item)
-#     log.write(syscall + str(alert_ts) + "\n")
-#     recency = 5
-#     # Change to use alert ts
-#     for subject in prev_subj.more_recent(alert_ts): 
-#         print("Adding to malicious", subject)
-#         # if subject not in subj_sysc_map: 
-#         #     subj_sysc_map[subject] = dict()
-#         # else: 
-#         #     # if "total" not in subj_sysc_map[subject]: 
-#         #     #     subj_sysc_map[subject]["total"] = 1 * recency
-#         subj_sysc_map[subject]["total"] += 1 * recency
-#         if syscall not in subj_sysc_map[subject]:
-#             subj_sysc_map[subject][syscall] = 1 * recency
-#         else:
-#             subj_sysc_map[subject][syscall] += 1 * recency
-#         # Update so next subject is less recent
-#         recency -= 2
-#     log.write(str(subj_sysc_map) + "\n")
-
-
-# def total_abnormal(): 
-#     total = 0
-#     for subject in subj_sysc_map: 
-#         if "total" in subj_sysc_map[subject]:
-#             total += subj_sysc_map[subject]["total"]
-#     return total
-
 def get_lines(pipe): 
     global svc_dict
-    # global conn_dict
-    # global stat_dict
-    # global terminated
-    # global subj_sysc_map
     # Check packet counts 
     with open(pipe, 'r') as f: 
         print("looping")
@@ -134,9 +94,7 @@ def get_lines(pipe):
 
 
             cur_svc = (svc_dict[pack.svc])
-            # stats = stat_dict[pack.svc]
-            # log.write(pack)
-            # stats.enqueue(pack) 
+
             # Update stored statistics
             cur_svc.stats.enqueue(pack)
 
@@ -147,20 +105,6 @@ def get_lines(pipe):
             
             # Add subject to list of recent for tagging
             subject = pack.external_port(pod_cidr)[0]
-            print("Current subject is ", subject)
-            ### Move to Service Function
-            # cur_sysc_map = cur_svc.subj_sysc_map
-            # if subject not in cur_sysc_map: 
-            #     cur_sysc_map[subject] = dict()
-            #     print("Map did not contain ", subject)
-            # if "total" not in cur_sysc_map[subject]: 
-            #     cur_sysc_map[subject]["total"] = 0
-            #     print(subject, "did not contain total")
-
-            # if not cur_svc.prev_subj.contains(subject):
-            #     print("APPENDING ", subject, "\n")
-            #     cur_svc.prev_subj.add((pack.ts,subject))
-            #     print(cur_svc.prev_subj)
             cur_svc.add_recent(subject,pack.ts)
 
             # Extract message from queue if one exists
@@ -177,34 +121,9 @@ def get_lines(pipe):
             obj_trust = rmse
             subj_trust = cur_svc.subject_trust(subject,cur_call,log)
 
-            ##### MMOVE TO Service FUNCTION 
-            # total_ab_sys = cur_svc.total_abnormal()
-            # if cur_sysc_map[subject]["total"] > 0 and total_ab_sys > 0 :
-            #     print("Set subject trust to ", cur_sysc_map[subject]["total"],"/",total_ab_sys," = ",int(cur_sysc_map[subject]["total"])/int(total_ab_sys))
-            #     subj_trust = int(cur_sysc_map[subject]["total"])/int(total_ab_sys)
-            #     log.write("Object trust: " + str(obj_trust) + ". Subject trust for " + subject + ": " + str(subj_trust) + "\n")
-            #     if cur_call in cur_sysc_map: 
-            #         if cur_sysc_map[subject][cur_call] != 1: 
-            #             print("Repeat syscall ",cur_call, ", skipping.")
-            #             subj_trust = -1
-            # else: 
-            #     log.write("Object trust: " + str(obj_trust) + ". Subject fully trusted\n")
-            # cur_sysc_map[subject]["trust"] = subj_trust
-            # log.write(str(cur_sysc_map))
-
             # Act on overall request trust
             if obj_trust > 100 or subj_trust > 0.8: 
                 cur_svc.terminate(orig_sip,orig_sport,log)
-                # print("Abnormal RMSE: ",rmse)
-                # log.write("ALERTED! Object: " + str(obj_trust) + ".Subject: " + str(subj_trust) + ".\n")
-                # if orig_sip not in terminated:
-                #     terminated[orig_sip] = dict()
-                # if orig_sport not in terminated[orig_sip]: 
-                #     log.write("Terminated connection.")
-                #     # Dummy value for termination
-                #     terminated[orig_sip][orig_sport] = 0
-                #     terminate_connection(orig_sip,orig_sport)
-
             log.flush()
 
         log.close()
@@ -224,13 +143,7 @@ def make_svcs():
 
     for x in parsed: 
         arr = x.split(":")
-        # print(arr)
-        # svc_dict[arr[0]] = arr[1]
         svc_dict[arr[0]] = Service(maxAE,FMgrace,ADgrace,arr[0],arr[1])
-        # stat_dict[arr[0]] = StatTracker()
-        # ml_dict[arr[0]] = Kitsune(None,None,maxAE,FMgrace,ADgrace)
-    # print(stat_dict)
-    # print(svc_dict)
 
 def get_cidr(): 
     global pod_cidr
@@ -241,19 +154,11 @@ def get_cidr():
 def on_recv(channel,method,properties,body): 
     global prev_time
     fields = json.loads(body.decode())
-    # print(json.loads(body.decode()))
     try: 
-        # print("Image: ", fields["output_fields"]["container.image.repository"], " pod name: ", fields["output_fields"]["k8s.pod.name"],fields["output_fields"]["container.name"],fields["rule"])
         if (fields["output_fields"]["container.name"] in fields["rule"]): 
-            # print("Changing runtime...")
             # Don't need nanosecond precision
-            # print(fields)
             time_s = str(int(float(fields["output_fields"]["evt.time"]) / 1000000000))
             msg_q.put([fields["output_fields"]["syscall.type"],time_s])
-            # print(time_s)
-            # print("Container up for " , float(fields["output_fields"]["container.duration"])  / 1000000000 )
-            # subprocess.run("./random_script.sh" + fields["output_fields"]["container.image.repository"] + " " + fields["output_fields"]["k8s.pod.name"] 
-            #                + " " + time_s + " " + str(fields["output_fields"]["proc.pid"]),shell=True)
     except KeyError: 
         return 
     

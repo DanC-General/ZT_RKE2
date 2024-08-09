@@ -1,3 +1,4 @@
+from collections import deque
 from netaddr import IPNetwork, IPAddress
 
 class Packet: 
@@ -95,8 +96,12 @@ class PrioQ:
         self.store.sort()
     def more_recent(self,ts):
         rec = list()
+        ts = float(ts)
         for i in self.store: 
+            print(ts, "<->",i[0])
+            delta = (ts - 5) - i[0]
             if i[0] >= ts - 5: 
+                print(i[1], " has relevant delta",delta,": added!")
                 rec.append(i[1])
         rec.reverse()
         return rec
@@ -104,6 +109,11 @@ class PrioQ:
         return len(self.store) == 0
     def full(self):
         return len(self.store) == 3
+    def contains(self, str):
+        for i in self.store: 
+            if i[1] == str:
+                return True
+        return False 
     def __str__(self) -> str:
         return str(self.store)
 

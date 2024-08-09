@@ -12,6 +12,11 @@ class Service:
         self.Sfuzz = SRule()
         self.name = name
         self.port = port
+        self.log = None
+
+    def write(self,msg):
+        if self.log is not None: 
+            self.log.write(msg)
 
     def total_abnormal(self): 
         total = 0
@@ -20,12 +25,14 @@ class Service:
                 total += self.subj_sysc_map[subject]["total"]
         return total
     
-    def handle_alert(self,syscall,alert_ts,log): 
+    def handle_alert(self,syscall,alert_ts): 
         # print("Recieved an alert!!")
         # print(item)
-        log.write(syscall + str(alert_ts) + "\n")
+        self.write(syscall + str(alert_ts) + "\n")
         recency = 5
         i = 0
+        print("Handling alert for", syscall)
+        print("Previous subjects", self.prev_subj.more_recent(alert_ts))
         # Change to use alert ts
         for subject in self.prev_subj.more_recent(alert_ts): 
             print("Adding to malicious", subject)
@@ -43,7 +50,7 @@ class Service:
             recency -= 2
             self.subj_sysc_map[subject]["trust"] = self.make_trust(subject,syscall,i)
             i+=1
-        log.write(self.name + ":: " + str(self.subj_sysc_map) + "\n")
+        self.write(self.name + ":: " + str(self.subj_sysc_map) + "\n")
 
     def add_recent(self,subject,time): 
         cur_sysc_map = self.subj_sysc_map
@@ -71,15 +78,15 @@ class Service:
         if orig_sip not in self.terminated:
             self.terminated[orig_sip] = dict()
         if orig_sport not in self.terminated[orig_sip]: 
-            log.write("Terminated connection.")
+            self.write("Terminated connection.")
             # Dummy value for termination
             self.terminated[orig_sip][orig_sport] = 0
             terminate_connection(orig_sip,orig_sport)
 
     def __get_sysc_trust(self,subject,syscall):
+        smap = self.subj_sysc_map
         if syscall not in smap[subject]:
             return 0
-        smap = self.subj_sysc_map
         total = 0
         for s in smap: 
             if syscall in smap[s]: 

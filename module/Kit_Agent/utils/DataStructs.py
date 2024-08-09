@@ -98,6 +98,7 @@ class PrioQ:
         rec = list()
         ts = float(ts)
         for i in self.store: 
+            print(self.store, i)
             print(ts, "<->",i[0])
             delta = (ts - 5) - i[0]
             if i[0] >= ts - 5: 

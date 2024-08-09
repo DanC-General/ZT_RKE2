@@ -86,6 +86,7 @@ def get_lines(pipe):
 
 
             cur_svc = (svc_dict[pack.svc])
+            cur_svc.log = log
 
             # Update stored statistics
             cur_svc.stats.enqueue(pack)
@@ -108,7 +109,7 @@ def get_lines(pipe):
                 cur_call = item[0]
                 alert_time = item[1]
                 # New subject trusts are made for the relevant subjects here
-                cur_svc.handle_alert(cur_call,alert_time,log)
+                cur_svc.handle_alert(cur_call,alert_time)
             # Evaluate system trust
             obj_trust = rmse
             # Clamp RMSE for fuzzy logic input
@@ -118,6 +119,7 @@ def get_lines(pipe):
             subj_trust = cur_svc.subject_trust(subject)
             log.write(cur_svc.name + str(cur_svc.subj_sysc_map))
             # Act on overall request trust
+            print(obj_trust,"vs",subj_trust)
             req_trust = Rfuzz.simulate(obj_trust,subj_trust)
             log.write("Subject trust " + str(subj_trust) + ", Object trust " +
                       str(obj_trust) + "--> ReqTrust " + str(req_trust))

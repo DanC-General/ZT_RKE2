@@ -6,7 +6,7 @@ from skfuzzy import control as ctrl
 class SRule:
     def __init__(self):
         # Step 1: Define the fuzzy sets for input variables (cost and benefit)
-        likelihood = ctrl.Antecedent(np.arange(1, 4, 1), 'likelihood')
+        likelihood = ctrl.Antecedent(np.arange(1, 3, 1), 'likelihood')
         # Past indication that subject is malicious 
         sub_malig = ctrl.Antecedent(np.arange(0, 1.1, 0.1), 'sub_malig')
         # Chance that current abnormal call is also malicious
@@ -29,12 +29,13 @@ class SRule:
 
         # TODO change numberical values below 
         # Step 2: Define the fuzzy sets for output variable (cost benefit)
-        subj_trust = ctrl.Consequent(np.arange(0, 11, 1), 'subject_trust')
+        subj_trust = ctrl.Consequent(np.arange(0, 1.1, 0.1), 'subject_trust')
 
         # Membership functions for subject_trust
-        subj_trust['low'] = fuzz.trimf(subj_trust.universe, [0, 2, 5])
-        subj_trust['medium'] = fuzz.trimf(subj_trust.universe, [3, 5, 7])
-        subj_trust['high'] = fuzz.trimf(subj_trust.universe, [6, 8, 10])
+        subj_trust['low'] = fuzz.trimf(subj_trust.universe, [0, 0.1, 0.4])
+        subj_trust['medium'] = fuzz.trimf(subj_trust.universe, [0.3, 0.5, 0.7])
+        subj_trust['high'] = fuzz.trimf(subj_trust.universe, [0.6, 0.9, 1])
+
 
         #### MAPPINGS OF FUZZY VARIABLES TO SUBJECT TRUSTS
         [[['unlikely|low|unique', 'unlikely|low|common', 'unlikely|low|ubiquitous'],
@@ -88,9 +89,14 @@ class SRule:
         self.subj_trust_sim.input['likelihood'] = l
         self.subj_trust_sim.input['sub_malig'] = s
         self.subj_trust_sim.input['sysc_malig'] = y
-        self.subj_trust_sim.compute()
-        print("Subject trust is ", self.subj_trust_sim.output['subject_trust'], " from " , l ,s, y)
-        return self.subj_trust_sim.output['subject_trust']
+        try:
+            self.subj_trust_sim.compute()
+            # print(l,s,y,"succeeded.")
+            # print("Subject trust is ", self.subj_trust_sim.output['subject_trust'], " from " , l ,s, y)
+            return self.subj_trust_sim.output['subject_trust']
+        except Exception:
+            print(l,s,y,"failed.")
+            return 1
 
 
 # test = SRule()
@@ -101,10 +107,10 @@ class RRule:
     def __init__(self):
         # Step 1: Define the fuzzy sets for input variables (cost and benefit)
         object_trust = ctrl.Antecedent(np.arange(-0.1, 1.01, 0.01), 'o_trust')
-        subject_trust = ctrl.Antecedent(np.arange(-0.1, 1.2, 0.1), 's_trust')
-        print(np.arange(0, 1.01, 0.01))
+        subject_trust = ctrl.Antecedent(np.arange(-0.1, 1.1, 0.1), 's_trust')
+        # print(np.arange(0, 1.01, 0.01))
         # Membership functions for cost and benefit
-        print(np.arange(0, 1, 0.1))
+        # print(np.arange(0, 1, 0.1))
 
         # Clamp object trust rmse 
         ## Seems to break if lower bounds are 0 to 1: need -0.01 and 1.1
@@ -123,7 +129,7 @@ class RRule:
         # Membership functions for subject_trust
         request_trust['low'] = fuzz.trimf(request_trust.universe, [0, 2, 5])
         request_trust['medium'] = fuzz.trimf(request_trust.universe, [3, 5, 7])
-        request_trust['high'] = fuzz.trimf(request_trust.universe, [6, 8, 10])
+        request_trust['high'] = fuzz.trimf(request_trust.universe, [6, 10, 10])
 
         #### MAPPINGS OF FUZZY VARIABLES TO SUBJECT TRUSTS
 
@@ -145,15 +151,15 @@ class RRule:
         ['low', 'medium', 'high'],
         ['medium', 'high', 'high']]
         rules = list()
-        print(rules_list)
+        # print(rules_list)
         for oi,ot in enumerate(['low', 'moderate','high']):
             for si,st in enumerate(['low', 'moderate','high']):
                 print(oi, si )
                 rules_list[oi][si] = (ot + "|" + st)
                 rules.append(ctrl.Rule(object_trust[ot] & subject_trust[st], request_trust[trust_list[oi][si]]))
-        print(rules)
+        # print(rules)
 
-        print(rules_list)
+        # print(rules_list)
         # print(rules)
 
 
@@ -168,14 +174,14 @@ class RRule:
 
     def simulate(self,o,s):
         self.req_trust_sim.input['o_trust'] = o
-        self.req_trust_sim.input['s_trust'] = s
-        print("Trying values ",o,s)
+        self.req_trust_sim.input['s_trust'] = s 
+        # print("Trying values ",o,s)
         self.req_trust_sim.compute()
         print("Request trust is ", self.req_trust_sim.output['r_trust'], " from object trust", o , " and subject trust", s )
         return self.req_trust_sim.output['r_trust']
     
-# SRule().simulate(1,1.0,0.3)
-# RRule().simulate(1.0,0.3)
+# SRule().simulate(1,0.8,0.8)
+# RRule().simulate(0.0,5.1)
 # r = RRule()
 # for o in np.arange(0, 1.01, 0.01):
 #     for s in np.arange(0, 1.1, 0.1):
@@ -184,3 +190,8 @@ class RRule:
 #             print(o,s,"succeeded.")
 #         except Exception:
 #             print(o,s,"failed.")
+# sr = SRule()
+# for l in np.arange(1, 3, 1):
+#     for s in np.arange(0, 1.1, 0.1):
+#         for y in np.arange(0, 1.1, 0.1):
+#             sr.simulate(l,s,y)

@@ -116,7 +116,7 @@ def get_lines(pipe):
                 obj_trust = 1
 
             subj_trust = cur_svc.subject_trust(subject)
-
+            log.write(cur_svc.name + str(cur_svc.subj_sysc_map))
             # Act on overall request trust
             req_trust = Rfuzz.simulate(obj_trust,subj_trust)
             log.write("Subject trust " + str(subj_trust) + ", Object trust " +

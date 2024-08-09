@@ -19,13 +19,13 @@ class SRule:
         likelihood['plausible'] = fuzz.trimf(likelihood.universe, [1, 1, 2])
         likelihood['likely'] = fuzz.trimf(likelihood.universe, [2, 2, 3])
 
-        sub_malig['low'] = fuzz.trimf(sub_malig.universe, [0, 0.2, 0.4])
+        sub_malig['low'] = fuzz.trimf(sub_malig.universe, [-0.1, 0.1, 0.4])
         sub_malig['moderate'] = fuzz.trimf(sub_malig.universe, [0.3, 0.5, 0.7])
-        sub_malig['high'] = fuzz.trimf(sub_malig.universe, [0.6, 0.8, 1])
+        sub_malig['high'] = fuzz.trimf(sub_malig.universe, [0.6, 1.0, 1.1])
 
-        sysc_malig['unique'] = fuzz.trimf(sysc_malig.universe, [0, 0.2, 0.4])
+        sysc_malig['unique'] = fuzz.trimf(sysc_malig.universe, [-0.1, 0.1, 0.4])
         sysc_malig['common'] = fuzz.trimf(sysc_malig.universe, [0.3, 0.5, 0.7])
-        sysc_malig['ubiquitous'] = fuzz.trimf(sysc_malig.universe, [0.6, 0.8, 1])
+        sysc_malig['ubiquitous'] = fuzz.trimf(sysc_malig.universe, [0.6, 1.0, 1.1])
 
         # TODO change numberical values below 
         # Step 2: Define the fuzzy sets for output variable (cost benefit)
@@ -34,7 +34,7 @@ class SRule:
         # Membership functions for subject_trust
         subj_trust['low'] = fuzz.trimf(subj_trust.universe, [0, 2, 5])
         subj_trust['medium'] = fuzz.trimf(subj_trust.universe, [3, 5, 7])
-        subj_trust['high'] = fuzz.trimf(subj_trust.universe, [5, 10, 10])
+        subj_trust['high'] = fuzz.trimf(subj_trust.universe, [6, 8, 10])
 
         #### MAPPINGS OF FUZZY VARIABLES TO SUBJECT TRUSTS
         [[['unlikely|low|unique', 'unlikely|low|common', 'unlikely|low|ubiquitous'],
@@ -100,19 +100,21 @@ class SRule:
 class RRule:
     def __init__(self):
         # Step 1: Define the fuzzy sets for input variables (cost and benefit)
-        object_trust = ctrl.Antecedent(np.arange(0, 1.1, 0.01), 'o_trust')
-        subject_trust = ctrl.Antecedent(np.arange(0, 1.1, 0.1), 's_trust')
-
+        object_trust = ctrl.Antecedent(np.arange(-0.1, 1.01, 0.01), 'o_trust')
+        subject_trust = ctrl.Antecedent(np.arange(-0.1, 1.2, 0.1), 's_trust')
+        print(np.arange(0, 1.01, 0.01))
         # Membership functions for cost and benefit
+        print(np.arange(0, 1, 0.1))
 
         # Clamp object trust rmse 
-        object_trust['high'] = fuzz.trimf(object_trust.universe, [0, 0.1, 0.2])
+        ## Seems to break if lower bounds are 0 to 1: need -0.01 and 1.1
+        object_trust['high'] = fuzz.trimf(object_trust.universe, [-0.01, 0.1, 0.2])
         object_trust['moderate'] = fuzz.trimf(object_trust.universe, [0.1, 0.3, 0.5])
-        object_trust['low'] = fuzz.trimf(object_trust.universe, [0.4, 0.8, 1])
+        object_trust['low'] = fuzz.trimf(object_trust.universe, [0.4, 1, 1.1])
 
-        subject_trust['low'] = fuzz.trimf(subject_trust.universe, [0, 0.2, 0.4])
+        subject_trust['low'] = fuzz.trimf(subject_trust.universe, [-0.01, 0.1, 0.4])
         subject_trust['moderate'] = fuzz.trimf(subject_trust.universe, [0.3, 0.5, 0.7])
-        subject_trust['high'] = fuzz.trimf(subject_trust.universe, [0.6, 0.8, 1])
+        subject_trust['high'] = fuzz.trimf(subject_trust.universe, [0.6, 1.0, 1.1])
 
         # TODO change numberical values below 
         # Step 2: Define the fuzzy sets for output variable (cost benefit)
@@ -121,7 +123,7 @@ class RRule:
         # Membership functions for subject_trust
         request_trust['low'] = fuzz.trimf(request_trust.universe, [0, 2, 5])
         request_trust['medium'] = fuzz.trimf(request_trust.universe, [3, 5, 7])
-        request_trust['high'] = fuzz.trimf(request_trust.universe, [5, 10, 10])
+        request_trust['high'] = fuzz.trimf(request_trust.universe, [6, 8, 10])
 
         #### MAPPINGS OF FUZZY VARIABLES TO SUBJECT TRUSTS
 
@@ -143,13 +145,13 @@ class RRule:
         ['low', 'medium', 'high'],
         ['medium', 'high', 'high']]
         rules = list()
-
         print(rules_list)
         for oi,ot in enumerate(['low', 'moderate','high']):
             for si,st in enumerate(['low', 'moderate','high']):
                 print(oi, si )
                 rules_list[oi][si] = (ot + "|" + st)
                 rules.append(ctrl.Rule(object_trust[ot] & subject_trust[st], request_trust[trust_list[oi][si]]))
+        print(rules)
 
         print(rules_list)
         # print(rules)
@@ -172,4 +174,13 @@ class RRule:
         print("Request trust is ", self.req_trust_sim.output['r_trust'], " from object trust", o , " and subject trust", s )
         return self.req_trust_sim.output['r_trust']
     
-RRule().simulate(0.0,0.1)
+# SRule().simulate(1,1.0,0.3)
+# RRule().simulate(1.0,0.3)
+# r = RRule()
+# for o in np.arange(0, 1.01, 0.01):
+#     for s in np.arange(0, 1.1, 0.1):
+#         try: 
+#             r.simulate(o,s)
+#             print(o,s,"succeeded.")
+#         except Exception:
+#             print(o,s,"failed.")

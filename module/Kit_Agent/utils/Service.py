@@ -1,6 +1,7 @@
 from Kitsune import Kitsune
 import subprocess
 from .DataStructs import PrioQ, StatTracker
+from .FuzzyLogic import SRule
 class Service: 
     def __init__(self,maxAE,FMgrace,ADgrace,name,port): 
         self.subj_sysc_map = dict()
@@ -8,6 +9,7 @@ class Service:
         self.terminated = dict()
         self.ml = Kitsune(None,None,maxAE,FMgrace,ADgrace)
         self.stats = StatTracker()
+        self.Sfuzz = SRule()
         self.name = name
         self.port = port
 
@@ -23,6 +25,7 @@ class Service:
         # print(item)
         log.write(syscall + str(alert_ts) + "\n")
         recency = 5
+        i = 0
         # Change to use alert ts
         for subject in self.prev_subj.more_recent(alert_ts): 
             print("Adding to malicious", subject)
@@ -38,6 +41,8 @@ class Service:
                 self.subj_sysc_map[subject][syscall] += 1 * recency
             # Update so next subject is less recent
             recency -= 2
+            self.subj_sysc_map[subject]["trust"] = self.make_trust(subject,syscall,i)
+            i+=1
         log.write(self.name + ":: " + str(self.subj_sysc_map) + "\n")
 
     def add_recent(self,subject,time): 
@@ -54,21 +59,12 @@ class Service:
             self.prev_subj.add((time,subject))
             print(self.prev_subj)
         
-    def subject_trust(self,subject,cur_call,log):
-        subj_trust = -1
-        total_ab_sys = self.total_abnormal()
-        smap = self.subj_sysc_map
-        if smap[subject]["total"] > 0 and total_ab_sys > 0 :
-            print("Set subject trust to ", smap[subject]["total"],"/",total_ab_sys," = ",int(smap[subject]["total"])/int(total_ab_sys))
-            subj_trust = int(smap[subject]["total"])/int(total_ab_sys)
-            log.write("Subject trust for " + subject + ": " + str(subj_trust) + "\n")
-            if cur_call in smap: 
-                if smap[subject][cur_call] != 1: 
-                    print("Repeat syscall ",cur_call, ", skipping.")
-                    subj_trust = -1
-        smap[subject]["trust"] = subj_trust
-        log.write(self.name + ":: " + str(self.subj_sysc_map) + "\n")
-        return subj_trust
+    def subject_trust(self,subject):
+        if "trust" not in self.subj_sysc_map[subject]:
+            self.subj_sysc_map[subject]["trust"] = 1
+        # smap[subject]["trust"] = subj_trust
+        # log.write(self.name + ":: " + str(self.subj_sysc_map) + "\n")
+        return self.subj_sysc_map[subject]["trust"]
     
     def terminate(self,orig_sip,orig_sport,log):
         # log.write("ALERTED! Object: " + str(obj_trust) + ".Subject: " + str(subj_trust) + ".\n")
@@ -80,7 +76,25 @@ class Service:
             self.terminated[orig_sip][orig_sport] = 0
             terminate_connection(orig_sip,orig_sport)
 
+    def __get_sysc_trust(self,subject,syscall):
+        if syscall not in smap[subject]:
+            return 0
+        smap = self.subj_sysc_map
+        total = 0
+        for s in smap: 
+            if syscall in smap[s]: 
+                total += smap[s][syscall]
+        return smap[subject][syscall] / total
+    
+    def __get_subj_trust(self,subject):
+        return int(self.subj_sysc_map[subject]["total"]) / self.total_abnormal()
+    
+    def make_trust(self,subject,syscall,likelihood): 
+        past_st = round(self.__get_subj_trust(subject),1)
+        sys_st = round(self.__get_sysc_trust(subject,syscall),1)
+        return round(self.Sfuzz.simulate(likelihood,past_st,sys_st),2)
+
 def terminate_connection(ip,port):
     # Could change this script to only search the namespaces of the relevant services.
     print("Terminating connection on " , ip , " <-> " , port)
-    output = subprocess.run(["../scripts/terminate.sh"]+[ip,port])
+    subprocess.run(["../scripts/terminate.sh"]+[ip,port])

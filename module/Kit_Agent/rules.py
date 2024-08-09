@@ -1,14 +1,11 @@
 import os
-import chardet
 import re
 import threading
 import subprocess
-from subprocess import CalledProcessError
-from utils.DataStructs import Packet, PrioQ, StatTracker
+from utils.DataStructs import Packet
 from utils.Service import Service
-from collections import deque
+from utils.FuzzyLogic import RRule
 import queue
-from Kitsune import Kitsune
 import sys
 import sched
 from time import sleep, time
@@ -17,16 +14,11 @@ sys.path.append("../syscall-monitor")
 import msg_handler as rq
 # sport:Connection -  should ocassionally wipe
 s = sched.scheduler(time,sleep)
-# conn_dict = dict()
-svc_dict = dict()
-# stat_dict = dict()
-# ml_dict = dict()
-pod_cidr = ""
 msg_q = queue.Queue()
-# Need to split by deployment
-# subj_sysc_map = dict()
-# prev_subj = PrioQ()
-# terminated = dict()
+Rfuzz = RRule()
+svc_dict = dict()
+pod_cidr = ""
+
 
 def parse_conntrack(conn_str,packet):
 # tcp      6 82684 ESTABLISHED src=192.168.122.10 dst=10.43.238.254 sport=51682 dport=8003 src=10.42.0.62 dst=10.1.1.243 sport=22 dport=59424 [ASSURED] mark=0 use=1
@@ -109,20 +101,27 @@ def get_lines(pipe):
 
             # Extract message from queue if one exists
             #   - otherwise pass.
-            cur_call = None
             while not msg_q.empty():
                 # TODO Could alter this to retrieve all messages from the queue
                 item = msg_q.get(block=False)
                 print(item)
                 cur_call = item[0]
                 alert_time = item[1]
+                # New subject trusts are made for the relevant subjects here
                 cur_svc.handle_alert(cur_call,alert_time,log)
             # Evaluate system trust
             obj_trust = rmse
-            subj_trust = cur_svc.subject_trust(subject,cur_call,log)
+            # Clamp RMSE for fuzzy logic input
+            if obj_trust > 1: 
+                obj_trust = 1
+
+            subj_trust = cur_svc.subject_trust(subject)
 
             # Act on overall request trust
-            if obj_trust > 100 or subj_trust > 0.8: 
+            req_trust = Rfuzz.simulate(obj_trust,subj_trust)
+            log.write("Subject trust " + str(subj_trust) + ", Object trust " +
+                      str(obj_trust) + "--> ReqTrust " + str(req_trust))
+            if req_trust < 0.5: 
                 cur_svc.terminate(orig_sip,orig_sport,log)
             log.flush()
 

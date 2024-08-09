@@ -89,7 +89,8 @@ class SRule:
         self.subj_trust_sim.input['sub_malig'] = s
         self.subj_trust_sim.input['sysc_malig'] = y
         self.subj_trust_sim.compute()
-        print("Subject trust is ", self.subj_trust_sim.output['subject_trust'])
+        print("Subject trust is ", self.subj_trust_sim.output['subject_trust'], " from " , l ,s, y)
+        return self.subj_trust_sim.output['subject_trust']
 
 
 # test = SRule()
@@ -105,9 +106,9 @@ class RRule:
         # Membership functions for cost and benefit
 
         # Clamp object trust rmse 
-        object_trust['low'] = fuzz.trimf(object_trust.universe, [0, 0.1, 0.2])
-        object_trust['moderate'] = fuzz.trimf(object_trust.universe, [0.17, 0.3, 0.45])
-        object_trust['high'] = fuzz.trimf(object_trust.universe, [0.4, 0.8, 1])
+        object_trust['high'] = fuzz.trimf(object_trust.universe, [0, 0.1, 0.2])
+        object_trust['moderate'] = fuzz.trimf(object_trust.universe, [0.1, 0.3, 0.5])
+        object_trust['low'] = fuzz.trimf(object_trust.universe, [0.4, 0.8, 1])
 
         subject_trust['low'] = fuzz.trimf(subject_trust.universe, [0, 0.2, 0.4])
         subject_trust['moderate'] = fuzz.trimf(subject_trust.universe, [0.3, 0.5, 0.7])
@@ -148,7 +149,7 @@ class RRule:
             for si,st in enumerate(['low', 'moderate','high']):
                 print(oi, si )
                 rules_list[oi][si] = (ot + "|" + st)
-                rules.append(ctrl.Rule(object_trust[ot] & subject_trust[st], request_trust[trust_list[ot][st]]))
+                rules.append(ctrl.Rule(object_trust[ot] & subject_trust[st], request_trust[trust_list[oi][si]]))
 
         print(rules_list)
         # print(rules)
@@ -166,7 +167,9 @@ class RRule:
     def simulate(self,o,s):
         self.req_trust_sim.input['o_trust'] = o
         self.req_trust_sim.input['s_trust'] = s
+        print("Trying values ",o,s)
         self.req_trust_sim.compute()
-        print("Request trust is ", self.req_trust_sim.output['r_trust'])
+        print("Request trust is ", self.req_trust_sim.output['r_trust'], " from object trust", o , " and subject trust", s )
+        return self.req_trust_sim.output['r_trust']
     
-RRule()
+RRule().simulate(0.0,0.1)

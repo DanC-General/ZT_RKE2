@@ -123,7 +123,7 @@ def get_lines(pipe):
             req_trust = Rfuzz.simulate(obj_trust,subj_trust)
             log.write("Subject trust " + str(subj_trust) + ", Object trust " +
                       str(obj_trust) + "--> ReqTrust " + str(req_trust))
-            if req_trust < 0.5: 
+            if req_trust < 5: 
                 cur_svc.terminate(orig_sip,orig_sport,log)
             log.flush()
 

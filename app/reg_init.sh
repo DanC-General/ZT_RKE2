@@ -7,5 +7,5 @@ else
 fi
 
 if [[ -z $(sudo docker ps -a | grep rabbitmq | grep 15673) ]]; then 
-    sudo sh -c "bash -c \"cd ../monitor/syscall-monitor && ./start;\"" &
+    sudo sh -c "bash -c \"cd ../module/syscall-monitor && ./start;\"" &
 fi

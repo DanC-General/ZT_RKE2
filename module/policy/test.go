@@ -147,7 +147,7 @@ func end_capture(pName string, capID string) {
 		}
 	}
 	fmt.Println("Killing ", pName, " -> ", capID)
-	fname := DIR + cName + "/" + pName + ".txt"
+	fname := DIR + cName + "/" + pName + "_extended.txt"
 	if _, err := os.Stat(DIR + cName); os.IsNotExist(err) {
 		// Create the directory with permissions 0755
 		err = os.MkdirAll(DIR+cName, 0755)

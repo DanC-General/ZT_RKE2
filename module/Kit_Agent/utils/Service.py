@@ -36,7 +36,6 @@ class Service:
         print("Previous subjects", self.prev_subj.more_recent(alert_ts))
         # Change to use alert ts
         for subject in self.prev_subj.more_recent(alert_ts): 
-            print("Adding to malicious", subject)
             # if subject not in subj_sysc_map: 
             #     subj_sysc_map[subject] = dict()
             # else: 

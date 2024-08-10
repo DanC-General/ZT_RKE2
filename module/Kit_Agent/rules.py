@@ -156,11 +156,11 @@ def get_cidr():
 def on_recv(channel,method,properties,body): 
     # global prev_time
     fields = json.loads(body.decode())
-    print(fields)
+    # print(fields)
     try: 
         if (fields["output_fields"]["container.name"] in fields["rule"]): 
             # Don't need nanosecond precision
-            time_s = str(int(float(fields["output_fields"]["evt.time"]) / 1000000000))
+            # time_s = str(int(float(fields["output_fields"]["evt.time"]) / 1000000000))
             msg_q.put([fields["output_fields"]["syscall.type"],fields["output_fields"]["evt.rawtime.s"]])
     except KeyError: 
         return 
@@ -168,7 +168,7 @@ def on_recv(channel,method,properties,body):
 def retrieve(): 
     temp = rq.AMQPConnection()
     print("Formed AMQP Connection...")
-    sleep(10)
+    # sleep(10)
     while(1):
         print("Consuming")
         temp.channel.basic_consume(queue="events",on_message_callback=on_recv,auto_ack=True)
@@ -213,22 +213,28 @@ def main():
 
 if __name__ == "__main__":
     print(os.getcwd())
-    main()
+    # main()
     maxAE = 10 #maximum size for any autoencoder in the ensemble layer
     FMgrace = 100 #the number of instances taken to learn the feature mapping (the ensemble's architecture)
     ADgrace = 1000 #the number of instances used to train the anomaly detector (ensemble itself)
     threading.Thread(target=retrieve).start()
     tst= Service(maxAE,FMgrace,ADgrace,"test","123")
-    while True:
-        if not msg_q.empty():
-            a = msg_q.get()
-            print("recv alert",a,"at",time())
+    # while True:
+    #     if not msg_q.empty():
+    #         a = msg_q.get()
+    #         print("recv alert",a,"at",time())
 
     t1 = tst.prev_subj
-    t1.more_recent(10.4)
+    # t1.more_recent(10.4)
     t1.add([20.01,"subj2"])
-    t1.more_recent(10.4)
-    t1.more_recent(20.2)
+    # t1.more_recent(20.2)
+    # t1.more_recent(10.4)
     t1.add([30.102,"subj1"])
-    t1.more_recent(10.4)
-    t1.more_recent(20.2)
+    t1.add([33.47,"subj2"])
+    # t1.more_recent(10.4)
+    t1.add([33.47,"subj3"])
+    t1.add([31.47,"subj4"])
+    t1.add([35.47,"subj5"])
+    t1.add([31.47,"subj7"])
+
+    # t1.more_recent(20.2)

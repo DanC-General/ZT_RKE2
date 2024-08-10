@@ -79,21 +79,22 @@ class PrioQ:
         self.store = list()
     # Take [ts, host] items    
     def add(self,item): 
-        if self.empty(): 
+        print("Adding item",item)
+        ind = self.contains(item[1])
+        print("Item at index",ind)
+        # Update existing entries with new timestamps
+        if ind is not None:
+            if item[0] > self.store[ind][0]:
+                self.store[ind] = item
+        # If the entry doesn't exists and the list isn't full, add it
+        elif not self.full():
             self.store.append(item)
-        else: 
-            if self.contains(item[1]):
-                pass
-            for i in self.store:
-                # Added items will have newer timestamps, 
-                #   so should update that timestamp
-                if item[1] == i[1]:
-                    i[0] == item[0]
-                    self.store.sort()
-                    return
-            # Greater ts -> newer packet. 
-            if item[0] > self.store[0][0]: 
-                self.store[0] = item
+        # If the entry doesn't exist but the list is full,
+        #       remove the oldest entry and add the new one
+        #       if it is newer (assumes oldest entry is 
+        #       at the start of the sorted list)
+        elif item[0] > self.store[0][0]:
+            self.store[0] = item
         self.store.sort()
         print("Added", self.store)
     ## TODO Need to review this 
@@ -116,10 +117,12 @@ class PrioQ:
     def full(self):
         return len(self.store) == 3
     def contains(self, str):
+        ind = 0
         for i in self.store: 
             if i[1] == str:
-                return True
-        return False 
+                return ind
+            ind += 1
+        return None 
     def __str__(self) -> str:
         return str(self.store)
 

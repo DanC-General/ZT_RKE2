@@ -17,68 +17,68 @@ tty: true
 customRules:
   falco-test.yaml: |-
     - list: http-l
-      items: [mknodat, mmap, mount, rt_sigreturn, setgroups, 
-            getrandom, mkdirat, access, brk, exit_group, 
-            getegid, madvise, sysinfo, sendto, write, 
-            unlinkat, fchdir, fchownat, getppid, recvmsg, 
-            sched_getaffinity, umask, select, faccessat2, fstatfs, 
-            getdents64, getuid, prlimit64, statfs, unlink, 
-            getcwd, recvfrom, geteuid, setgid, symlinkat, 
-            accept, read, munmap, pivot_root, prctl, 
-            setsid, lstat, getsockname, connect, epoll_ctl, 
-            gettid, mprotect, rseq, sched_yield, close, 
-            rt_sigprocmask, tgkill, unshare, getpid, nanosleep, 
-            set_robust_list, capset, epoll_create1, newfstatat, getrlimit, 
-            lseek, socket, stat, dup3, bind, 
-            clone, listen, readlinkat, chdir, rt_sigaction, 
-            epoll_pwait, execve, keyctl, pipe2, setuid, 
-            shutdown, close_range, ioctl, pread64, umount2, 
-            fcntl, capget, futex, openat, setitimer, 
-            ppoll, set_tid_address, fstat, arch_prctl, sigaltstack, 
-            getgid, setsockopt ]
+      items: [lstat, futex, getppid, set_tid_address, setgid, 
+            statfs, fchdir, keyctl, accept, access, 
+            arch_prctl, capget, capset, exit_group, mkdirat, 
+            munmap, nanosleep, sched_yield, setsockopt, madvise, 
+            umount2, unshare, close, recvfrom, rt_sigprocmask, 
+            shutdown, epoll_ctl, getsockname, stat, brk, 
+            getuid, socket, unlink, unlinkat, symlinkat, 
+            sigaltstack, chdir, connect, execve, faccessat2, 
+            fchownat, lseek, fstat, getcwd, bind, 
+            mmap, ppoll, recvmsg, setsid, setuid, 
+            rt_sigreturn, sysinfo, write, getegid, getrlimit, 
+            mknodat, mount, pipe2, tgkill, dup3, 
+            listen, pivot_root, pread64, close_range, getdents64, 
+            geteuid, getrandom, mprotect, setitimer, epoll_create1, 
+            getpid, rseq, set_robust_list, clone, getgid, 
+            gettid, setgroups, sched_getaffinity, openat, sendto, 
+            epoll_pwait, fstatfs, ioctl, readlinkat, prlimit64, 
+            umask, fcntl, read, rt_sigaction, select, 
+            newfstatat, prctl ]
 
     - list: sql-l
-      items: [getegid, pwrite64, set_robust_list, geteuid, getrusage, 
-            eventfd2, getppid, setuid, clock_nanosleep, futex, 
-            dup2, exit, getpgrp, sched_getaffinity, getrandom, 
-            getuid, mkdir, dup, getgid, sysinfo, 
-            write, rename, munmap, symlinkat, newfstatat, 
-            pread64, rseq, rt_sigprocmask, capget, shutdown, 
-            bind, clock_gettime, getgroups, capset, pipe, 
-            fstatfs, clone3, lseek, poll, prctl, 
-            unlink, read, io_setup, sigaltstack, renameat, 
-            epoll_wait, readlink, connect, fallocate, ppoll, 
-            fstat, getpid, mmap, setsockopt, fchdir, 
-            getdents64, nanosleep, prlimit64, rt_sigreturn, socket, 
-            uname, accept, fdatasync, mprotect, fsync, 
-            rt_sigtimedwait, close, fcntl, getcwd, io_getevents, 
-            chdir, set_tid_address, io_submit, faccessat2, gettid, 
-            access, rt_sigaction, setgid, pipe2, arch_prctl, 
-            epoll_create1, exit_group, setgroups, recvfrom, epoll_ctl, 
-            wait4, openat, umask, sched_yield, sendto, 
-            clone, execve, madvise, sched_setaffinity, times, 
-            listen, getpeername, brk, ioctl, epoll_pwait, 
-            fadvise64, getpriority, setpriority, tgkill, statfs ]
+      items: [clock_gettime, clone, fstat, munmap, sysinfo, 
+            dup2, eventfd2, getpgrp, symlinkat, newfstatat, 
+            brk, fadvise64, mmap, pwrite64, sched_getaffinity, 
+            write, getrandom, prlimit64, unlink, capget, 
+            pipe2, set_tid_address, poll, exit_group, rename, 
+            pread64, arch_prctl, geteuid, close, fallocate, 
+            getegid, sched_setaffinity, shutdown, connect, getpriority, 
+            epoll_wait, futex, getgid, listen, getcwd, 
+            getpeername, getrusage, gettid, getgroups, bind, 
+            nanosleep, statfs, openat, prctl, fchdir, 
+            fstatfs, clone3, sendto, setsockopt, execve, 
+            exit, lseek, faccessat2, ioctl, setgroups, 
+            times, uname, mkdir, io_submit, read, 
+            access, chdir, fsync, io_setup, madvise, 
+            setpriority, fcntl, getppid, clock_nanosleep, mprotect, 
+            set_robust_list, capset, epoll_pwait, pipe, setuid, 
+            dup, getdents64, getuid, setgid, sigaltstack, 
+            wait4, accept, readlink, rt_sigreturn, getpid, 
+            socket, sched_yield, epoll_ctl, umask, ppoll, 
+            rt_sigaction, io_getevents, recvfrom, renameat, rt_sigtimedwait, 
+            fdatasync, rseq, rt_sigprocmask, epoll_create1, tgkill ]
 
     - list: ssh-l
-      items: [chroot, getgroups, getsockname, poll, rseq, 
-            setgroups, getdents64, getpeername, getpgrp, getuid, 
-            ioctl, lseek, munmap, setresuid, vfork, 
-            connect, getsockopt, openat, prctl, rt_sigaction, 
-            rt_sigreturn, setsid, capset, clone, fcntl, 
-            recvfrom, setgid, statx, futex, mmap, 
-            socket, listen, access, execve, fstat, 
-            geteuid, getrandom, set_robust_list, bind, chdir, 
-            faccessat2, setsockopt, umask, close, getcwd, 
-            getpriority, pipe2, sendto, nanosleep, clone3, 
-            getpid, set_tid_address, socketpair, statfs, fstatfs, 
-            close_range, mprotect, ppoll, prlimit64, read, 
-            readlink, getegid, wait4, alarm, getppid, 
-            mkdir, rt_sigprocmask, setpriority, epoll_ctl, accept, 
-            arch_prctl, brk, recvmsg, setuid, uname, 
-            capget, epoll_pwait, tgkill, clock_nanosleep, dup2, 
-            exit_group, getgid, newfstatat, rename, setresgid, 
-            ftruncate, keyctl, pread64, write ]
+      items: [chroot, getdents64, getgroups, lseek, prlimit64, 
+            setresgid, socketpair, ftruncate, setgid, uname, 
+            nanosleep, dup2, fstatfs, bind, clock_nanosleep, 
+            wait4, accept, arch_prctl, getcwd, getegid, 
+            keyctl, pipe2, set_robust_list, chdir, mmap, 
+            pread64, rt_sigprocmask, setpriority, socket, capset, 
+            fcntl, getrandom, tgkill, access, faccessat2, 
+            getgid, ppoll, sendto, close_range, connect, 
+            execve, getpgrp, read, rename, setgroups, 
+            umask, vfork, clone, geteuid, getpriority, 
+            ioctl, mkdir, munmap, openat, rt_sigaction, 
+            set_tid_address, clone3, exit_group, statfs, brk, 
+            close, recvmsg, rseq, listen, fstat, 
+            getppid, getsockname, mprotect, setsid, write, 
+            epoll_pwait, futex, getsockopt, newfstatat, rt_sigreturn, 
+            setuid, capget, getpeername, prctl, recvfrom, 
+            epoll_ctl, alarm, getpid, getuid, poll, 
+            readlink, setresuid, setsockopt, statx ]
 
     - rule: http-r 
       desc: notice abnormal syscall in http
@@ -90,7 +90,8 @@ customRules:
         container.duration > 60000000000
       output: > 
         | http | %container.image | %k8s.pod.name | %proc.pid
-        |SYSCALLTYPE %syscall.type DONE| %container.duration 
+        |SYSCALLTYPE %syscall.type DONE| %container.duration | %evt.rawtime.s
+		| %evt.rawtime.ns | %evt.rawtime
       priority: ALERT
 
 
@@ -104,7 +105,8 @@ customRules:
         container.duration > 60000000000
       output: > 
         | sql | %container.image | %k8s.pod.name | %proc.pid
-        |SYSCALLTYPE %syscall.type DONE| %container.duration 
+        |SYSCALLTYPE %syscall.type DONE| %container.duration | %evt.rawtime.s
+		| %evt.rawtime.ns | %evt.rawtime
       priority: ALERT
 
 
@@ -118,6 +120,7 @@ customRules:
         container.duration > 60000000000
       output: > 
         | ssh | %container.image | %k8s.pod.name | %proc.pid
-        |SYSCALLTYPE %syscall.type DONE| %container.duration 
+        |SYSCALLTYPE %syscall.type DONE| %container.duration | %evt.rawtime.s
+		| %evt.rawtime.ns | %evt.rawtime
       priority: ALERT
 

@@ -75,14 +75,15 @@ def get_lines(pipe):
                     break 
             # Split the string into a list with the necessary 
             #   fields for class parsing.
-            log.write(data + "\n")
+            # log.write(data + "\n")
             details = data.strip().split("|")
             if len(details) != 10: 
                 continue
             pack = Packet(details)
+            print("Packet",pack.ts,"general time",time())
             orig_sip, orig_sport = pack.external_port(pod_cidr)
             get_connection(pack)
-            log.write(str(pack) + "\n")
+            # log.write(str(pack) + "\n")
 
 
             cur_svc = (svc_dict[pack.svc])
@@ -94,7 +95,7 @@ def get_lines(pipe):
             # Train relevant ML instance
             cur_svc.ml.FE.packets.append(pack)
             rmse =  cur_svc.ml.proc_next_packet()
-            log.write("RMSE for " + pack.svc + str(cur_svc.ml.FE.curPacketIndx) +  ":" + str(rmse) +"\n")
+            # log.write("RMSE for " + pack.svc + str(cur_svc.ml.FE.curPacketIndx) +  ":" + str(rmse) +"\n")
             
             # Add subject to list of recent for tagging
             subject = pack.external_port(pod_cidr)[0]
@@ -120,9 +121,9 @@ def get_lines(pipe):
             log.write(cur_svc.name + str(cur_svc.subj_sysc_map))
             # Act on overall request trust
             print(obj_trust,"vs",subj_trust)
-            req_trust = Rfuzz.simulate(obj_trust,subj_trust)
+            req_trust = Rfuzz.simulate(obj_trust,subj_trust,log)
             log.write("Subject trust " + str(subj_trust) + ", Object trust " +
-                      str(obj_trust) + "--> ReqTrust " + str(req_trust))
+                      str(obj_trust) + "--> ReqTrust " + str(req_trust) + "\n")
             if req_trust < 5: 
                 cur_svc.terminate(orig_sip,orig_sport,log)
             log.flush()
@@ -153,13 +154,14 @@ def get_cidr():
         "jsonpath={.items[*].spec.podCIDR}")).decode()
 
 def on_recv(channel,method,properties,body): 
-    global prev_time
+    # global prev_time
     fields = json.loads(body.decode())
+    print(fields)
     try: 
         if (fields["output_fields"]["container.name"] in fields["rule"]): 
             # Don't need nanosecond precision
             time_s = str(int(float(fields["output_fields"]["evt.time"]) / 1000000000))
-            msg_q.put([fields["output_fields"]["syscall.type"],time_s])
+            msg_q.put([fields["output_fields"]["syscall.type"],fields["output_fields"]["evt.rawtime.s"]])
     except KeyError: 
         return 
     
@@ -168,6 +170,7 @@ def retrieve():
     print("Formed AMQP Connection...")
     sleep(10)
     while(1):
+        print("Consuming")
         temp.channel.basic_consume(queue="events",on_message_callback=on_recv,auto_ack=True)
         temp.channel.start_consuming()
     temp.connection.close()
@@ -211,3 +214,21 @@ def main():
 if __name__ == "__main__":
     print(os.getcwd())
     main()
+    maxAE = 10 #maximum size for any autoencoder in the ensemble layer
+    FMgrace = 100 #the number of instances taken to learn the feature mapping (the ensemble's architecture)
+    ADgrace = 1000 #the number of instances used to train the anomaly detector (ensemble itself)
+    threading.Thread(target=retrieve).start()
+    tst= Service(maxAE,FMgrace,ADgrace,"test","123")
+    while True:
+        if not msg_q.empty():
+            a = msg_q.get()
+            print("recv alert",a,"at",time())
+
+    t1 = tst.prev_subj
+    t1.more_recent(10.4)
+    t1.add([20.01,"subj2"])
+    t1.more_recent(10.4)
+    t1.more_recent(20.2)
+    t1.add([30.102,"subj1"])
+    t1.more_recent(10.4)
+    t1.more_recent(20.2)

@@ -69,7 +69,8 @@ func writeRules() {
         container.duration > 60000000000
       output: > 
         | ` + cName + ` | %container.image | %k8s.pod.name | %proc.pid
-        |SYSCALLTYPE %syscall.type DONE| %container.duration 
+        |SYSCALLTYPE %syscall.type DONE| %container.duration | %evt.rawtime.s
+		| %evt.rawtime.ns | %evt.rawtime
       priority: ALERT` + "\n\n"
 		fmt.Println(rule)
 		_, err = f.Write([]byte(rule))

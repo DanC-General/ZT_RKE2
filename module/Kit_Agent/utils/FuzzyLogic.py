@@ -85,7 +85,7 @@ class SRule:
     # cost_benefit_sim.input['cost'] = 3  # low cost
     # cost_benefit_sim.input['benefit'] = 8  # high benefit
 
-    def simulate(self,l,s,y):
+    def simulate(self,l,s,y,log):
         self.subj_trust_sim.input['likelihood'] = l
         self.subj_trust_sim.input['sub_malig'] = s
         self.subj_trust_sim.input['sysc_malig'] = y
@@ -93,6 +93,8 @@ class SRule:
             self.subj_trust_sim.compute()
             # print(l,s,y,"succeeded.")
             # print("Subject trust is ", self.subj_trust_sim.output['subject_trust'], " from " , l ,s, y)
+            log.write("Likelihood "+ str(l) + " sub malig "+ str(s) 
+                      + "sysc malig "+ str(y) + "--->\n\t "+ str(self.subj_trust_sim.output['subject_trust']) + "\n" )
             return self.subj_trust_sim.output['subject_trust']
         except Exception:
             print(l,s,y,"failed.")
@@ -172,11 +174,12 @@ class RRule:
     # cost_benefit_sim.input['cost'] = 3  # low cost
     # cost_benefit_sim.input['benefit'] = 8  # high benefit
 
-    def simulate(self,o,s):
+    def simulate(self,o,s,log):
         self.req_trust_sim.input['o_trust'] = o
         self.req_trust_sim.input['s_trust'] = s 
         # print("Trying values ",o,s)
         self.req_trust_sim.compute()
+        log.write("Request trust is " + str(self.req_trust_sim.output['r_trust']) + " from object trust" + str(o)  + " and subject trust" + str(s)  + "\n" )
         print("Request trust is ", self.req_trust_sim.output['r_trust'], " from object trust", o , " and subject trust", s )
         return self.req_trust_sim.output['r_trust']
     

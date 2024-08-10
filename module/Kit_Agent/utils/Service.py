@@ -8,6 +8,7 @@ class Service:
         self.prev_subj = PrioQ()
         self.terminated = dict()
         self.ml = Kitsune(None,None,maxAE,FMgrace,ADgrace)
+        # TODO remove
         self.stats = StatTracker()
         self.Sfuzz = SRule()
         self.name = name
@@ -99,9 +100,11 @@ class Service:
     def make_trust(self,subject,syscall,likelihood): 
         past_st = round(self.__get_subj_trust(subject),1)
         sys_st = round(self.__get_sysc_trust(subject,syscall),1)
-        return round(self.Sfuzz.simulate(likelihood,past_st,sys_st),2)
+        return round(self.Sfuzz.simulate(likelihood,past_st,sys_st,self.log),2)
 
 def terminate_connection(ip,port):
     # Could change this script to only search the namespaces of the relevant services.
     print("Terminating connection on " , ip , " <-> " , port)
     subprocess.run(["../scripts/terminate.sh"]+[ip,port])
+
+

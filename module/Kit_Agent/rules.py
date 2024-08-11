@@ -213,28 +213,28 @@ def main():
 
 if __name__ == "__main__":
     print(os.getcwd())
-    # main()
-    maxAE = 10 #maximum size for any autoencoder in the ensemble layer
-    FMgrace = 100 #the number of instances taken to learn the feature mapping (the ensemble's architecture)
-    ADgrace = 1000 #the number of instances used to train the anomaly detector (ensemble itself)
-    threading.Thread(target=retrieve).start()
-    tst= Service(maxAE,FMgrace,ADgrace,"test","123")
+    main()
+    # maxAE = 10 #maximum size for any autoencoder in the ensemble layer
+    # FMgrace = 100 #the number of instances taken to learn the feature mapping (the ensemble's architecture)
+    # ADgrace = 1000 #the number of instances used to train the anomaly detector (ensemble itself)
+    # threading.Thread(target=retrieve).start()
+    # tst= Service(maxAE,FMgrace,ADgrace,"test","123")
     # while True:
     #     if not msg_q.empty():
     #         a = msg_q.get()
     #         print("recv alert",a,"at",time())
 
-    t1 = tst.prev_subj
+    # t1 = tst.prev_subj
     # t1.more_recent(10.4)
-    t1.add([20.01,"subj2"])
+    # t1.add([20.01,"subj2"])
     # t1.more_recent(20.2)
-    # t1.more_recent(10.4)
-    t1.add([30.102,"subj1"])
-    t1.add([33.47,"subj2"])
-    # t1.more_recent(10.4)
-    t1.add([33.47,"subj3"])
-    t1.add([31.47,"subj4"])
-    t1.add([35.47,"subj5"])
-    t1.add([31.47,"subj7"])
+    # t1.add([30.102,"subj1"])
+    # t1.add([33.47,"subj2"])
+    # t1.more_recent(35.102)
+    # t1.add([33.47,"subj3"])
+    # t1.add([38.47,"subj4"])
+    # t1.add([35.47,"subj5"])
+    # t1.add([36.47,"subj7"])
+    # t1.more_recent(40.1)
 
     # t1.more_recent(20.2)

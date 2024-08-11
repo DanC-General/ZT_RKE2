@@ -79,9 +79,9 @@ class PrioQ:
         self.store = list()
     # Take [ts, host] items    
     def add(self,item): 
-        print("Adding item",item)
+        # print("Adding item",item)
         ind = self.contains(item[1])
-        print("Item at index",ind)
+        # print("Item at index",ind)
         # Update existing entries with new timestamps
         if ind is not None:
             if item[0] > self.store[ind][0]:
@@ -96,21 +96,23 @@ class PrioQ:
         elif item[0] > self.store[0][0]:
             self.store[0] = item
         self.store.sort()
-        print("Added", self.store)
+        # print("Added", self.store)
     ## TODO Need to review this 
     def more_recent(self,ts):
         print("CHECKING",ts)
         rec = list()
         ts = float(ts)
         for i in self.store: 
-            print(ts, "<->",i)
             delta = ts - i[0]
-            print(delta)
-            if i[0] >= ts - 5: 
-                print(i[1], " has relevant delta",delta,": added!")
+            # print(delta)
+            print("    ||",ts, "<->",i, " =",delta)
+            if delta <= 5 and delta >= 0: 
+                print("     added")
+                # print("    -->",i[1], " has relevant delta",delta,": added!")
                 rec.append(i[1])
         print(rec)
         rec.reverse()
+        print(rec,"\n")
         return rec
     def empty(self): 
         return len(self.store) == 0

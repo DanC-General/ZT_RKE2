@@ -80,11 +80,11 @@ def get_lines(pipe):
             if len(details) != 10: 
                 continue
             pack = Packet(details)
-            print("Packet",pack.ts,"general time",time())
+            # print("Packet",pack.ts,"general time",time())
             orig_sip, orig_sport = pack.external_port(pod_cidr)
             get_connection(pack)
             # log.write(str(pack) + "\n")
-
+            log.write(str(pack.ts) + "\n")
 
             cur_svc = (svc_dict[pack.svc])
             cur_svc.log = log
@@ -106,7 +106,7 @@ def get_lines(pipe):
             while not msg_q.empty():
                 # TODO Could alter this to retrieve all messages from the queue
                 item = msg_q.get(block=False)
-                print(item)
+                # print(item)
                 cur_call = item[0]
                 alert_time = item[1]
                 # New subject trusts are made for the relevant subjects here
@@ -118,12 +118,12 @@ def get_lines(pipe):
                 obj_trust = 1
 
             subj_trust = cur_svc.subject_trust(subject)
-            log.write(cur_svc.name + str(cur_svc.subj_sysc_map))
+            log.write(cur_svc.name + str(cur_svc.subj_sysc_map) + "\n")
             # Act on overall request trust
-            print(obj_trust,"vs",subj_trust)
+            # print(obj_trust,"vs",subj_trust)
             req_trust = Rfuzz.simulate(obj_trust,subj_trust,log)
-            log.write("Subject trust " + str(subj_trust) + ", Object trust " +
-                      str(obj_trust) + "--> ReqTrust " + str(req_trust) + "\n")
+            # log.write("Subject trust " + str(subj_trust) + ", Object trust " +
+            #           str(obj_trust) + "--> ReqTrust " + str(req_trust) + "\n")
             if req_trust < 5: 
                 cur_svc.terminate(orig_sip,orig_sport,log)
             log.flush()

@@ -77,14 +77,16 @@ class Packet:
 class PrioQ:
     def __init__(self):
         self.store = list()
+        self.log = open("../logs/py.log",'w')
     # Take [ts, host] items    
-    def add(self,item): 
+    def add(self,item,l=None): 
         # print("Adding item",item)
         ind = self.contains(item[1])
         # print("Item at index",ind)
         # Update existing entries with new timestamps
         if ind is not None:
             if item[0] > self.store[ind][0]:
+                self.log.write("Changed " + str(self.store[ind]) + " to " + str(item) + "\n")
                 self.store[ind] = item
         # If the entry doesn't exists and the list isn't full, add it
         elif not self.full():
@@ -95,6 +97,7 @@ class PrioQ:
         #       at the start of the sorted list)
         elif item[0] > self.store[0][0]:
             self.store[0] = item
+            self.log.write("Changed " + str(self.store[ind]) + " to " + str(item) + "\n")
         self.store.sort()
         # print("Added", self.store)
     ## TODO Need to review this 
@@ -105,14 +108,17 @@ class PrioQ:
         for i in self.store: 
             delta = ts - i[0]
             # print(delta)
-            print("    ||",ts, "<->",i, " =",delta)
-            if delta <= 5 and delta >= 0: 
-                print("     added")
+            # print("    ||",ts, "<->",i, " =",delta)
+            self.log.write("    || "+str(ts) + " <-> " + str(i) + " = "+str(delta) + "\n")
+            # Might need to check above 0 
+            if delta <= 5: 
+                self.log.write("       added\n")
+                # print("     added")
                 # print("    -->",i[1], " has relevant delta",delta,": added!")
                 rec.append(i[1])
-        print(rec)
+        # print(rec)
         rec.reverse()
-        print(rec,"\n")
+        # print(rec,"\n")
         return rec
     def empty(self): 
         return len(self.store) == 0

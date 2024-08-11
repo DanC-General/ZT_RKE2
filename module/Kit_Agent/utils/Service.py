@@ -29,13 +29,16 @@ class Service:
     def handle_alert(self,syscall,alert_ts): 
         # print("Recieved an alert!!")
         # print(item)
-        self.write(syscall + str(alert_ts) + "\n")
+        self.write(syscall +" " + str(alert_ts) + "\n")
         recency = 5
         i = 0
         print("Handling alert for", syscall)
         print("Previous subjects", self.prev_subj.more_recent(alert_ts))
         # Change to use alert ts
+        self.write("All subjects "+ str(self.prev_subj.store)+"\n")
+        self.write("Alert on:" + str(self.prev_subj.more_recent(alert_ts)) + "\n")
         for subject in self.prev_subj.more_recent(alert_ts): 
+        
             # if subject not in subj_sysc_map: 
             #     subj_sysc_map[subject] = dict()
             # else: 
@@ -61,10 +64,10 @@ class Service:
             cur_sysc_map[subject]["total"] = 0
             print(subject, "did not contain total")
 
-        if not self.prev_subj.contains(subject):
-            print("APPENDING ", subject, "to ",self.name, "\n")
-            self.prev_subj.add((time,subject))
-            print(self.prev_subj)
+        # if not self.prev_subj.contains(subject):
+            # print("APPENDING ", subject, "to ",self.name, "\n")
+        self.prev_subj.add((time,subject))
+            # print(self.prev_subj)
         
     def subject_trust(self,subject):
         if "trust" not in self.subj_sysc_map[subject]:

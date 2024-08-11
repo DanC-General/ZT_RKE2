@@ -34,7 +34,7 @@ func getSyscalls() string {
 	complete := ""
 	for cName, set := range mappedSyscalls {
 		i := 0
-		str := "\n    - list: " + cName + "-l\n      items: ["
+		str := "\n    - list: " + cName + "-l\n      items: [ kill, "
 		// fmt.Println(cName + ":")
 		for syscall := range set {
 			// fmt.Print(syscall + ", ")

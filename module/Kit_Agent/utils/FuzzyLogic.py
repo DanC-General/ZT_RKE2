@@ -21,11 +21,11 @@ class SRule:
 
         sub_malig['low'] = fuzz.trimf(sub_malig.universe, [0, 0.1, 0.4])
         sub_malig['moderate'] = fuzz.trimf(sub_malig.universe, [0.3, 0.5, 0.7])
-        sub_malig['high'] = fuzz.trimf(sub_malig.universe, [0.6, 1.0, 1.1])
+        sub_malig['high'] = fuzz.trimf(sub_malig.universe, [0.6, 1, 1])
 
         sysc_malig['unique'] = fuzz.trimf(sysc_malig.universe, [0, 0.1, 0.4])
         sysc_malig['common'] = fuzz.trimf(sysc_malig.universe, [0.3, 0.5, 0.7])
-        sysc_malig['ubiquitous'] = fuzz.trimf(sysc_malig.universe, [0.6, 1.0, 1.1])
+        sysc_malig['ubiquitous'] = fuzz.trimf(sysc_malig.universe, [0.6, 1.0, 1])
 
         # TODO change numberical values below 
         # Step 2: Define the fuzzy sets for output variable (cost benefit)
@@ -34,7 +34,7 @@ class SRule:
         # Membership functions for subject_trust
         subj_trust['low'] = fuzz.trimf(subj_trust.universe, [0, 0.2, 0.4])
         subj_trust['medium'] = fuzz.trimf(subj_trust.universe, [0.3, 0.5, 0.7])
-        subj_trust['high'] = fuzz.trimf(subj_trust.universe, [0.6, 1, 1])
+        subj_trust['high'] = fuzz.trimf(subj_trust.universe, [0.6, 0.8, 1])
 
 
         #### MAPPINGS OF FUZZY VARIABLES TO SUBJECT TRUSTS
@@ -75,7 +75,9 @@ class SRule:
         print(rules_list)
         print(rules)
 
-
+        likelihood.view()
+        sub_malig.view()
+        sysc_malig.view()
         # # Step 4: Implement the fuzzy inference system
 
         subj_trust_ctrl = ctrl.ControlSystem(rules) 
@@ -123,7 +125,7 @@ class RRule:
 
         subject_trust['low'] = fuzz.trimf(subject_trust.universe, [-0.01, 0.1, 0.4])
         subject_trust['moderate'] = fuzz.trimf(subject_trust.universe, [0.3, 0.5, 0.7])
-        subject_trust['high'] = fuzz.trimf(subject_trust.universe, [0.6, 1.0, 1.1])
+        subject_trust['high'] = fuzz.trimf(subject_trust.universe, [0.6, 0.8, 1.0])
 
         # TODO change numberical values below 
         # Step 2: Define the fuzzy sets for output variable (cost benefit)

@@ -15,7 +15,7 @@ from skfuzzy import control as ctrl
 class SRule:
     def __init__(self):
         # Step 1: Define the fuzzy sets for input variables (cost and benefit)
-        likelihood = ctrl.Antecedent(np.arange(0, 3, 0.5), 'likelihood')
+        likelihood = ctrl.Antecedent(np.arange(0, 2.5, 0.5), 'likelihood')
         # Past indication that subject is malicious 
         sub_malig = ctrl.Antecedent(np.arange(0, 1.1, 0.1), 'sub_malig')
         # Chance that current abnormal call is also malicious
@@ -42,22 +42,22 @@ class SRule:
         # likelihood['plausible'] = fuzz.trapmf(likelihood.universe, [0.8, 1.3, 1.8, 2.2])
         # likelihood['likely'] = fuzz.trapmf(likelihood.universe, [1.8, 2.3, 2.7,3.1])
 
-        sub_malig['low'] = fuzz.trapmf(sub_malig.universe, [0, 0, 0.3, 0.4])
-        sub_malig['moderate'] = fuzz.trapmf(sub_malig.universe, [0.3, 0.4,0.6, 0.7])
-        sub_malig['high'] = fuzz.trapmf(sub_malig.universe, [0.6,0.7,1, 1])
+        sub_malig['low'] = fuzz.trapmf(sub_malig.universe, [0, 0, 0.2, 0.4])
+        sub_malig['moderate'] = fuzz.trapmf(sub_malig.universe, [0.2, 0.4,0.6, 0.8])
+        sub_malig['high'] = fuzz.trapmf(sub_malig.universe, [0.6,0.8,1, 1])
 
-        sysc_malig['unique'] = fuzz.trapmf(sysc_malig.universe, [0, 0,0.3, 0.4])
-        sysc_malig['common'] = fuzz.trapmf(sysc_malig.universe, [0.3, 0.4,0.6, 0.7])
-        sysc_malig['ubiquitous'] = fuzz.trapmf(sysc_malig.universe, [0.6,0.7,1, 1])
+        sysc_malig['unique'] = fuzz.trapmf(sysc_malig.universe, [0, 0,0.2, 0.4])
+        sysc_malig['common'] = fuzz.trapmf(sysc_malig.universe, [0.2, 0.4,0.6, 0.8])
+        sysc_malig['ubiquitous'] = fuzz.trapmf(sysc_malig.universe, [0.6,0.8,1, 1])
 
         # TODO change numberical values below 
         # Step 2: Define the fuzzy sets for output variable (cost benefit)
         subj_trust = ctrl.Consequent(np.arange(0, 1.1, 0.1), 'subject_trust')
 
         # Membership functions for subject_trust
-        subj_trust['low'] = fuzz.trimf(subj_trust.universe, [0, 0.2, 0.4])
-        subj_trust['medium'] = fuzz.trimf(subj_trust.universe, [0.3, 0.5, 0.7])
-        subj_trust['high'] = fuzz.trimf(subj_trust.universe, [0.6, 0.8, 1])
+        subj_trust['low'] = fuzz.trapmf(subj_trust.universe, [0, 0, 0.2, 0.4])
+        subj_trust['medium'] = fuzz.trapmf(subj_trust.universe, [0.2,0.4,0.5, 0.7])
+        subj_trust['high'] = fuzz.trapmf(subj_trust.universe, [0.5,0.7, 0.8, 1])
 
 
         #### MAPPINGS OF FUZZY VARIABLES TO SUBJECT TRUSTS
@@ -105,6 +105,7 @@ class SRule:
         likelihood.view(fname="./like.png")
         sub_malig.view(fname="./subject.png")
         sysc_malig.view(fname="./sysc.png")
+        subj_trust.view(fname="./strust.png")
 
     # # Step 5: Test the fuzzy logic system with sample inputs
     # cost_benefit_sim.input['cost'] = 3  # low cost
@@ -134,30 +135,29 @@ class SRule:
 class RRule:
     def __init__(self):
         # Step 1: Define the fuzzy sets for input variables (cost and benefit)
-        object_trust = ctrl.Antecedent(np.arange(-0.1, 1.01, 0.01), 'o_trust')
-        subject_trust = ctrl.Antecedent(np.arange(-0.1, 1.1, 0.1), 's_trust')
+        object_trust = ctrl.Antecedent(np.arange(0, 1.01, 0.01), 'o_trust')
+        subject_trust = ctrl.Antecedent(np.arange(0, 1.1, 0.1), 's_trust')
         # print(np.arange(0, 1.01, 0.01))
         # Membership functions for cost and benefit
         # print(np.arange(0, 1, 0.1))
 
         # Clamp object trust rmse 
-        ## Seems to break if lower bounds are 0 to 1: need -0.01 and 1.1
-        object_trust['high'] = fuzz.trimf(object_trust.universe, [-0.01, 0.1, 0.2])
-        object_trust['moderate'] = fuzz.trimf(object_trust.universe, [0.1, 0.3, 0.5])
-        object_trust['low'] = fuzz.trimf(object_trust.universe, [0.4, 1, 1.1])
+        object_trust['high'] = fuzz.trapmf(object_trust.universe, [0,0, 0.1, 0.3])
+        object_trust['moderate'] = fuzz.trapmf(object_trust.universe, [0.1, 0.3,0.4, 0.5])
+        object_trust['low'] = fuzz.trapmf(object_trust.universe, [0.4,0.5, 1, 1])
 
-        subject_trust['low'] = fuzz.trimf(subject_trust.universe, [-0.01, 0.1, 0.4])
-        subject_trust['moderate'] = fuzz.trimf(subject_trust.universe, [0.3, 0.5, 0.7])
-        subject_trust['high'] = fuzz.trimf(subject_trust.universe, [0.6, 0.8, 1.0])
+        subject_trust['low'] = fuzz.trapmf(subject_trust.universe, [0, 0, 0.2, 0.4])
+        subject_trust['moderate'] = fuzz.trapmf(subject_trust.universe, [0.2,0.4,0.5, 0.7])
+        subject_trust['high'] = fuzz.trapmf(subject_trust.universe, [0.5,0.7, 1, 1])
 
         # TODO change numberical values below 
         # Step 2: Define the fuzzy sets for output variable (cost benefit)
         request_trust = ctrl.Consequent(np.arange(0, 11, 1), 'r_trust')
 
         # Membership functions for subject_trust
-        request_trust['low'] = fuzz.trimf(request_trust.universe, [0, 2, 4])
-        request_trust['medium'] = fuzz.trimf(request_trust.universe, [3, 5, 7])
-        request_trust['high'] = fuzz.trimf(request_trust.universe, [6, 10, 10])
+        request_trust['low'] = fuzz.trapmf(request_trust.universe, [0, 0, 2, 4])
+        request_trust['medium'] = fuzz.trapmf(request_trust.universe, [2, 3, 5, 7])
+        request_trust['high'] = fuzz.trapmf(request_trust.universe, [6, 8, 10, 10])
 
         #### MAPPINGS OF FUZZY VARIABLES TO SUBJECT TRUSTS
 
@@ -189,7 +189,9 @@ class RRule:
 
         # print(rules_list)
         # print(rules)
-
+        subject_trust.view('./s_trust.png')
+        object_trust.view('./o_trust.png')
+        request_trust.view('./r_trust.png')
 
         # # Step 4: Implement the fuzzy inference system
 
@@ -200,30 +202,28 @@ class RRule:
     # cost_benefit_sim.input['cost'] = 3  # low cost
     # cost_benefit_sim.input['benefit'] = 8  # high benefit
 
-    def simulate(self,o,s,log):
+    def simulate(self,o,s,log=None):
         self.req_trust_sim.input['o_trust'] = o
         self.req_trust_sim.input['s_trust'] = s 
         # print("Trying values ",o,s)
         self.req_trust_sim.compute()
-        log.write("Request trust is " + str(self.req_trust_sim.output['r_trust']) + " from object trust" + str(o)  + " and subject trust" + str(s)  + "\n" )
+        print(o,s,"--->",self.req_trust_sim.output['r_trust'])
+        if log is not None:
+            log.write("Request trust is " + str(self.req_trust_sim.output['r_trust']) + " from object trust" + str(o)  + " and subject trust" + str(s)  + "\n" )
         # print("Request trust is ", self.req_trust_sim.output['r_trust'], " from object trust", o , " and subject trust", s )
         return self.req_trust_sim.output['r_trust']
     
 # SRule().simulate(1,0.8,0.8)
 # RRule().simulate(0.0,5.1)
-# r = RRule()
-# for o in np.arange(0, 1.01, 0.01):
-#     for s in np.arange(0, 1.1, 0.1):
-#         try: 
-#             r.simulate(o,s)
-#             print(o,s,"succeeded.")
-#         except Exception:
-#             print(o,s,"failed.")
-sr = SRule()
-# sleep(5)
-# while True:
-#     continue
-for l in np.arange(0, 3, 1):
+r = RRule()
+for o in np.arange(0, 1.01, 0.01):
     for s in np.arange(0, 1.1, 0.1):
-        for y in np.arange(0, 1.1, 0.1):
-            sr.simulate(l,s,y)
+        r.simulate(o,s)
+# sr = SRule()
+# # sleep(5)
+# # while True:
+# #     continue
+# for l in np.arange(0, 3, 1):
+#     for s in np.arange(0, 1.1, 0.1):
+#         for y in np.arange(0, 1.1, 0.1):
+#             sr.simulate(l,s,y)

@@ -86,7 +86,7 @@ class PrioQ:
         # Update existing entries with new timestamps
         if ind is not None:
             if item[0] > self.store[ind][0]:
-                self.log.write("Changed " + str(self.store[ind]) + " to " + str(item) + "\n")
+                # self.log.write("Changed " + str(self.store[ind]) + " to " + str(item) + "\n")
                 self.store[ind] = item
         # If the entry doesn't exists and the list isn't full, add it
         elif not self.full():
@@ -97,7 +97,7 @@ class PrioQ:
         #       at the start of the sorted list)
         elif item[0] > self.store[0][0]:
             self.store[0] = item
-            self.log.write("Changed " + str(self.store[ind]) + " to " + str(item) + "\n")
+            # self.log.write("Changed " + str(self.store[ind]) + " to " + str(item) + "\n")
         self.store.sort()
         # print("Added", self.store)
     ## TODO Need to review this 

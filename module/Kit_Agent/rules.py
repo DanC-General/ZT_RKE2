@@ -84,9 +84,10 @@ def get_lines(pipe):
             orig_sip, orig_sport = pack.external_port(pod_cidr)
             get_connection(pack)
             # log.write(str(pack) + "\n")
-            log.write(str(pack.ts) + "\n")
+            # log.write(str(pack.ts) + "\n")
 
             cur_svc = (svc_dict[pack.svc])
+            cur_svc.count += 1
             cur_svc.log = log
 
             # Update stored statistics
@@ -118,7 +119,7 @@ def get_lines(pipe):
                 obj_trust = 1
 
             subj_trust = cur_svc.subject_trust(subject)
-            log.write(cur_svc.name + str(cur_svc.subj_sysc_map) + "\n")
+            # log.write(cur_svc.name + str(cur_svc.subj_sysc_map) + "\n")
             # Act on overall request trust
             # print(obj_trust,"vs",subj_trust)
             req_trust = Rfuzz.simulate(obj_trust,subj_trust,log)

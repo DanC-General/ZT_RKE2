@@ -14,6 +14,7 @@ class Service:
         self.name = name
         self.port = port
         self.log = None
+        self.count = 0
 
     def write(self,msg):
         if self.log is not None: 
@@ -29,13 +30,15 @@ class Service:
     def handle_alert(self,syscall,alert_ts): 
         # print("Recieved an alert!!")
         # print(item)
-        self.write(syscall +" " + str(alert_ts) + "\n")
+        # self.write(syscall +" " + str(alert_ts) + "\n")
+        self.write(str(self.count) + " benign packets.\n")
+        self.count = 0
         recency = 5
         i = 0
         print("Handling alert for", syscall)
         print("Previous subjects", self.prev_subj.more_recent(alert_ts))
         # Change to use alert ts
-        self.write("All subjects "+ str(self.prev_subj.store)+"\n")
+        # self.write("All subjects "+ str(self.prev_subj.store)+"\n")
         self.write("Alert on:" + str(self.prev_subj.more_recent(alert_ts)) + "\n")
         for subject in self.prev_subj.more_recent(alert_ts): 
         
@@ -53,7 +56,7 @@ class Service:
             recency -= 2
             self.subj_sysc_map[subject]["trust"] = self.make_trust(subject,syscall,i)
             i+=1
-        self.write(self.name + ":: " + str(self.subj_sysc_map) + "\n")
+        # self.write(self.name + ":: " + str(self.subj_sysc_map) + "\n")
 
     def add_recent(self,subject,time): 
         cur_sysc_map = self.subj_sysc_map

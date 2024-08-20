@@ -10,7 +10,7 @@ falcosidekick:
   enabled: true 
   config:
     rabbitmq:
-      url: amqp://ztrke2:ztrke2@10.1.1.243:5673
+      url: amqp://ztrke2:ztrke2@10.1.1.241:5673
       queue: "events"
 tty: true 
 

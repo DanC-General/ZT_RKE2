@@ -1,4 +1,5 @@
 import paramiko
+import random
 import uuid
 import os
 
@@ -34,13 +35,20 @@ class SSHClient:
     def exit(self):
         self.client.close()
 
+    def simulate_one_action(self, probs = [0.1, 0.4, 0.3, 0.2]): 
+        options = [self.write_file,self.read_file,self.edit_file,self.exec_cmd]
+        res = random.choices(options, weights=probs, k=10)
+        print(res)
+
+
 def main(): 
     if os.environ.get('IP') == None: 
         print("$IP not set. Set to the IP of the remote host and rerun.")
     client = SSHClient()
     # client.run_command("ls -al")
     # client.run_command("for i in {0..5}; do echo $i; done")
-    client.edit_file()
+    # client.edit_file()
+    client.simulate_one_action()
     
 
 

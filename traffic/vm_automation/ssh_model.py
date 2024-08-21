@@ -1,6 +1,7 @@
 import paramiko
 import random
 import uuid
+import time
 import os
 
 class SSHClient: 
@@ -37,8 +38,18 @@ class SSHClient:
 
     def simulate_one_action(self, probs = [0.1, 0.4, 0.3, 0.2]): 
         options = [self.write_file,self.read_file,self.edit_file,self.exec_cmd]
-        res = random.choices(options, weights=probs, k=10)
+        res = random.choices(options, weights=probs, k=1)
         print(res)
+
+    def simulate_x(self,num):
+        for i in range(num): 
+            self.simulate_one_action()
+
+    def simulate_for_x(self,nsecs):
+        start_time = time.time()
+        while (time.time() - start_time < nsecs):
+            continue
+        print(time.time() - start_time, "elapsed.")
 
 
 def main(): 
@@ -48,7 +59,7 @@ def main():
     # client.run_command("ls -al")
     # client.run_command("for i in {0..5}; do echo $i; done")
     # client.edit_file()
-    client.simulate_one_action()
+    client.simulate_for_x(5)
     
 
 

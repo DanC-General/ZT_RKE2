@@ -27,12 +27,14 @@ class Service:
                 total += self.subj_sysc_map[subject]["total"]
         return total
     
+    def reset_count(self): 
+        self.write(str(self.count) + " benign packets.\n")
+        self.count = 0
+
     def handle_alert(self,syscall,alert_ts): 
         # print("Recieved an alert!!")
         # print(item)
         # self.write(syscall +" " + str(alert_ts) + "\n")
-        self.write(str(self.count) + " benign packets.\n")
-        self.count = 0
         recency = 5
         i = 0
         print("Handling alert for", syscall)
@@ -80,6 +82,7 @@ class Service:
         return self.subj_sysc_map[subject]["trust"]
     
     def terminate(self,orig_sip,orig_sport,log):
+        self.reset_count()
         # log.write("ALERTED! Object: " + str(obj_trust) + ".Subject: " + str(subj_trust) + ".\n")
         if orig_sip not in self.terminated:
             self.terminated[orig_sip] = dict()

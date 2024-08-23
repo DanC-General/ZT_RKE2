@@ -67,12 +67,13 @@ def get_lines(pipe):
         while True: 
             # Read in data as bytes from pipe 
             #    - readline had encoding issues on other OSs
-            data = ""
-            while True: 
-                cur = f.read(1)
-                data += cur
-                if cur == '\n': 
-                    break 
+            # data = ""
+            # while True: 
+            #     cur = f.read(1)
+            #     data += cur
+            #     if cur == '\n': 
+            #         break 
+            data = f.readline()
             # Split the string into a list with the necessary 
             #   fields for class parsing.
             # log.write(data + "\n")

@@ -122,6 +122,7 @@ def get_lines(pipe):
             subj_trust = cur_svc.subject_trust(subject)
             # log.write(cur_svc.name + str(cur_svc.subj_sysc_map) + "\n")
             # Act on overall request trust
+            log.write(str(obj_trust) + ": " + str(pack) + "\n")
             # print(obj_trust,"vs",subj_trust)
             req_trust = Rfuzz.simulate(obj_trust,subj_trust,log)
             # log.write("Subject trust " + str(subj_trust) + ", Object trust " +
@@ -142,8 +143,8 @@ def make_svcs():
     # log.write(parsed)
     # KitNET params - initalisation from Kitsune:
     maxAE = 10 #maximum size for any autoencoder in the ensemble layer
-    FMgrace = 100 #the number of instances taken to learn the feature mapping (the ensemble's architecture)
-    ADgrace = 1000 #the number of instances used to train the anomaly detector (ensemble itself)
+    FMgrace = 5000 #the number of instances taken to learn the feature mapping (the ensemble's architecture)
+    ADgrace = 50000 #the number of instances used to train the anomaly detector (ensemble itself)
 
     for x in parsed: 
         arr = x.split(":")

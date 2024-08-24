@@ -1,4 +1,6 @@
 import os
+import statistics
+import numpy
 rd_cmds = ["cat","less","head","tail","man","file"]
 wr_cmds = ["cp","mv","unzip"," >",">>","tee","mkdir","touch"]
 ed_cmds = ["vim","sed", "tr","nano","awk","vi","rm","rmdir","chmod"]
@@ -7,6 +9,7 @@ srch_mv_cmds = ["cd", "ls","la","l","which", "whereis", "grep", "find","dirname"
 ["clear","ping google.com -c 1","ip a","ps", "ss", "jobs","apt update"]
 cur = [0,0,0,0,0]
 firsts = [0,0,0,0,0,0]
+sessions = []
 def check_list(text,lst):
     # if any(cmd in text for cmd in lst): 
     for cmd in lst:
@@ -32,6 +35,8 @@ def make_weights(path="/home/dc/History"):
                 full = os.path.join(root,file)
                 print(full)
                 with open(full, "r") as f: 
+                    sessions.append(0)
+                    sess = -1
                     for line in f: 
                         # print("Start: " ,line)
                         previous = cur.copy()
@@ -67,8 +72,10 @@ def make_weights(path="/home/dc/History"):
                         cur_counts[-1] +=1 
                         if "exit" in line: 
                             is_first = True
+                            sessions.append(0)
                         else: 
                             is_first = False
+                            sessions[-1] += 1
                 cur_counts[-2] = cur_counts[-1] - sum(cur_counts[0:4])
                 print(cur_counts)
                 total_counts = list(map(lambda c,n: c+n,cur_counts,total_counts))
@@ -84,6 +91,12 @@ def make_weights(path="/home/dc/History"):
     print("Overall distributions",calc_weights(total_counts[:-1]))
     print("Per category distributions",list(map(lambda x:calc_weights(x),per_category_counts)))
     print("First command distributions ", calc_weights(firsts[:-1]))
+    final_sessions = list(i for i in sessions if i != 0)
+    print(final_sessions)
+    print(statistics.mean(final_sessions))
+    print(statistics.stdev(final_sessions))
+    for i in range(10): 
+        print(abs(numpy.random.normal(loc=statistics.mean(final_sessions),scale=statistics.stdev(final_sessions))))
     return weights
 
 def calc_weights(arr): 

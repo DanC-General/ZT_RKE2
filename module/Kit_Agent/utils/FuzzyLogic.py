@@ -4,6 +4,7 @@ import numpy as np
 from time import sleep
 import skfuzzy as fuzz
 from skfuzzy import control as ctrl
+from datetime import datetime
 ##### 
 # CHANGE VIEW TO BELOW 
 # def view(self, fname,*args, **kwargs):
@@ -212,7 +213,8 @@ class RRule:
         # print(o,s,"--->",self.req_trust_sim.output['r_trust'])
         result = self.req_trust_sim.output['r_trust']
         if log is not None and result < 5:
-            log.write("Request trust is " + str(result) + " from object trust" + str(o)  + " and subject trust" + str(s)  + "\n" )
+            log.write("Request trust is " + str(self.req_trust_sim.output['r_trust']) + " from object trust" + str(o)  + " and subject trust" + str(s)  + " at " + datetime.now().strftime("%d/%m/%Y %H:%M:%S:%f")
+                +"\n" )        
         # print("Request trust is ", self.req_trust_sim.output['r_trust'], " from object trust", o , " and subject trust", s )
         return result
     

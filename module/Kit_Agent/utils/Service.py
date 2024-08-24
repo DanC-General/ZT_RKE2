@@ -87,7 +87,7 @@ class Service:
         if orig_sip not in self.terminated:
             self.terminated[orig_sip] = dict()
         if orig_sport not in self.terminated[orig_sip]: 
-            self.write("Terminated connection.")
+            self.write("Terminated connection.\n")
             # Dummy value for termination
             self.terminated[orig_sip][orig_sport] = 0
             terminate_connection(orig_sip,orig_sport)

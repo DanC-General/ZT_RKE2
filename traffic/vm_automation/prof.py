@@ -102,4 +102,4 @@ def make_weights(path="/home/dc/History"):
 def calc_weights(arr): 
     # total = sum(arr)
     return list(map(lambda x: x/sum(arr) * 100,arr))
-make_weights()
+# make_weights()

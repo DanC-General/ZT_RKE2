@@ -27,9 +27,9 @@ from OnlineFE import OnlineFE
 
 class Kitsune:
     # ADD FUNCTIONALITY - work online (without pcap file) if no path is provided 
-    def __init__(self,file_path,limit,max_autoencoder_size=10,FM_grace_period=None,AD_grace_period=10000,learning_rate=0.1,hidden_ratio=0.75,):
+    def __init__(self,file_path,limit,max_autoencoder_size=10,FM_grace_period=None,AD_grace_period=10000,learning_rate=0.1,hidden_ratio=0.75,online=True):
         #init packet feature extractor (AfterImage)
-        if file_path is None: 
+        if file_path is None and online: 
             #
             self.FE = OnlineFE()
             print("Running online.")
@@ -47,4 +47,3 @@ class Kitsune:
 
         # process KitNET
         return self.AnomDetector.process(x)  # will train during the grace periods, then execute on all the rest.
-

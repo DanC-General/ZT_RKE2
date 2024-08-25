@@ -147,7 +147,7 @@ class FE:
                 elif srcIP + srcproto + dstIP + dstproto == '':  # some other protocol
                     srcIP = row[2]  # src MAC
                     dstIP = row[3]  # dst MAC
-
+            print("||",timestamp,srcIP,srcMAC,dstIP,dstMAC,srcproto,dstproto)
         elif self.parse_type == "scapy":
             packet = self.scapyin[self.curPacketIndx]
             IPtype = np.nan

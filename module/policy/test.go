@@ -40,7 +40,7 @@ func capture_syscalls() {
 		// Handle error
 		fmt.Println("Error :(")
 	}
-	timeOut := int64(600)
+	timeOut := int64(1200)
 	watchInterface, _ := clientset.CoreV1().Pods("default").Watch(context.Background(), mv1.ListOptions{TimeoutSeconds: &timeOut})
 
 	// Handle watch events in a loop
@@ -147,7 +147,7 @@ func end_capture(pName string, capID string) {
 		}
 	}
 	fmt.Println("Killing ", pName, " -> ", capID)
-	fname := DIR + cName + "/" + pName + "_extended.txt"
+	fname := DIR + cName + "/" + pName + "_alsoextended.txt"
 	if _, err := os.Stat(DIR + cName); os.IsNotExist(err) {
 		// Create the directory with permissions 0755
 		err = os.MkdirAll(DIR+cName, 0755)

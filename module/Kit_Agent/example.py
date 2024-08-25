@@ -15,14 +15,14 @@ import time
 
 # Load Mirai pcap (a recording of the Mirai botnet malware being activated)
 # The first 70,000 observations are clean...
-print("Unzipping Sample Capture...")
-import zipfile
-with zipfile.ZipFile("mirai.zip","r") as zip_ref:
-    zip_ref.extractall()
+# print("Unzipping Sample Capture...")
+# import zipfile
+# with zipfile.ZipFile("mirai.zip","r") as zip_ref:
+#     zip_ref.extractall()
 
 
 # File location
-path = "mirai.pcap" #the pcap, pcapng, or tsv file to process.
+path = "../../full_both.pcap" #the pcap, pcapng, or tsv file to process.
 packet_limit = np.inf #the number of packets to process
 
 # KitNET params:
@@ -31,7 +31,7 @@ FMgrace = 5000 #the number of instances taken to learn the feature mapping (the 
 ADgrace = 50000 #the number of instances used to train the anomaly detector (ensemble itself)
 
 # Build Kitsune
-K = Kitsune(path,packet_limit,maxAE,FMgrace,ADgrace)
+K = Kitsune(path,packet_limit,maxAE,FMgrace,ADgrace,online=False)
 
 print("Running Kitsune:")
 RMSEs = []
@@ -43,12 +43,15 @@ while True:
     i+=1
     if i % 1000 == 0:
         print(i)
-    elif i >= 100000:
-        print("Cancelling")
-        break
+    # elif i >= 100000:
+    #     print("Cancelling")
+    #     break
     rmse = K.proc_next_packet()
+    # print(rmse)
     if rmse == -1:
         break
+    # elif rmse >= 0.4: 
+    #     print("Error noticed ")
     RMSEs.append(rmse)
 stop = time.time()
 print("Complete. Time elapsed: "+ str(stop - start))

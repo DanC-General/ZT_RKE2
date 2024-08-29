@@ -129,8 +129,8 @@ def get_lines(pipe):
                 obj_trust = 1
             subj_trust = cur_svc.subject_trust(subject)
             # Pass if the model is still training
-            # if obj_trust == 0.0: 
-            #     continue
+            if obj_trust == 0.0: 
+                continue
             # log.write(cur_svc.name + str(cur_svc.subj_sysc_map) + "\n")
             # Act on overall request trust
             log.write(str(obj_trust) + ": " + str(pack) + "\n")

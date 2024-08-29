@@ -109,7 +109,7 @@ class PrioQ:
             delta = ts - i[0]
             # print(delta)
             # print("    ||",ts, "<->",i, " =",delta)
-            self.log.write("    || "+str(ts) + " <-> " + str(i) + " = "+str(delta) + "\n")
+            # self.log.write("    || "+str(ts) + " <-> " + str(i) + " = "+str(delta) + "\n")
             # Might need to check above 0 
             if delta <= 5: 
                 self.log.write("       added\n")

@@ -201,7 +201,7 @@ class SSHClient:
     def run_internal(self,f):
         # Add logic - could run symlink
         f.write("Ran malicious Symlink Attack at " +  datetime.now().strftime("%d/%m/%Y %H:%M:%S:%f") + "\n")
-        _,out,e = self.run_command("ln -s " + self.make_random_fname() + " " + self.get_random())
+        _,out,e = self.run_command("ln -s " + self.get_random() + " " + self.make_random_fname())
         print(out, e)
 
 
@@ -218,15 +218,12 @@ class SSHClient:
                 self.run_cve(f)
             elif atk_type == "s": 
                 self.run_internal(f)
-            else: 
-                if random.random() < 0.5: 
-                    self.run_flood(f)
-                else: 
-                    self.run_bruteforce(f)
 
     def add_malicious(self):
         if random.random() < 0.2: 
-            self.run_malicious()
+            chosen_atk = random.choice(["f","b","c","s"])
+            # print("Chose",chosen_atk)
+            self.run_malicious(atk_type=chosen_atk)
         else: 
             self.simulate_session()
         # time.sleep(random.randint(60,90))
@@ -238,16 +235,9 @@ def main():
         print("$IP not set. Set to the IP of the remote host and rerun.")
     client = SSHClient()
     for i in range(10): 
+        # client.add_malicious()
         client.simulate_session()
-    # client.simulate_session()
-    # client.simulate_session()
 
-    # client.simulate_session()
-
-    # client.simulate_session()
-
-    # client.simulate_session()
-    # if "y" in input("Proceed to malicious testing?"):
     while True: 
         client.add_malicious()
 

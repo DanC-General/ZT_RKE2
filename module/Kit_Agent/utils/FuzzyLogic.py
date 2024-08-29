@@ -214,7 +214,7 @@ class RRule:
         result = self.req_trust_sim.output['r_trust']
         if log is not None and result < 5:
             log.write("Request trust is " + str(self.req_trust_sim.output['r_trust']) + " from object trust" + str(o)  + " and subject trust" + str(s)  + " at " + datetime.now().strftime("%d/%m/%Y %H:%M:%S:%f")
-                +"\n" )        
+                +"\n" )         
         # print("Request trust is ", self.req_trust_sim.output['r_trust'], " from object trust", o , " and subject trust", s )
         return result
     

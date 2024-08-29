@@ -24,8 +24,8 @@ services:
     # depends_on:
     #   - db
     restart: always
-    networks:
-      - test_net
+    # networks:
+    #   - test_net
 
   sql: 
     image: mysql:8.4 
@@ -41,16 +41,16 @@ services:
     # ports:
     #   - "8000:33060"
     #   - "3306:3306"
-    networks:
-      - test_net
+    # networks:
+    #   - test_net
   ssh:
     build:
       context: ./ssh
       dockerfile: ./Dockerfile  
     # ports:
     #   - "8003:22"
-    networks:
-      - test_net
+    # networks:
+    #   - test_net
 
 volumes: 
   sql_vol:

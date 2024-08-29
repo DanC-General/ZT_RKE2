@@ -48,7 +48,7 @@ class SSHClient:
     def run_command(self, cmd):
         _stdin, _stdout,_stderr = self.client.exec_command(cmd)
         out = _stdout.read().decode()
-        return _stdin, out, _stderr
+        return _stdin, out, _stderr.read().decode()
 
     def get_next(self,state):
         return random.choices(self.options, weights=transition_matrix[state],k=1)[0]
@@ -169,6 +169,7 @@ class SSHClient:
         except Exception as e: 
             print("Failed e")
             client.close()
+
     def run_flood(self,f): 
         f.write("Ran malicious DoS at " +  datetime.now().strftime("%d/%m/%Y %H:%M:%S:%f") + "\n")
         pswd = os.environ["spass"] 
@@ -191,6 +192,19 @@ class SSHClient:
         self.client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
         self.client.connect(self.host, username=self.username, password=self.password, port=30002)
 
+    def run_cve(self,f): 
+        # Add logic
+        f.write("Ran malicious Dirty COW at " +  datetime.now().strftime("%d/%m/%Y %H:%M:%S:%f") + "\n")
+        _,out,e = self.run_command("timeout 1 /var/run/sshd/exploits/dirty /var/run/sshd/exploits/foo m00000000000000000")
+        print(out, e)
+
+    def run_internal(self,f):
+        # Add logic - could run symlink
+        f.write("Ran malicious Symlink Attack at " +  datetime.now().strftime("%d/%m/%Y %H:%M:%S:%f") + "\n")
+        _,out,e = self.run_command("ln -s " + self.make_random_fname() + " " + self.get_random())
+        print(out, e)
+
+
     def run_malicious(self,atk_type = ''): 
         file = 'malicious.log'
         if os.environ.get('outfile'): 
@@ -200,6 +214,10 @@ class SSHClient:
                 self.run_flood(f)
             elif atk_type == "b":
                 self.run_bruteforce(f)
+            elif atk_type == "c": 
+                self.run_cve(f)
+            elif atk_type == "s": 
+                self.run_internal(f)
             else: 
                 if random.random() < 0.5: 
                     self.run_flood(f)

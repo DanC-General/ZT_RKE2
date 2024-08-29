@@ -111,7 +111,7 @@ def get_lines(pipe):
             cur_svc.add_recent(subject,pack.ts)
             c = count_q.get()
             count_q.put(c + 1)
-            continue
+            # continue
             # Extract message from queue if one exists
             #   - otherwise pass.
             while not msg_q.empty():
@@ -129,8 +129,8 @@ def get_lines(pipe):
                 obj_trust = 1
             subj_trust = cur_svc.subject_trust(subject)
             # Pass if the model is still training
-            if obj_trust == 0.0: 
-                continue
+            # if obj_trust == 0.0: 
+            #     continue
             # log.write(cur_svc.name + str(cur_svc.subj_sysc_map) + "\n")
             # Act on overall request trust
             log.write(str(obj_trust) + ": " + str(pack) + "\n")
@@ -203,7 +203,7 @@ def adjust_trust():
 
 def count_packs():
     global count_q
-    print("Running count Thread")
+    # print("Running count Thread")
     if count_q.empty():
         print("No packets in the last minute since",datetime.datetime.now().time())
     else: 
@@ -221,7 +221,7 @@ def repeat():
     s.enter(3600,1,repeat)
 
 def run_sched():
-    repeat_count()
+    # repeat_count()
     repeat()
     s.run()
 

@@ -8,6 +8,7 @@ from utils.FuzzyLogic import RRule
 import queue
 import sys
 import sched
+import datetime
 from time import sleep, time
 import json
 sys.path.append("../syscall-monitor")
@@ -57,13 +58,18 @@ def get_connection(pack):
     #     pass
     return parse_conntrack(output,pack)
 
+count_q = queue.Queue()
+
 def get_lines(pipe): 
     global svc_dict
+    global count_q
     # Check packet counts 
     with open(pipe, 'r') as f: 
         print("looping")
         log = open("../logs/py.log",'w')
-        count = 0
+        # count = 0
+        count_q.put(0)
+        st = time()
         while True: 
             # Read in data as bytes from pipe 
             #    - readline had encoding issues on other OSs
@@ -74,6 +80,7 @@ def get_lines(pipe):
             #     if cur == '\n': 
             #         break 
             data = f.readline()
+            # print("read")
             # Split the string into a list with the necessary 
             #   fields for class parsing.
             # log.write(data + "\n")
@@ -102,7 +109,9 @@ def get_lines(pipe):
             # Add subject to list of recent for tagging
             subject = pack.external_port(pod_cidr)[0]
             cur_svc.add_recent(subject,pack.ts)
-
+            c = count_q.get()
+            count_q.put(c + 1)
+            continue
             # Extract message from queue if one exists
             #   - otherwise pass.
             while not msg_q.empty():
@@ -181,7 +190,7 @@ def retrieve():
     temp.connection.close()
 
 def adjust_trust(): 
-    # global subj_sysc_map
+    global subj_sysc_map
     global svc_dict
     for svc in svc_dict:
         sysc_map = (svc_dict[svc]).subj_sysc_map
@@ -192,12 +201,27 @@ def adjust_trust():
 
     print("Increased trusts at ", time())
 
+def count_packs():
+    global count_q
+    print("Running count Thread")
+    if count_q.empty():
+        print("No packets in the last minute since",datetime.datetime.now().time())
+    else: 
+        c = count_q.get()
+        print(c,"packets in the last minute since",datetime.datetime.now().time())
+        count_q.put(0)
+
+def repeat_count(): 
+    s.enter(5,1,count_packs)
+    s.enter(5,1,repeat_count)
+
 def repeat(): 
     # TODO Update for hour
     s.enter(3600,1,adjust_trust)
     s.enter(3600,1,repeat)
 
 def run_sched():
+    repeat_count()
     repeat()
     s.run()
 
@@ -223,11 +247,11 @@ if __name__ == "__main__":
     # FMgrace = 100 #the number of instances taken to learn the feature mapping (the ensemble's architecture)
     # ADgrace = 1000 #the number of instances used to train the anomaly detector (ensemble itself)
     # threading.Thread(target=retrieve).start()
-    # tst= Service(maxAE,FMgrace,ADgrace,"test","123")
     # while True:
     #     if not msg_q.empty():
     #         a = msg_q.get()
     #         print("recv alert",a,"at",time())
+    # tst= Service(maxAE,FMgrace,ADgrace,"test","123")
 
     # t1 = tst.prev_subj
     # t1.more_recent(10.4)

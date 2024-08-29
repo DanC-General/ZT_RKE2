@@ -156,6 +156,7 @@ char* wait_for_service(char* svc){
 void on_packet(u_char *user,const struct pcap_pkthdr* head,const u_char*
         content)
 {
+    // printf("Running");
     struct pack_inputs* input = (struct pack_inputs*) user; 
     // printf("Struct addresses: %p || %p || %p -> %d\n",&input->svc,input->cap_store,&input->num,*(input->num));
     struct ether_header* eth_h = (struct ether_header*) content; 

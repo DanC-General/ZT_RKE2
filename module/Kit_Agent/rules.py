@@ -20,7 +20,6 @@ Rfuzz = RRule()
 svc_dict = dict()
 pod_cidr = ""
 
-
 def parse_conntrack(conn_str,packet):
 # tcp      6 82684 ESTABLISHED src=192.168.122.10 dst=10.43.238.254 sport=51682 dport=8003 src=10.42.0.62 dst=10.1.1.243 sport=22 dport=59424 [ASSURED] mark=0 use=1
     # print("SEARCHING FOR ", conn_str)
@@ -63,10 +62,12 @@ count_q = queue.Queue()
 def get_lines(pipe): 
     global svc_dict
     global count_q
+    total_count = 0 
     # Check packet counts 
     with open(pipe, 'r') as f: 
         print("looping")
         log = open("../logs/py.log",'w')
+        log.write(str(datetime.datetime.now().strftime("%d/%m/%Y %H:%M:%S:%f"))+"\n")
         # count = 0
         count_q.put(0)
         st = time()
@@ -96,9 +97,12 @@ def get_lines(pipe):
 
             cur_svc = (svc_dict[pack.svc])
             cur_svc.count += 1
-            if cur_svc.count % 1000 == 0:
+            total_count += 1
+            # print(total_count)
+            if total_count % 1000 == 0:
                 log.write(str(cur_svc.count) + " packets processed.\n")
                 log.write(cur_svc.name + ":: " + str(cur_svc.subj_sysc_map) + "\n")
+                log.flush()
             cur_svc.log = log
 
             # Update stored statistics
@@ -159,7 +163,8 @@ def make_svcs():
     # KitNET params - initalisation from Kitsune:
     maxAE = 10 #maximum size for any autoencoder in the ensemble layer
     FMgrace = 5000 #the number of instances taken to learn the feature mapping (the ensemble's architecture)
-    ADgrace = 50000 #the number of instances used to train the anomaly detector (ensemble itself)
+    ADgrace = 10000
+    # ADgrace = 50000 #the number of instances used to train the anomaly detector (ensemble itself)
 
     for x in parsed: 
         arr = x.split(":")

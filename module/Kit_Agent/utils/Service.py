@@ -113,6 +113,6 @@ class Service:
 def terminate_connection(ip,port):
     # Could change this script to only search the namespaces of the relevant services.
     print("Terminating connection on " , ip , " <-> " , port)
-    subprocess.run(["../scripts/terminate.sh"]+[ip,port])
+    # subprocess.run(["../scripts/terminate.sh"]+[ip,port])
 
 

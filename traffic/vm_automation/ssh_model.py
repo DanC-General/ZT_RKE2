@@ -188,9 +188,6 @@ class SSHClient:
         print("No more threads")
         for thread in trs: 
             thread.join()
-        self.client = paramiko.client.SSHClient()
-        self.client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-        self.client.connect(self.host, username=self.username, password=self.password, port=30002)
 
     def run_cve(self,f): 
         # Add logic
@@ -220,13 +217,19 @@ class SSHClient:
                 self.run_internal(f)
 
     def add_malicious(self):
-        if random.random() < 0.2: 
-            chosen_atk = random.choice(["f","b","c","s"])
-            # print("Chose",chosen_atk)
-            self.run_malicious(atk_type=chosen_atk)
-        else: 
-            self.simulate_session()
-        # time.sleep(random.randint(60,90))
+        try:
+            if random.random() < 0.7: 
+                chosen_atk = random.choice(["f","b","c","s"])
+                print("Chose",chosen_atk)
+                self.client = paramiko.client.SSHClient()
+                self.client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+                self.client.connect(self.host, username=self.username, password=self.password, port=30002)
+                self.run_malicious(atk_type=chosen_atk)
+            else: 
+                self.simulate_session()
+        except Exception as e: 
+            print("Something went wrong in malicious:", e)
+        time.sleep(random.randint(60,90))
 
 
 
@@ -234,7 +237,7 @@ def main():
     if os.environ.get('IP') == None or os.environ.get('spass') == None: 
         print("$IP not set. Set to the IP of the remote host and rerun.")
     client = SSHClient()
-    for i in range(10): 
+    for i in range(3): 
         # client.add_malicious()
         client.simulate_session()
 

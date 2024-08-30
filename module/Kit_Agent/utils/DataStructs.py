@@ -112,7 +112,7 @@ class PrioQ:
             # self.log.write("    || "+str(ts) + " <-> " + str(i) + " = "+str(delta) + "\n")
             # Might need to check above 0 
             if delta <= 5: 
-                self.log.write("       added\n")
+                # self.log.write("       added\n")
                 # print("     added")
                 # print("    -->",i[1], " has relevant delta",delta,": added!")
                 rec.append(i[1])

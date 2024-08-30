@@ -119,8 +119,8 @@ class dA:
             x = (x - self.norm_min) / (self.norm_max - self.norm_min + 0.0000000000000001)
             z = self.reconstruct(x)
             rmse = numpy.sqrt(((x - z) ** 2).mean()) #MSE
-            if rmse >= 0.4: 
-                print("Abnormal packet",rmse,"at",x)
+            # if rmse >= 0.4: 
+            #     print("Abnormal packet",rmse,"at",x)
             return rmse
 
 

@@ -96,6 +96,9 @@ def get_lines(pipe):
 
             cur_svc = (svc_dict[pack.svc])
             cur_svc.count += 1
+            if cur_svc.count % 1000 == 0:
+                log.write(str(cur_svc.count) + " packets processed.\n")
+                log.write(cur_svc.name + ":: " + str(cur_svc.subj_sysc_map) + "\n")
             cur_svc.log = log
 
             # Update stored statistics
@@ -120,8 +123,9 @@ def get_lines(pipe):
                 # print(item)
                 cur_call = item[0]
                 alert_time = item[1]
+                rel_svc = svc_dict[item[2]]
                 # New subject trusts are made for the relevant subjects here
-                cur_svc.handle_alert(cur_call,alert_time)
+                rel_svc.handle_alert(cur_call,alert_time)
             # Evaluate system trust
             obj_trust = rmse
             # Clamp RMSE for fuzzy logic input
@@ -175,8 +179,10 @@ def on_recv(channel,method,properties,body):
         if (fields["output_fields"]["container.name"] in fields["rule"]): 
             # Don't need nanosecond precision
             # time_s = str(int(float(fields["output_fields"]["evt.time"]) / 1000000000))
-            msg_q.put([fields["output_fields"]["syscall.type"],fields["output_fields"]["evt.rawtime.s"]])
+
+            msg_q.put([fields["output_fields"]["syscall.type"],fields["output_fields"]["evt.rawtime.s"],fields["output_fields"]["container.name"]])
     except KeyError: 
+        print("Error", fields)
         return 
     
 def retrieve(): 
@@ -246,11 +252,11 @@ if __name__ == "__main__":
     # maxAE = 10 #maximum size for any autoencoder in the ensemble layer
     # FMgrace = 100 #the number of instances taken to learn the feature mapping (the ensemble's architecture)
     # ADgrace = 1000 #the number of instances used to train the anomaly detector (ensemble itself)
-    # threading.Thread(target=retrieve).start()
-    # while True:
-    #     if not msg_q.empty():
-    #         a = msg_q.get()
-    #         print("recv alert",a,"at",time())
+    threading.Thread(target=retrieve).start()
+    while True:
+        if not msg_q.empty():
+            a = msg_q.get()
+            print("recv alert",a,"at",time())
     # tst= Service(maxAE,FMgrace,ADgrace,"test","123")
 
     # t1 = tst.prev_subj

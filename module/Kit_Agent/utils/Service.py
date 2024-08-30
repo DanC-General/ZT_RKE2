@@ -78,7 +78,7 @@ class Service:
         if "trust" not in self.subj_sysc_map[subject]:
             self.subj_sysc_map[subject]["trust"] = 1
         # smap[subject]["trust"] = subj_trust
-        self.log.write(self.name + ":: " + str(self.subj_sysc_map) + "\n")
+        # self.log.write(self.name + ":: " + str(self.subj_sysc_map) + "\n")
         return self.subj_sysc_map[subject]["trust"]
     
     def terminate(self,orig_sip,orig_sport,log):

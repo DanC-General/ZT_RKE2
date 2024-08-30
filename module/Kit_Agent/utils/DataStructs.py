@@ -102,7 +102,7 @@ class PrioQ:
         # print("Added", self.store)
     ## TODO Need to review this 
     def more_recent(self,ts):
-        print("CHECKING",ts)
+        # print("CHECKING",ts)
         rec = list()
         ts = float(ts)
         for i in self.store: 

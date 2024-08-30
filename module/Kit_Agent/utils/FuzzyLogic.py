@@ -123,8 +123,7 @@ class SRule:
             # print(l,s,y,"succeeded.")
             print(l,s,y,"-->",self.subj_trust_sim.output['subject_trust'])
             if log is not None: 
-                log.write("Likelihood "+ str(l) + " sub malig "+ str(s) 
-                        + "sysc malig "+ str(y) + "--->\n\t "+ str(self.subj_trust_sim.output) + "\n" )
+                log.write("Likelihood "+ str(l) + " sub malig "+ str(s) + "sysc malig "+ str(y) + "--->\n\t "+ str(self.subj_trust_sim.output) + "\n" )
             return self.subj_trust_sim.output['subject_trust']
         except Exception:
             print(l,s,y,"failed.")

@@ -237,7 +237,7 @@ def main():
     if os.environ.get('IP') == None or os.environ.get('spass') == None: 
         print("$IP not set. Set to the IP of the remote host and rerun.")
     client = SSHClient()
-    for i in range(3): 
+    for i in range(5): 
         # client.add_malicious()
         client.simulate_session()
 

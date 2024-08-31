@@ -147,10 +147,9 @@ def get_lines(pipe):
             # log.write("Subject trust " + str(subj_trust) + ", Object trust " +
             #           str(obj_trust) + "--> ReqTrust " + str(req_trust) + "\n")
             if req_trust < 5: 
-                log.write(" " + str(pack.sip) + " " + str(pack.dip) + "\n")
+                log.write(" " + str(pack.sip) + " " + str(pack.dip) + cur_svc.name + ":: " + str(cur_svc.subj_sysc_map) + str(obj_trust) + ": " + str(pack) + "\n")
                 cur_svc.terminate(orig_sip,orig_sport,log)
             log.flush()
-
         log.close()
 def make_svcs(): 
     global svc_dict

@@ -22,13 +22,13 @@ import time
 
 
 # File location
-path = "../../full_both.pcap" #the pcap, pcapng, or tsv file to process.
+path = "../../performance/8_30_segfault.pcap" #the pcap, pcapng, or tsv file to process.
 packet_limit = np.inf #the number of packets to process
 
 # KitNET params:
 maxAE = 10 #maximum size for any autoencoder in the ensemble layer
 FMgrace = 5000 #the number of instances taken to learn the feature mapping (the ensemble's architecture)
-ADgrace = 50000 #the number of instances used to train the anomaly detector (ensemble itself)
+ADgrace = 15000 #the number of instances used to train the anomaly detector (ensemble itself)
 
 # Build Kitsune
 K = Kitsune(path,packet_limit,maxAE,FMgrace,ADgrace,online=False)

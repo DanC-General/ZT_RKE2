@@ -122,8 +122,8 @@ class SRule:
             self.subj_trust_sim.compute()
             # print(l,s,y,"succeeded.")
             print(l,s,y,"-->",self.subj_trust_sim.output['subject_trust'])
-            if log is not None: 
-                log.write("Likelihood "+ str(l) + " sub malig "+ str(s) + "sysc malig "+ str(y) + "--->\n\t "+ str(self.subj_trust_sim.output) + "\n" )
+            # if log is not None: 
+            #     log.write("Likelihood "+ str(l) + " sub malig "+ str(s) + "sysc malig "+ str(y) + "--->\n\t "+ str(self.subj_trust_sim.output) + "\n" )
             return self.subj_trust_sim.output['subject_trust']
         except Exception:
             print(l,s,y,"failed.")
@@ -211,9 +211,9 @@ class RRule:
         self.req_trust_sim.compute()
         # print(o,s,"--->",self.req_trust_sim.output['r_trust'])
         result = self.req_trust_sim.output['r_trust']
-        if log is not None and result < 7:
-            log.write("Request trust is " + str(self.req_trust_sim.output['r_trust']) + " from object trust" + str(o)  + " and subject trust" + str(s)  + " at " + datetime.now().strftime("%d/%m/%Y %H:%M:%S:%f")
-                +"\n" )         
+        if log is not None and result < 5:
+            log.write("Request trust is " + str(self.req_trust_sim.output['r_trust']) + " from object trust" + str(o)  + " and subject trust" + str(s)  + " at " + datetime.now().strftime("%d/%m/%Y %H:%M:%S:%f"))
+                # +"\n" )         
         # print("Request trust is ", self.req_trust_sim.output['r_trust'], " from object trust", o , " and subject trust", s )
         return result
     

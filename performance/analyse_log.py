@@ -1,5 +1,7 @@
 from argparse import ArgumentParser
+import matplotlib.pyplot as plt
 import datetime
+import numpy as np
 import re
 def timestr_to_obj(timestr):
     return datetime.datetime.strptime(timestr.strip(),"%d/%m/%Y %H:%M:%S:%f").timestamp()
@@ -48,7 +50,7 @@ class Attacks:
         
 
 class Request: 
-    def __init__(self,r_t,o_t,s_t,benign,alert_ts,timestr,sip,dip,pack,term=False): 
+    def __init__(self,r_t,o_t,s_t,benign,alert_ts,timestr,sstr,pack,term=False): 
         self.r_trust = r_t 
         self.s_trust = s_t 
         self.o_trust = o_t
@@ -59,6 +61,7 @@ class Request:
         self.terminated = term
         self.last_pack = pack
         self.hosts = set(pack[-2:])
+        self.sysc_str = sstr
     def __str__(self):
         ret = ""
         for k in vars(self): 
@@ -99,6 +102,7 @@ class Analyser:
             # details = line.split(" ")
             ## Parse request into request, syscalls and packet
             no_sysc = re.sub(r"[a-zA-Z]+:: {.*}",' ',line)
+            sstr = re.search(r"[a-zA-Z]+:: {.*}",line).group()
             # print("NS",no_sysc)
             one = no_sysc.split("svc->")
             # for i,e in enumerate(one): 
@@ -134,9 +138,9 @@ class Analyser:
             self.last_details = [rmse,name,sip,dip]
             if (third.startswith("Terminated")):
                 # print("REQUEST TERMINATED",line)
-                self.add_request(Request(req_t,o_t,s_t,ben_c,datestr,pack_ts,sip,dip,self.last_details,True))
-            else: 
-                self.add_request(Request(req_t,o_t,s_t,ben_c,datestr,pack_ts,sip,dip,self.last_details))
+                self.add_request(Request(req_t,o_t,s_t,ben_c,datestr,pack_ts,sstr,self.last_details,True))
+            else:
+                self.add_request(Request(req_t,o_t,s_t,ben_c,datestr,pack_ts,sstr,self.last_details))
                 self.analyse_line(third,f)
         elif re.match(r"\d+ packets processed.",line):
             # print("GENERAL PACKET COUNTS", line)
@@ -207,6 +211,7 @@ def main():
         count = 0
         host_map = { "VM1":"10.1.2.5","VM2":"10.1.2.10","LOCAL":"127.0.0.1"}
         values = {"total":0,"within_90s":0,"correct_host":0}
+        all_groups = list()
         for r in results.req_q:
             # print("((",r,end=")),  ")
             # group_count += 1
@@ -224,18 +229,21 @@ def main():
                 found = True
                 groups[host_str][0] += 1
                 if r.ts - groups[host_str][2] > 60:
-                    groups[host_str][1] = to_date(groups[host_str][1])
-                    groups[host_str][2] = to_date(groups[host_str][2])
-                    if len(groups[host_str]) > 3:
+                    # print(groups[host_str])
+                    # groups[host_str][1] = to_date(groups[host_str][1])
+                    # groups[host_str][2] = to_date(groups[host_str][2])
+                    if len(groups[host_str]) > 4:
                         # try:
                         #     print(type(groups[host_str][-1]),groups[host_str][-1])
                         #     groups[host_str][-1] = groups[host_str][-1].time()
                         # # .date()
                         # except: 
                         #     print("In loop" ,groups[host_str][-1])
-                        groups[host_str][-1] = to_date(groups[host_str][-1])
-
+                        groups[host_str][6] = to_date(groups[host_str][6])
+                    # groups[host_str].append(r.sysc_str)
+                    # if "10.1.2.5" in host_str: 
                     print(host_str,"Group ended:",groups[host_str])
+                    all_groups.append(groups[host_str].copy())
                     values["total"] += 1
                     if len(groups[host_str]) > 3 and groups[host_str][3] < 90:
                         print("Alert within 90s of attack:",r.o_trust,"x",r.s_trust,"-->",r.r_trust)
@@ -246,17 +254,72 @@ def main():
                     # print("NEW ATTACK GROUP",datetime.datetime.fromtimestamp(r.ts),r.hosts,r.o_trust,r.s_trust,near[0],near[1])
                     near = results.attacks.get_closest_atk(r.ts)
                     groups[host_str] = [0,r.ts,r.ts,near[0],near[1].name,near[1].host,near[1].ts]                         
+                    # groups[host_str] = [0,r.ts,r.ts,near[0],near[1].name,near[1].host,near[1].ts,r.sysc_str]                        
                 else: 
                     groups[host_str][2] = r.ts 
             if not found:
                 near = results.attacks.get_closest_atk(r.ts)
                 groups[host_str] = [0,r.ts,r.ts,near[0],near[1].name,near[1].host,near[1].ts]                         
-        print(values)
+                # groups[host_str] = [0,r.ts,r.ts,near[0],near[1].name,near[1].host,near[1].ts,r.sysc_str]                         
             # if r.ts - last_ts > 3: 
             #     print("NEW ATTACK GROUP",datetime.datetime.fromtimestamp(r.ts),r.hosts,r.o_trust,r.s_trust,near[0],near[1])
             # print("DIFF",r.ts - last_ts)
             # print("CLOSEST ATTACKS TO",r.ts,"==",near[0],near[1])
+        print(values)
+        print("ALL GROUPS:",all_groups)
+        atk_ranges = list()
+        for grp in all_groups:
+            # print(grp)
+            start = grp[1] - results.start_time
+            end = grp[2] -  results.start_time
+            atk_ranges.append((int(start),int(end)))
+            # print(start,end)
 
+        # from 22:15 to 23:05 
+        # Create the line plot
+        values = range(0, 3600)
+        # target_ranges = [(5, 7), (34, 36)]
+        ground_truths = dict()
+        for atk in results.attacks.all: 
+            # print(int(atk.ts - results.start_time))
+            ground_truths[int(atk.ts - results.start_time)] = atk.get_class()
+        # Create a list to store the corresponding values
+        plot_values = []
+        net_atks = []
+        host_atks = []
+        # print(results.start_time)
+        # print(ground_truths)
+        all_atks = []
+        for value in values:
+            if any(start <= value <= end for start, end in atk_ranges):
+                plot_values.append(1)
+            else:
+                plot_values.append(None)
+            if value in ground_truths:
+                all_atks.append(0.5)
+                if ground_truths[value] == "Network": 
+                    net_atks.append(0.75)
+                    host_atks.append(None)
+                else: 
+                    host_atks.append(0.25)
+                    net_atks.append(None)
+            else:
+                net_atks.append(None)
+                all_atks.append(None)
+                host_atks.append(None)
+        # print(plot_values)
+        # print(plot_2_values)
+        plt.plot(values, plot_values, drawstyle='steps-post',markersize=3,marker='o',label="Detected Attacks")
+        plt.plot(values, host_atks, drawstyle='steps-post',color="orange",markersize=3,marker='o',label="Host Attacks")
+        plt.plot(values, all_atks, drawstyle='steps-post',color="green",markersize=3,marker='o',label="All Attacks")
+        plt.plot(values, net_atks, drawstyle='steps-post',color="red",markersize=3,marker='o',label="Network Attacks")
+        plt.xlabel("Values")
+        plt.ylabel("Indicator")
+        plt.xticks(np.arange(0,3600,step=600))
+        plt.yticks(np.arange(0,2,step=0.5))
+        plt.legend()
+        plt.title("Range-Based Indicator")
+        plt.show()
 
 if __name__ == "__main__": 
     main()

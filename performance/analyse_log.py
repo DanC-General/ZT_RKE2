@@ -296,12 +296,12 @@ def main():
             else:
                 plot_values.append(None)
             if value in ground_truths:
-                all_atks.append(0.5)
+                all_atks.append(0.25)
                 if ground_truths[value] == "Network": 
                     net_atks.append(0.75)
                     host_atks.append(None)
                 else: 
-                    host_atks.append(0.25)
+                    host_atks.append(0.5)
                     net_atks.append(None)
             else:
                 net_atks.append(None)
@@ -309,16 +309,18 @@ def main():
                 host_atks.append(None)
         # print(plot_values)
         # print(plot_2_values)
+        plt.figure(figsize=(20,10))
         plt.plot(values, plot_values, drawstyle='steps-post',markersize=3,marker='o',label="Detected Attacks")
         plt.plot(values, host_atks, drawstyle='steps-post',color="orange",markersize=3,marker='o',label="Host Attacks")
         plt.plot(values, all_atks, drawstyle='steps-post',color="green",markersize=3,marker='o',label="All Attacks")
         plt.plot(values, net_atks, drawstyle='steps-post',color="red",markersize=3,marker='o',label="Network Attacks")
-        plt.xlabel("Values")
-        plt.ylabel("Indicator")
+        plt.xlabel("Time since start (seconds)")
+        plt.ylabel("Attack Category")
         plt.xticks(np.arange(0,3600,step=600))
         plt.yticks(np.arange(0,2,step=0.5))
         plt.legend()
-        plt.title("Range-Based Indicator")
+        plt.title("Analysis of ZT-RKE2 model")
+        plt.savefig("31_8.png")
         plt.show()
 
 if __name__ == "__main__": 

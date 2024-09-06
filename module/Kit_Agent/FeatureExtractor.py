@@ -106,7 +106,7 @@ class FE:
             self.limit = len(self.scapyin)
             print("Loaded " + str(len(self.scapyin)) + " Packets.")
 
-    def get_next_vector(self):
+    def get_next_vector(self,f):
         if self.curPacketIndx == self.limit:
             if self.parse_type == 'tsv':
                 self.tsvinf.close()
@@ -147,7 +147,7 @@ class FE:
                 elif srcIP + srcproto + dstIP + dstproto == '':  # some other protocol
                     srcIP = row[2]  # src MAC
                     dstIP = row[3]  # dst MAC
-            print("||",timestamp,srcIP,srcMAC,dstIP,dstMAC,srcproto,dstproto)
+            f.write("||"+ str(timestamp) + " " + str(srcIP) + " " + str(srcMAC) + " " + str(dstIP) + " " + str(dstMAC) + " " + str(srcproto) + " " + str(dstproto) + " " )
         elif self.parse_type == "scapy":
             packet = self.scapyin[self.curPacketIndx]
             IPtype = np.nan

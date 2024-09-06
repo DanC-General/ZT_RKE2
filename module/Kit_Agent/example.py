@@ -22,7 +22,7 @@ import time
 
 
 # File location
-path = "../../performance/8_30_segfault.pcap" #the pcap, pcapng, or tsv file to process.
+path = "../../performance/2mil-2.8mil.pcap" #the pcap, pcapng, or tsv file to process.
 packet_limit = np.inf #the number of packets to process
 
 # KitNET params:
@@ -37,22 +37,27 @@ print("Running Kitsune:")
 RMSEs = []
 i = 0
 start = time.time()
+loop_time = time.time()
 # Here we process (train/execute) each individual packet.
 # In this way, each observation is discarded after performing process() method.
-while True:
-    i+=1
-    if i % 1000 == 0:
-        print(i)
-    # elif i >= 100000:
-    #     print("Cancelling")
-    #     break
-    rmse = K.proc_next_packet()
-    # print(rmse)
-    if rmse == -1:
-        break
-    # elif rmse >= 0.4: 
-    #     print("Error noticed ")
-    RMSEs.append(rmse)
+with open("",'w') as f:
+    while True:
+        i+=1
+        if i % 1000 == 0:
+            cur_time = time.time()
+            print(i,"in",cur_time - loop_time)
+            loop_time = cur_time
+        # elif i >= 100000:
+        #     print("Cancelling")
+        #     break
+        rmse = K.proc_next_packet(f)
+        # print(rmse)
+        if rmse == -1:
+            break
+        # elif rmse >= 0.4: 
+        #     print("Error noticed ")
+        f.write(str(rmse) + "\n")
+        RMSEs.append(rmse)
 stop = time.time()
 print("Complete. Time elapsed: "+ str(stop - start))
 

@@ -262,19 +262,3 @@ if __name__ == "__main__":
         if not msg_q.empty():
             a = msg_q.get()
             print("recv alert",a,"at",time())
-    # tst= Service(maxAE,FMgrace,ADgrace,"test","123")
-
-    # t1 = tst.prev_subj
-    # t1.more_recent(10.4)
-    # t1.add([20.01,"subj2"])
-    # t1.more_recent(20.2)
-    # t1.add([30.102,"subj1"])
-    # t1.add([33.47,"subj2"])
-    # t1.more_recent(35.102)
-    # t1.add([33.47,"subj3"])
-    # t1.add([38.47,"subj4"])
-    # t1.add([35.47,"subj5"])
-    # t1.add([36.47,"subj7"])
-    # t1.more_recent(40.1)
-
-    # t1.more_recent(20.2)

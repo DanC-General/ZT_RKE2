@@ -39,9 +39,9 @@ class Kitsune:
         #init Kitnet
         self.AnomDetector = KitNET(self.FE.get_num_features(),max_autoencoder_size,FM_grace_period,AD_grace_period,learning_rate,hidden_ratio)
 
-    def proc_next_packet(self):
+    def proc_next_packet(self,f=None):
         # create feature vector
-        x = self.FE.get_next_vector()
+        x = self.FE.get_next_vector(f)
         if len(x) == 0:
             return -1 #Error or no packets left
 

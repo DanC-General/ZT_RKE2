@@ -80,7 +80,7 @@ class Request:
         self.ts = float(timestr)
         self.terminated = term
         self.last_pack = pack
-        self.hosts = set(pack[-2:])
+        self.hosts = pack[-2:]
         self.sysc_str = sstr
     def __str__(self):
         ret = ""
@@ -180,7 +180,7 @@ class Analyser:
         dip = det[2]
         
         last_details = [rmse,"compare",sip,dip]
-        print("added ",last_details, "from", det)
+        # print("added ",last_details, "from", det)
         self.add_request(Request(None,rmse,None,None,None,ts,None,last_details,True))
 
     def add_request(self,req): 
@@ -236,74 +236,83 @@ def main():
         for line in raw: 
             # print(line)
             results.analyse_line(line,raw)
-        groups = dict()
-        # group_count = 0
-        new_group = False
-        last_ts = 0
-        count = 0
-        host_map = { "VM1":"10.1.2.5","VM2":"10.1.2.10","LOCAL":"127.0.0.1"}
-        values = {"total":0,"within_90s":0,"correct_host":0}
-        all_groups = list()
-        for r in results.req_q:
-            # print("((",r,end=")),  ")
-            # group_count += 1
-            count += 1
-            near = results.attacks.get_host_atks(r)
-            # if count > 3:
-            #     break
-            # Store groups = { hosts -> [ count,start_ts, end_ts ]}
+        all_groups = get_groups_from_analyser(results)
+        zt_rke2_group = get_group_times(all_groups,results.start_time)
+        comp_groups = analyse_comparison("../module/Kit_Agent/100k_minimal.log")
+        kit_group = get_group_times(comp_groups,results.start_time)
+        print("ZT_RKE2 GROUPS")
+        for i in all_groups: 
+            print("(( ",i,end=" ))")
+        print("COMPARISON GROUPS")
+        for i in comp_groups: 
+            print("(( ",i,end=" ))")
+        # groups = dict()
+        # # group_count = 0
+        # new_group = False
+        # last_ts = 0
+        # count = 0
+        # host_map = { "VM1":"10.1.2.5","VM2":"10.1.2.10","LOCAL":"127.0.0.1"}
+        # values = {"total":0,"within_90s":0,"correct_host":0}
+        # all_groups = list()
+        # for r in results.req_q:
+        #     # print("((",r,end=")),  ")
+        #     # group_count += 1
+        #     count += 1
+        #     near = results.attacks.get_host_atks(r)
+        #     # if count > 3:
+        #     #     break
+        #     # Store groups = { hosts -> [ count,start_ts, end_ts ]}
 
-            found = False
-            host_str = ""
-            print("Adding",r.hosts)
-            for i,v in enumerate(sorted(r.hosts)):
-                # print("Sorted",i,v)
-                print("adding",v)
-                host_str += "-" + str(v)
-            if host_str in groups:
-                found = True
-                groups[host_str][0] += 1
-                # If there is a gap larger than 60 seconds between packets, end the current flow.
-                if r.ts - groups[host_str][2] > 60:
-                    if len(groups[host_str]) > 4:
-                        groups[host_str][6] = to_date(groups[host_str][6])
-                    # groups[host_str].append(r.sysc_str)
-                    # if "10.1.2.5" in host_str: 
-                    print(host_str,"Group ended:",groups[host_str])
-                    all_groups.append(groups[host_str].copy())
-                    values["total"] += 1
-                    if len(groups[host_str]) > 3 and groups[host_str][3] < 90:
-                        print("Alert within 90s of attack:",r.o_trust,"x",r.s_trust,"-->",r.r_trust)
-                        values["within_90s"] += 1
-                        if host_map[groups[host_str][5]] in host_str: 
-                            print("Correct host matched.")
-                            values["correct_host"] += 1
-                    # print("NEW ATTACK GROUP",datetime.datetime.fromtimestamp(r.ts),r.hosts,r.o_trust,r.s_trust,near[0],near[1])
-                    near = results.attacks.get_host_atks(r)
-                    groups[host_str] = [0,r.ts,r.ts,near[0],near[1].name,near[1].host,near[1].ts,r.hosts]                         
-                    # groups[host_str] = [0,r.ts,r.ts,near[0],near[1].name,near[1].host,near[1].ts,r.sysc_str]                        
-                else: 
-                    groups[host_str][2] = r.ts 
-            if not found:
-                near = results.attacks.get_host_atks(r)
-                groups[host_str] = [0,r.ts,r.ts,near[0],near[1].name,near[1].host,near[1].ts,r.hosts]                         
+        #     found = False
+        #     host_str = ""
+        #     print("Adding",r.hosts)
+        #     for i,v in enumerate(sorted(r.hosts)):
+        #         # print("Sorted",i,v)
+        #         print("adding",v)
+        #         host_str += "-" + str(v)
+        #     if host_str in groups:
+        #         found = True
+        #         groups[host_str][0] += 1
+        #         # If there is a gap larger than 60 seconds between packets, end the current flow.
+        #         if r.ts - groups[host_str][2] > 60:
+        #             if len(groups[host_str]) > 4:
+        #                 groups[host_str][6] = to_date(groups[host_str][6])
+        #             # groups[host_str].append(r.sysc_str)
+        #             # if "10.1.2.5" in host_str: 
+        #             print(host_str,"Group ended:",groups[host_str])
+        #             all_groups.append(groups[host_str].copy())
+        #             values["total"] += 1
+        #             if len(groups[host_str]) > 3 and groups[host_str][3] < 90:
+        #                 print("Alert within 90s of attack:",r.o_trust,"x",r.s_trust,"-->",r.r_trust)
+        #                 values["within_90s"] += 1
+        #                 if host_map[groups[host_str][5]] in host_str: 
+        #                     print("Correct host matched.")
+        #                     values["correct_host"] += 1
+        #             # print("NEW ATTACK GROUP",datetime.datetime.fromtimestamp(r.ts),r.hosts,r.o_trust,r.s_trust,near[0],near[1])
+        #             near = results.attacks.get_host_atks(r)
+        #             groups[host_str] = [0,r.ts,r.ts,near[0],near[1].name,near[1].host,near[1].ts,r.hosts]                         
+        #             # groups[host_str] = [0,r.ts,r.ts,near[0],near[1].name,near[1].host,near[1].ts,r.sysc_str]                        
+        #         else: 
+        #             groups[host_str][2] = r.ts 
+        #     if not found:
+        #         near = results.attacks.get_host_atks(r)
+        #         groups[host_str] = [0,r.ts,r.ts,near[0],near[1].name,near[1].host,near[1].ts,r.hosts]                         
                 # groups[host_str] = [0,r.ts,r.ts,near[0],near[1].name,near[1].host,near[1].ts,r.sysc_str]                         
             # if r.ts - last_ts > 3: 
             #     print("NEW ATTACK GROUP",datetime.datetime.fromtimestamp(r.ts),r.hosts,r.o_trust,r.s_trust,near[0],near[1])
             # print("DIFF",r.ts - last_ts)
             # print("CLOSEST ATTACKS TO",r.ts,"==",near[0],near[1])
-        print(values)
-        print("ALL GROUPS:",all_groups)
-        atk_ranges = list()
-        for grp in all_groups:
-            print("Group",grp)
-            start = grp[1] - results.start_time
-            end = grp[2] -  results.start_time
-            # start = grp[1]
-            # end = grp[2]
-            atk_ranges.append((int(start),int(end)))
+        # print(values)
+        # print("ALL GROUPS:",all_groups)
+        # atk_ranges = list()
+        # for grp in all_groups:
+        #     print("Group",grp)
+        #     start = grp[1] - results.start_time
+        #     end = grp[2] -  results.start_time
+        #     # start = grp[1]
+        #     # end = grp[2]
+        #     atk_ranges.append((int(start),int(end)))
             # print(start,end)
-
         # from 22:15 to 23:05 
         # Create the line plot
         values = range(0, 3600)
@@ -326,7 +335,7 @@ def main():
             # print(c_ts[1])
         # print("Compare",compare_ts)
         for value in values:
-            if any(start <= value <= end for start, end in atk_ranges):
+            if any(start <= value <= end for start, end in zt_rke2_group):
                 plot_values.append(1)
             else:
                 plot_values.append(None)
@@ -374,8 +383,19 @@ def analyse_comparison(file_name):
         for line in f:
             results.analyse_comp_line(line)
     # print(results.req_q)
-    get_groups_from_analyser(results)
-    return results
+    all_grps = get_groups_from_analyser(results)
+    return all_grps
+
+def get_group_times(group_list,start_time): 
+    atk_ranges = list()
+    for grp in group_list:
+        print("Group",grp)
+        start = grp[1] - start_time
+        end = grp[2] -  start_time
+        # start = grp[1]
+        # end = grp[2]
+        atk_ranges.append((int(start),int(end)))
+    return atk_ranges
 
 def get_groups_from_analyser(results):
     groups = dict()
@@ -384,21 +404,21 @@ def get_groups_from_analyser(results):
     values = {"total":0,"within_90s":0,"correct_host":0}
     all_groups = list()
     for r in results.req_q:
-        print("((",r,end=")),  ")
+        # print("((",r,end=")),  ")
         # group_count += 1
         count += 1
         near = results.attacks.get_host_atks(r)
         # Store groups = { hosts -> [ count,start_ts, end_ts ]}
-        print(near)
+        # print(near)
         found = False
         host_str = ""
-        print("Adding",r.hosts,r.last_pack)
+        # print("Adding",r.hosts,r.last_pack)
         for i,v in enumerate(sorted(r.hosts)):
             # print("Sorted",i,v)
-            print("adding",v)
+            # print("adding",v)
             host_str += "-" + str(v)
         if host_str in groups:
-            print(host_str)
+            # print(host_str)
             found = True
             groups[host_str][0] += 1
             # If there is a gap larger than 60 seconds between packets, end the current flow.
@@ -410,7 +430,8 @@ def get_groups_from_analyser(results):
                 print(host_str,"Group ended:",groups[host_str])
                 all_groups.append(groups[host_str].copy())
                 values["total"] += 1
-                if len(groups[host_str]) > 3 and groups[host_str][3] < 90:
+
+                if groups[host_str][3] is not None and groups[host_str][3] < 90:
                     print("Alert within 90s of attack:",r.o_trust,"x",r.s_trust,"-->",r.r_trust)
                     values["within_90s"] += 1
                     if host_map[groups[host_str][5]] in host_str: 
@@ -425,9 +446,10 @@ def get_groups_from_analyser(results):
         if not found:
             near = results.attacks.get_host_atks(r)
             groups[host_str] = [0,r.ts,r.ts,near[0],near[1].name,near[1].host,near[1].ts,r.hosts]      
-    return groups
+    # print(all_groups)
+    return all_groups
 
 if __name__ == "__main__": 
-    analyse_comparison("../module/Kit_Agent/50k_minimal.log")
-    # main()
+    # analyse_comparison("../module/Kit_Agent/50k_minimal.log")
+    main()
     

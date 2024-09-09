@@ -2,14 +2,20 @@ from argparse import ArgumentParser
 import matplotlib.pyplot as plt
 import datetime
 import numpy as np
+import os
 import re
+import time
 def timestr_to_obj(timestr):
+    if timestr is None:
+        return None
     return datetime.datetime.strptime(timestr.strip(),"%d/%m/%Y %H:%M:%S:%f").timestamp()
 class Attack:
     def __init__(self,name,ts,host):
         self.name = name
         self.ts = timestr_to_obj(ts)
         self.host = host
+        self.host_map = { "VM1":"10.1.2.5","VM2":"10.1.2.10","LOCAL":"127.0.0.1"}
+
     def get_class(self): 
         if (self.name in ["Brute Force","DoS"]): 
             return "Network"
@@ -21,6 +27,8 @@ class Attack:
         for k in vars(self): 
             ret += k+"->"+str(vars(self)[k])+" | "
         return ret
+    def get_ip(self): 
+        return self.host_map[self.host]
     
 class Attacks: 
     def __init__(self): 
@@ -35,9 +43,6 @@ class Attacks:
         lowest = None
         for atk in self.all:
             diff = abs(ts - atk.ts)
-            # print("DIFF for atk",ts,atk.ts,diff,atk)
-            # if diff < 0:
-            #     continue
             if lowest is None: 
                 # print("NEW LOWEST",diff,atk)
                 lowest = diff
@@ -45,9 +50,24 @@ class Attacks:
             if diff < lowest: 
                 lowest = diff 
                 stored = atk
+        if stored is None: 
+            return None, Attack(None,None,None)
         return lowest, stored
-
-        
+    def get_host_atks(self,req):
+        stored = None
+        lowest = None
+        for atk in self.all:
+            diff = abs(req.ts - atk.ts)
+            if lowest is None: 
+                # print("NEW LOWEST",diff,atk)
+                lowest = diff
+                stored = atk
+            if diff < lowest and atk.get_ip() in req.hosts: 
+                lowest = diff 
+                stored = atk
+        if stored is None: 
+            return None, Attack(None,None,None)
+        return lowest, stored
 
 class Request: 
     def __init__(self,r_t,o_t,s_t,benign,alert_ts,timestr,sstr,pack,term=False): 
@@ -80,8 +100,10 @@ class Analyser:
         self.req_q = list()
         self.attacks = Attacks()
         self.last_details = list()
+
     def set_start(self,timestr):
         self.start_time = timestr_to_obj(timestr)
+
     def analyse_line(self,line,f): 
         if re.match(r"[a-zA-Z]+:",line): 
             return
@@ -145,12 +167,21 @@ class Analyser:
         elif re.match(r"\d+ packets processed.",line):
             # print("GENERAL PACKET COUNTS", line)
             pass
-        # elif line.startswith("Likelihood"): 
-        #     print("LIKELIHOOD",line)
-        #     weights = f.readline()
-        #     print("WEIGHTS",weights)
-        # else: 
-        #     print(line)
+
+    def analyse_comp_line(self,line):
+        det = [x.strip() for x in line.strip().split(" ") if x.strip() != '']
+        # print(line,det)
+        if len(det) != 6:
+            print("Illegal line",line,det)
+            return
+        ts = det[0].replace("|",'').strip()
+        rmse = det[-1]
+        sip = det[1]
+        dip = det[2]
+        
+        last_details = [rmse,"compare",sip,dip]
+        print("added ",last_details, "from", det)
+        self.add_request(Request(None,rmse,None,None,None,ts,None,last_details,True))
 
     def add_request(self,req): 
         # print("|",req)
@@ -160,7 +191,8 @@ def to_date(times):
     if times is not None:
         # print(type(time))
         
-        return str(datetime.datetime.fromtimestamp(float(times)).time())
+        return str(datetime.datetime.fromtimestamp(float(times)).time()) 
+
 def main(): 
     parser = ArgumentParser()
     parser.add_argument("file", help="Path of file to anlayse")
@@ -216,29 +248,24 @@ def main():
             # print("((",r,end=")),  ")
             # group_count += 1
             count += 1
-            near = results.attacks.get_closest_atk(r.ts)
+            near = results.attacks.get_host_atks(r)
             # if count > 3:
             #     break
             # Store groups = { hosts -> [ count,start_ts, end_ts ]}
+
             found = False
             host_str = ""
+            print("Adding",r.hosts)
             for i,v in enumerate(sorted(r.hosts)):
                 # print("Sorted",i,v)
+                print("adding",v)
                 host_str += "-" + str(v)
             if host_str in groups:
                 found = True
                 groups[host_str][0] += 1
+                # If there is a gap larger than 60 seconds between packets, end the current flow.
                 if r.ts - groups[host_str][2] > 60:
-                    # print(groups[host_str])
-                    # groups[host_str][1] = to_date(groups[host_str][1])
-                    # groups[host_str][2] = to_date(groups[host_str][2])
                     if len(groups[host_str]) > 4:
-                        # try:
-                        #     print(type(groups[host_str][-1]),groups[host_str][-1])
-                        #     groups[host_str][-1] = groups[host_str][-1].time()
-                        # # .date()
-                        # except: 
-                        #     print("In loop" ,groups[host_str][-1])
                         groups[host_str][6] = to_date(groups[host_str][6])
                     # groups[host_str].append(r.sysc_str)
                     # if "10.1.2.5" in host_str: 
@@ -252,14 +279,14 @@ def main():
                             print("Correct host matched.")
                             values["correct_host"] += 1
                     # print("NEW ATTACK GROUP",datetime.datetime.fromtimestamp(r.ts),r.hosts,r.o_trust,r.s_trust,near[0],near[1])
-                    near = results.attacks.get_closest_atk(r.ts)
-                    groups[host_str] = [0,r.ts,r.ts,near[0],near[1].name,near[1].host,near[1].ts]                         
+                    near = results.attacks.get_host_atks(r)
+                    groups[host_str] = [0,r.ts,r.ts,near[0],near[1].name,near[1].host,near[1].ts,r.hosts]                         
                     # groups[host_str] = [0,r.ts,r.ts,near[0],near[1].name,near[1].host,near[1].ts,r.sysc_str]                        
                 else: 
                     groups[host_str][2] = r.ts 
             if not found:
-                near = results.attacks.get_closest_atk(r.ts)
-                groups[host_str] = [0,r.ts,r.ts,near[0],near[1].name,near[1].host,near[1].ts]                         
+                near = results.attacks.get_host_atks(r)
+                groups[host_str] = [0,r.ts,r.ts,near[0],near[1].name,near[1].host,near[1].ts,r.hosts]                         
                 # groups[host_str] = [0,r.ts,r.ts,near[0],near[1].name,near[1].host,near[1].ts,r.sysc_str]                         
             # if r.ts - last_ts > 3: 
             #     print("NEW ATTACK GROUP",datetime.datetime.fromtimestamp(r.ts),r.hosts,r.o_trust,r.s_trust,near[0],near[1])
@@ -269,9 +296,11 @@ def main():
         print("ALL GROUPS:",all_groups)
         atk_ranges = list()
         for grp in all_groups:
-            # print(grp)
+            print("Group",grp)
             start = grp[1] - results.start_time
             end = grp[2] -  results.start_time
+            # start = grp[1]
+            # end = grp[2]
             atk_ranges.append((int(start),int(end)))
             # print(start,end)
 
@@ -290,6 +319,12 @@ def main():
         # print(results.start_time)
         # print(ground_truths)
         all_atks = []
+        comp_vals = []
+        compare_ts = analyse_comparison("../module/Kit_Agent/100k_minimal.log")
+        for i,c_ts in enumerate(compare_ts): 
+            compare_ts[i] = int(float(c_ts[0]) - results.start_time)
+            # print(c_ts[1])
+        # print("Compare",compare_ts)
         for value in values:
             if any(start <= value <= end for start, end in atk_ranges):
                 plot_values.append(1)
@@ -307,22 +342,92 @@ def main():
                 net_atks.append(None)
                 all_atks.append(None)
                 host_atks.append(None)
-        # print(plot_values)
+            if value in compare_ts: 
+                comp_vals.append(1.25)
+            else:
+                comp_vals.append(None)
+            # if 
+        print("Values",plot_values)
         # print(plot_2_values)
         plt.figure(figsize=(20,10))
         plt.plot(values, plot_values, drawstyle='steps-post',markersize=3,marker='o',label="Detected Attacks")
         plt.plot(values, host_atks, drawstyle='steps-post',color="orange",markersize=3,marker='o',label="Host Attacks")
         plt.plot(values, all_atks, drawstyle='steps-post',color="green",markersize=3,marker='o',label="All Attacks")
         plt.plot(values, net_atks, drawstyle='steps-post',color="red",markersize=3,marker='o',label="Network Attacks")
+        plt.plot(values, comp_vals, drawstyle='steps-post',color="purple",markersize=3,marker='o',label="General model")
         plt.xlabel("Time since start (seconds)")
+
         plt.ylabel("Attack Category")
         plt.xticks(np.arange(0,3600,step=600))
         plt.yticks(np.arange(0,2,step=0.5))
         plt.legend()
         plt.title("Analysis of ZT-RKE2 model")
-        plt.savefig("31_8.png")
+        # plt.savefig(f'out/31_8_{time.strftime("%Y%m%d-%H%M%S")}.png')
         plt.show()
 
+def analyse_comparison(file_name):
+    if not os.path.exists(file_name): 
+        print("Invalid file for comparison.")
+        return
+    results = Analyser()
+    with open(file_name,'r') as f:
+        for line in f:
+            results.analyse_comp_line(line)
+    # print(results.req_q)
+    get_groups_from_analyser(results)
+    return results
+
+def get_groups_from_analyser(results):
+    groups = dict()
+    count = 0
+    host_map = { "VM1":"10.1.2.5","VM2":"10.1.2.10","LOCAL":"127.0.0.1"}
+    values = {"total":0,"within_90s":0,"correct_host":0}
+    all_groups = list()
+    for r in results.req_q:
+        print("((",r,end=")),  ")
+        # group_count += 1
+        count += 1
+        near = results.attacks.get_host_atks(r)
+        # Store groups = { hosts -> [ count,start_ts, end_ts ]}
+        print(near)
+        found = False
+        host_str = ""
+        print("Adding",r.hosts,r.last_pack)
+        for i,v in enumerate(sorted(r.hosts)):
+            # print("Sorted",i,v)
+            print("adding",v)
+            host_str += "-" + str(v)
+        if host_str in groups:
+            print(host_str)
+            found = True
+            groups[host_str][0] += 1
+            # If there is a gap larger than 60 seconds between packets, end the current flow.
+            if r.ts - groups[host_str][2] > 60:
+                if len(groups[host_str]) > 4:
+                    groups[host_str][6] = to_date(groups[host_str][6])
+                # groups[host_str].append(r.sysc_str)
+                # if "10.1.2.5" in host_str: 
+                print(host_str,"Group ended:",groups[host_str])
+                all_groups.append(groups[host_str].copy())
+                values["total"] += 1
+                if len(groups[host_str]) > 3 and groups[host_str][3] < 90:
+                    print("Alert within 90s of attack:",r.o_trust,"x",r.s_trust,"-->",r.r_trust)
+                    values["within_90s"] += 1
+                    if host_map[groups[host_str][5]] in host_str: 
+                        print("Correct host matched.")
+                        values["correct_host"] += 1
+                # print("NEW ATTACK GROUP",datetime.datetime.fromtimestamp(r.ts),r.hosts,r.o_trust,r.s_trust,near[0],near[1])
+                near = results.attacks.get_host_atks(r)
+                groups[host_str] = [0,r.ts,r.ts,near[0],near[1].name,near[1].host,near[1].ts,r.hosts]                         
+                # groups[host_str] = [0,r.ts,r.ts,near[0],near[1].name,near[1].host,near[1].ts,r.sysc_str]                        
+            else: 
+                groups[host_str][2] = r.ts 
+        if not found:
+            near = results.attacks.get_host_atks(r)
+            groups[host_str] = [0,r.ts,r.ts,near[0],near[1].name,near[1].host,near[1].ts,r.hosts]      
+    return groups
+
 if __name__ == "__main__": 
-    main()
+    analyse_comparison("../module/Kit_Agent/50k_minimal.log")
+    # main()
     

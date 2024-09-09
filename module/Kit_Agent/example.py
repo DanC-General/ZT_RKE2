@@ -22,7 +22,7 @@ import time
 
 
 # File location
-path = "../../performance/2mil-2.8mil.pcap" #the pcap, pcapng, or tsv file to process.
+path = "../../performance/30_sam_31_8.pcap" #the pcap, pcapng, or tsv file to process.
 packet_limit = np.inf #the number of packets to process
 
 # KitNET params:
@@ -40,7 +40,7 @@ start = time.time()
 loop_time = time.time()
 # Here we process (train/execute) each individual packet.
 # In this way, each observation is discarded after performing process() method.
-with open("",'w') as f:
+with open("./new_minimal.log",'w') as f:
     while True:
         i+=1
         if i % 1000 == 0:

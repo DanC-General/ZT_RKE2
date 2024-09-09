@@ -240,7 +240,6 @@ def main():
     for i in range(5): 
         # client.add_malicious()
         client.simulate_session()
-
     while True: 
         client.add_malicious()
 

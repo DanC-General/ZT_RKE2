@@ -96,7 +96,7 @@ class SRule:
                 for syi,sysc in enumerate(['unique','common','ubiquitous']):
                     rules_list[li][si][syi] = l + "|" + sub + "|" +sysc + "->" + trust_list[li][si][syi]
                     rules.append(ctrl.Rule(likelihood[l] & sub_malig[sub]& sysc_malig[sysc], subj_trust[trust_list[li][si][syi]]))
-        # print(rules_list)
+        print(rules_list)
         # print(rules)
 
         # # Step 4: Implement the fuzzy inference system

@@ -1,10 +1,6 @@
 from analysis_cls import Analyser,Attacks,Attack,Request,timestr_to_obj
 import datetime
-import math
-import numpy as np
 import os
-import re
-import time
 import statistics
 
 def analyse_comparison(file_name):

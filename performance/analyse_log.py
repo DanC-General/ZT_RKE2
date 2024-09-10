@@ -1,12 +1,6 @@
 from argparse import ArgumentParser
 import matplotlib.pyplot as plt
-import datetime
-import math
 import numpy as np
-import os
-import re
-import time
-import statistics
 from analysis_funcs import (
     get_groups_from_analyser,get_group_times,parse_log_file,
     parse_attack_file,get_average_atk_delay,analyse_comparison

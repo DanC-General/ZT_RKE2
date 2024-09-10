@@ -24,7 +24,7 @@ def get_group_times(group_list,start_time):
         atk_ranges.append((int(start),int(end)))
     return atk_ranges
 
-def get_groups_from_analyser(results,atks,start_time):
+def get_groups_from_analyser(results,atks):
     groups = dict()
     count = 0
     fal_pos = 0
@@ -129,8 +129,8 @@ def get_groups_from_analyser(results,atks,start_time):
     print("POSTIIVE COUNTS", count, "FP",fal_pos,"TP",true_pos)
     print("NEGATIVE COUNTS",total_atks,"SEEN",len(seen),"UNSEEN",len(unseen))
     print("TRUE POSITIVES",tp_p,"FALSE POSITIVES",fp_p,"TRUE NEGATIVES",tn_p,"FALSE NEGATIVES",fn_p)
-
-    return all_groups
+    metrics = [tp_p,fp_p,tn_p,fn_p]
+    return all_groups, metrics
 
 def to_date(times):
     if times is not None:

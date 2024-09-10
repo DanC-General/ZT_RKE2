@@ -1,6 +1,9 @@
 from argparse import ArgumentParser
-import matplotlib.pyplot as plt
+import time
 import numpy as np
+import matplotlib.pyplot as plt
+
+
 from analysis_funcs import (
     get_groups_from_analyser,get_group_times,parse_log_file,
     parse_attack_file,get_average_atk_delay,analyse_comparison
@@ -14,13 +17,14 @@ def main():
     results = parse_log_file(args.file)
     atks = parse_attack_file(args.attack_file,results.start_time)
     get_average_atk_delay(atks)
-    all_groups = get_groups_from_analyser(results,atks,results.start_time)
+    all_groups,ztrke2_metrics = get_groups_from_analyser(results,atks)
     print("ANALYSER COUNT",results.total_count)
     zt_rke2_group = get_group_times(all_groups,results.start_time)
     comp_analyser = analyse_comparison("../module/Kit_Agent/100k_minimal.log")
-    comp_groups = get_groups_from_analyser(comp_analyser,atks,results.start_time)
+    comp_groups, comp_metrics = get_groups_from_analyser(comp_analyser,atks)
     print("ANALYSER COUNT",comp_analyser.total_count)
     kit_group = get_group_times(comp_groups,results.start_time)
+    print("ZT_RKE2 METRICS",ztrke2_metrics,"COMP METS",comp_metrics)
     # print("ZT_RKE2 GROUPS")
     # for i in all_groups: 
     #     print("(( ",i,end=" ))")
@@ -76,9 +80,29 @@ def main():
     plt.yticks(np.arange(0,2,step=0.5))
     plt.legend()
     plt.title("Analysis of ZT-RKE2 model")
-    # plt.savefig(f'out/31_8_{time.strftime("%Y%m%d-%H%M%S")}.png')
+    plot_time = time.strftime("%Y%m%d-%H%M%S")
+    plt.savefig(f'out/visual_31_8_{plot_time}.png')
     # plt.show()
 
+
+
+    index = np.arange(4)
+    bar_width = 0.35
+
+    fig, ax = plt.subplots()
+    ztrke2 = ax.bar(index, ztrke2_metrics, bar_width,
+                    label="ZTRKE2")
+
+    comparison = ax.bar(index+bar_width, comp_metrics,
+                    bar_width, label="Comparison")
+    ax.set_xlabel('Metric')
+    ax.set_ylabel('Proportion')
+    ax.set_title('Incident Detection Rates by Different Models')
+    ax.set_xticks(index + bar_width / 2)
+    ax.set_xticklabels(["TP", "FP", "TN", "FN"])
+    ax.legend()
+    plt.savefig(f'out/metrics_31_8_{plot_time}.png')
+    plt.show()
 
 if __name__ == "__main__": 
     # analyse_comparison("../module/Kit_Agent/50k_minimal.log")

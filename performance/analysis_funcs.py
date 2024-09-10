@@ -40,7 +40,6 @@ def get_groups_from_analyser(results,atks,start_time):
 
         ##### GROUP COUNTING NOT WORKING PROPERLY #####
 
-
         if host_str not in host_list: 
             host_list.append(host_str)
         if host_str in groups:
@@ -87,26 +86,50 @@ def get_groups_from_analyser(results,atks,start_time):
             # print("Incremented",near[1],r)
         else:
             fal_pos += group[0]
-    print("A_G:",all_groups)
+    # print("A_G:",all_groups)
     # print("C_G",groups)
-    ids = []
+    seen = []
+    unseen = []
     for grp in all_groups:
-        if grp[8] not in ids:
-            print(grp[8],datetime.datetime.fromtimestamp(grp[0]).time(),grp[7])
-            ids.append(grp[8])
+        if grp[8] is None:
+            continue
+        if grp[8] not in seen:
+            # print(grp[8],datetime.datetime.fromtimestamp(grp[0]).time(),grp[7])
+            seen.append(grp[8])
         else:
-            print("Duplicate",grp[8],datetime.datetime.fromtimestamp(grp[0]).time(),grp[7])
-            print(atks.get_60s_ts(float(r.ts) + float(start_time),grp[7]))
+            # print("Duplicate",grp[8],grp[1],grp[7])
+            # print(start_time,"list:")
+            for i in atks.get_60s_ts(float(grp[1]),float(grp[2]),grp[7]):
+                # print("        ",i)
+                # print("NEW_ID",i.id)
+                if i.id not in seen:
+                    # print("ADDED UNSEEN",i.id)
+                    # print(grp[8],datetime.datetime.fromtimestamp(grp[0]).time(),grp[7])
+                    seen.append(i.id)
     for atk in atks.all: 
-        if atk.id not in ids:
-            print("Missing",atk)
-        
+        if atk.id not in seen and atk.id is not None:
+            # print("Missing",atk)
+            if atk.id not in unseen: 
+                unseen.append(atk.id)
+
+
+    total_atks = len(atks.all)
+    # print("ATK LEN",len(atks.all))
     count = results.total_count
     total_pos = fal_pos + true_pos
+    pos_p = total_pos / count
+    neg_p = 1 - pos_p
+    tp_p = (true_pos / total_pos) * pos_p
+    fp_p = (fal_pos / total_pos) * pos_p
+    fn_p = (len(unseen)/total_atks) * neg_p
+    tn_p = (1 - tp_p - fp_p - fn_p) * neg_p
     print("PARSED ", count, "packets")
-    print("LISTS",host_list)
-    print("IDS",len(ids),ids)
-    print("COUNTS", count, "FP",fal_pos,"prop FP",fal_pos/total_pos,"TP",true_pos,"prop",true_pos/total_pos)
+    # print("LISTS",host_list)
+    # print("IDS",len(seen),seen)
+    print("POSTIIVE COUNTS", count, "FP",fal_pos,"TP",true_pos)
+    print("NEGATIVE COUNTS",total_atks,"SEEN",len(seen),"UNSEEN",len(unseen))
+    print("TRUE POSITIVES",tp_p,"FALSE POSITIVES",fp_p,"TRUE NEGATIVES",tn_p,"FALSE NEGATIVES",fn_p)
+
     return all_groups
 
 def to_date(times):

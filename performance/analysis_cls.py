@@ -82,13 +82,14 @@ class Attacks:
         return lowest, stored
 
     ### Input ts as the original ts: group timestamp + analyser start time 
-    def get_60s_ts(self,ts,hosts):
-        print("FINDING ATTACKS NEAR",ts,hosts)
+    def get_60s_ts(self,start,end,hosts):
+        # print("FINDING ATTACKS NEAR",ts,hosts)
         relevant = []
         for atk in self.all:
             num = 0
-            diff = ts - atk.ts
-            if diff > -1 and diff < 60: 
+            diff = start - atk.ts
+            # print(atk.ts,diff)
+            if diff > -1 and diff < 60 or atk.ts > start and atk.ts < end : 
                 for i in hosts:
                     if i.startswith("10.42"):
                         num+=2

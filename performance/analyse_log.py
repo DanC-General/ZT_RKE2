@@ -6,6 +6,8 @@ import numpy as np
 import os
 import re
 import time
+import statistics
+
 def timestr_to_obj(timestr):
     if timestr is None:
         return None
@@ -15,7 +17,7 @@ class Attack:
         self.name = name
         self.ts = timestr_to_obj(ts)
         self.host = host
-        self.host_map = { "VM1":["10.1.2.5"],"VM2":["10.1.2.10"],"LOCAL":["127.0.0.1","10.1.2.1","10.1.1.241"]}
+        self.host_map = { "VM1":["10.1.2.5","10.1.2.1"],"VM2":["10.1.2.10","10.1.2.1"],"LOCAL":["127.0.0.1","10.1.1.241"]}
 
     def get_class(self): 
         if (self.name in ["Brute Force","DoS"]): 
@@ -62,7 +64,7 @@ class Attacks:
         for atk in self.all:
             diff = req.ts - atk.ts
             num = 0
-            if diff < lowest and diff > -5 and diff < 300:
+            if diff < lowest and diff > -5:
             # if lowest is None: 
             #     # print("NEW LOWEST",diff,atk)
             #     lowest = diff
@@ -112,6 +114,7 @@ class Analyser:
         self.req_q = list()
         self.attacks = Attacks()
         self.last_details = list()
+        self.total_count = 0
 
     def set_start(self,timestr):
         self.start_time = timestr_to_obj(timestr)
@@ -121,6 +124,7 @@ class Analyser:
             return
             print("SYSCALL MAPPING:", line)
         elif re.match(r"(1:)|(\d+\.\d+):",line):
+            self.total_count += 1
             return
             print("PACKET DETAILS:",line)
             one = line.split(": ")
@@ -135,6 +139,7 @@ class Analyser:
             # print("REQUEST DETAILS",line)
             # details = line.split(" ")
             ## Parse request into request, syscalls and packet
+            # self.total_count += 1
             no_sysc = re.sub(r"[a-zA-Z]+:: {.*}",' ',line)
             sstr = re.search(r"[a-zA-Z]+:: {.*}",line).group()
             # print("NS",no_sysc)
@@ -177,10 +182,12 @@ class Analyser:
                 self.add_request(Request(req_t,o_t,s_t,ben_c,datestr,pack_ts,sstr,self.last_details))
                 self.analyse_line(third,f)
         elif re.match(r"\d+ packets processed.",line):
+            self.total_count += 1000
             # print("GENERAL PACKET COUNTS", line)
             pass
 
     def analyse_comp_line(self,line):
+        self.total_count += 1
         det = [x.strip() for x in line.strip().split(" ") if x.strip() != '']
         # print(line,det)
         if len(det) != 6:
@@ -226,41 +233,45 @@ def get_group_times(group_list,start_time):
 def get_groups_from_analyser(results,atks):
     groups = dict()
     count = 0
-    host_no_attack = 0
-    within_90s = 0
-    host_map = { "VM1":"10.1.2.5","VM2":"10.1.2.10","LOCAL":"127.0.0.1"}
+    fal_pos = 0
+    true_pos = 0
     values = {"total":0,"within_90s":0,"correct_host":0}
     all_groups = list()
     host_list = []
     for r in results.req_q:
         # print("((",r,end=")),  ")
         # group_count += 1
-        count += 1
+        # count += 1
         near = atks.get_host_atks(r)
-        if near[0] is None: 
-            host_no_attack += 1
-        elif near[0] < 300: 
-            within_90s += 1
+        # if near[0] is None: 
+        #     host_no_attack += 1
+        # elif near[0] < 95: 
+        #     within_90s += 1
         #     print("Incremented",near[1],r)
         # else:
         #     print("Near nonnull",near,near[1])
         # Store groups = { hosts -> [ count,start_ts, end_ts ]}
         # print(near)
-        found = False
+        # found = False
         host_str = ""
         # print("Adding",r.hosts,r.last_pack)
         for i,v in enumerate(sorted(r.hosts)):
             # print("Sorted",i,v)
             # print("adding",v)
             host_str += "-" + str(v)
+
+        ##### GROUP COUNTING NOT WORKING PROPERLY #####
+
+
         if host_str not in host_list: 
             host_list.append(host_str)
         if host_str in groups:
             # print(host_str)
-            found = True
+            # found = True
             groups[host_str][0] += 1
             # If there is a gap larger than 60 seconds between packets, end the current flow.
             if r.ts - groups[host_str][2] > 60:
+                ### Terminate an old group
                 if len(groups[host_str]) > 4:
                     groups[host_str][6] = to_date(groups[host_str][6])
                 # groups[host_str].append(r.sysc_str)
@@ -277,17 +288,41 @@ def get_groups_from_analyser(results,atks):
                 #         values["correct_host"] += 1
                 # print("NEW ATTACK GROUP",datetime.datetime.fromtimestamp(r.ts),r.hosts,r.o_trust,r.s_trust,near[0],near[1])
                 # near = results.attacks.get_host_atks(r)
+                if groups[host_str][3] is None:
+                # if near[0] is None: 
+                    fal_pos += groups[host_str][0]
+                # elif near[0] < 90: 
+                elif groups[host_str][3] < 60:
+                # else:
+                    true_pos += groups[host_str][0]
+                    # print("Incremented",near[1],r)
+                else:
+                    fal_pos += groups[host_str][0]
+                # count += 1
                 groups[host_str] = [0,r.ts,r.ts,near[0],near[1].name,near[1].host,near[1].ts,r.hosts]                         
                 # groups[host_str] = [0,r.ts,r.ts,near[0],near[1].name,near[1].host,near[1].ts,r.sysc_str]                        
             else: 
                 groups[host_str][2] = r.ts 
-        if not found:
+        # if not found:
+        else:
+            ## Start a new group
             # near = results.attacks.get_host_atks(r)
+            # if near[0] is None: 
+            #     host_no_attack += 1
+            # # elif near[0] < 300: 
+            # else:
+            #     within_90s += 1
+            #     # print("Incremented",near[1],r)
+            # count += 1 
+            # print("NOT FOUND")
             groups[host_str] = [0,r.ts,r.ts,near[0],near[1].name,near[1].host,near[1].ts,r.hosts]      
-    # print(all_groups)
+    print("A_G:",all_groups)
+    print("C_G",groups)
+    count = results.total_count
+    total_pos = fal_pos + true_pos
     print("PARSED ", count, "packets")
     print("LISTS",host_list)
-    print("COUNTS", count, "UNKNOWN",host_no_attack,"prop unknown",host_no_attack/count,"within90",within_90s,"prop",within_90s/count)
+    print("COUNTS", count, "FP",fal_pos,"prop FP",fal_pos/total_pos,"TP",true_pos,"prop",true_pos/total_pos)
     return all_groups
 
 def to_date(times):
@@ -339,6 +374,19 @@ def parse_log_file(fname):
             results.analyse_line(line,raw)
         return results
 
+def get_average_atk_delay(atks):
+    objs = []
+    prev = None
+    for i in atks.all: 
+        cur = i.ts
+        if prev is None: 
+            prev = cur
+            continue
+        objs.append(cur-prev)
+        prev = cur
+    print(objs)
+    print("Average delay",statistics.fmean(objs),statistics.median(objs))
+
 def main(): 
     parser = ArgumentParser()
     parser.add_argument("file", help="Path of file to anlayse")
@@ -346,10 +394,12 @@ def main():
     args = parser.parse_args()
     results = parse_log_file(args.file)
     atks = parse_attack_file(args.attack_file,results.start_time)
-
+    get_average_atk_delay(atks)
     all_groups = get_groups_from_analyser(results,atks)
+    print("ANALYSER COUNT",results.total_count)
     zt_rke2_group = get_group_times(all_groups,results.start_time)
     comp_analyser = analyse_comparison("../module/Kit_Agent/100k_minimal.log")
+    print("ANALYSER COUNT",comp_analyser.total_count)
     comp_groups = get_groups_from_analyser(comp_analyser,atks)
     kit_group = get_group_times(comp_groups,results.start_time)
     # print("ZT_RKE2 GROUPS")
@@ -421,7 +471,7 @@ def main():
     plt.legend()
     plt.title("Analysis of ZT-RKE2 model")
     # plt.savefig(f'out/31_8_{time.strftime("%Y%m%d-%H%M%S")}.png')
-    plt.show()
+    # plt.show()
 
 
 if __name__ == "__main__": 

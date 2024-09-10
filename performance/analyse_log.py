@@ -18,6 +18,10 @@ class Attack:
         self.ts = timestr_to_obj(ts)
         self.host = host
         self.host_map = { "VM1":["10.1.2.5","10.1.2.1"],"VM2":["10.1.2.10","10.1.2.1"],"LOCAL":["127.0.0.1","10.1.1.241"]}
+        if ts is None or host is None: 
+            self.id = None
+        else:
+            self.id = str(ts) + str(host)
 
     def get_class(self): 
         if (self.name in ["Brute Force","DoS"]): 
@@ -82,6 +86,23 @@ class Attacks:
         if stored is None: 
             return None, Attack(None,None,None)
         return lowest, stored
+
+    ### Input ts as the original ts: group timestamp + analyser start time 
+    def get_60s_ts(self,ts,hosts):
+        print("FINDING ATTACKS NEAR",ts,hosts)
+        relevant = []
+        for atk in self.all:
+            num = 0
+            diff = ts - atk.ts
+            if diff > -1 and diff < 60: 
+                for i in hosts:
+                    if i.startswith("10.42"):
+                        num+=2
+                    if i in atk.get_ips(): 
+                        num+= 1
+                if num == 3:
+                    relevant.append(atk)
+        return relevant
 
 class Request: 
     def __init__(self,r_t,o_t,s_t,benign,alert_ts,timestr,sstr,pack,term=False): 
@@ -230,7 +251,7 @@ def get_group_times(group_list,start_time):
         atk_ranges.append((int(start),int(end)))
     return atk_ranges
 
-def get_groups_from_analyser(results,atks):
+def get_groups_from_analyser(results,atks,start_time):
     groups = dict()
     count = 0
     fal_pos = 0
@@ -299,7 +320,7 @@ def get_groups_from_analyser(results,atks):
                 else:
                     fal_pos += groups[host_str][0]
                 # count += 1
-                groups[host_str] = [0,r.ts,r.ts,near[0],near[1].name,near[1].host,near[1].ts,r.hosts]                         
+                groups[host_str] = [0,r.ts,r.ts,near[0],near[1].name,near[1].host,near[1].ts,r.hosts,near[1].id]                         
                 # groups[host_str] = [0,r.ts,r.ts,near[0],near[1].name,near[1].host,near[1].ts,r.sysc_str]                        
             else: 
                 groups[host_str][2] = r.ts 
@@ -315,13 +336,40 @@ def get_groups_from_analyser(results,atks):
             #     # print("Incremented",near[1],r)
             # count += 1 
             # print("NOT FOUND")
-            groups[host_str] = [0,r.ts,r.ts,near[0],near[1].name,near[1].host,near[1].ts,r.hosts]      
+            groups[host_str] = [0,r.ts,r.ts,near[0],near[1].name,near[1].host,near[1].ts,r.hosts,near[1].id]      
+    ## END UNTERMIANTED GROUPS
+    for host_str,group in groups.items():
+        # print("GROUPS",host_str,group)
+        all_groups.append(group.copy())
+        if group[3] is None:
+        # if near[0] is None: 
+            fal_pos += group[0]
+        # elif near[0] < 90: 
+        elif group[3] < 60:
+        # else:
+            true_pos += group[0]
+            # print("Incremented",near[1],r)
+        else:
+            fal_pos += group[0]
     print("A_G:",all_groups)
-    print("C_G",groups)
+    # print("C_G",groups)
+    ids = []
+    for grp in all_groups:
+        if grp[8] not in ids:
+            print(grp[8],datetime.datetime.fromtimestamp(grp[0]).time(),grp[7])
+            ids.append(grp[8])
+        else:
+            print("Duplicate",grp[8],datetime.datetime.fromtimestamp(grp[0]).time(),grp[7])
+            print(atks.get_60s_ts(float(r.ts) + float(start_time),grp[7]))
+    for atk in atks.all: 
+        if atk.id not in ids:
+            print("Missing",atk)
+        
     count = results.total_count
     total_pos = fal_pos + true_pos
     print("PARSED ", count, "packets")
     print("LISTS",host_list)
+    print("IDS",len(ids),ids)
     print("COUNTS", count, "FP",fal_pos,"prop FP",fal_pos/total_pos,"TP",true_pos,"prop",true_pos/total_pos)
     return all_groups
 
@@ -395,12 +443,12 @@ def main():
     results = parse_log_file(args.file)
     atks = parse_attack_file(args.attack_file,results.start_time)
     get_average_atk_delay(atks)
-    all_groups = get_groups_from_analyser(results,atks)
+    all_groups = get_groups_from_analyser(results,atks,results.start_time)
     print("ANALYSER COUNT",results.total_count)
     zt_rke2_group = get_group_times(all_groups,results.start_time)
     comp_analyser = analyse_comparison("../module/Kit_Agent/100k_minimal.log")
     print("ANALYSER COUNT",comp_analyser.total_count)
-    comp_groups = get_groups_from_analyser(comp_analyser,atks)
+    comp_groups = get_groups_from_analyser(comp_analyser,atks,results.start_time)
     kit_group = get_group_times(comp_groups,results.start_time)
     # print("ZT_RKE2 GROUPS")
     # for i in all_groups: 

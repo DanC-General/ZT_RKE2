@@ -169,10 +169,11 @@ def parse_attack_file(file,start):
     # print("Found",len(atks.all),"attacks")
     return atks
     
-def parse_log_file(fname):
+def parse_log_file(fname,atks):
     print(fname) 
     with open(fname,"r") as raw: 
         results = Analyser()
+        results.attacks = atks
         line = raw.readline()
         print("|st",timestr_to_obj(line))
         results.set_start(line)        
@@ -193,3 +194,9 @@ def get_average_atk_delay(atks):
         prev = cur
     print(objs)
     print("Average delay",statistics.fmean(objs),statistics.median(objs))
+
+def get_start_time(fname):
+    # print(fname) 
+    with open(fname,"r") as raw: 
+        line = raw.readline()
+        return timestr_to_obj(line)

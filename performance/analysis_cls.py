@@ -253,16 +253,43 @@ class Analyser:
             return
         ts = det[0].replace("|",'').strip()
         rmse = det[-1]
-        if float(rmse) < 0.4: 
-            # print("Excluding",rmse)
-            return
+        # if float(rmse) < 0.4: 
+        #     # print("Excluding",rmse)
+        #     return
+        # else:
+        sip = det[1]
+        dip = det[2]
+        last_details = [rmse,"compare",sip,dip]
+        mark = False
+        if float(rmse) > 0.4:
+            mark = True
+        actual_mark = self.attacks.mark_packet(ts,[sip,dip])
+        if actual_mark:
+            self.pos += 1
+            if mark: 
+                self.correct_pos += 1
         else:
-            sip = det[1]
-            dip = det[2]
-            last_details = [rmse,"compare",sip,dip]
+            self.neg += 1
+            if not mark: 
+                self.true_neg += 1
             # print("added ",last_details, "from", det)
-            self.add_request(Request(None,rmse,None,None,None,ts,None,last_details,True))
+            # self.add_request(Request(None,rmse,None,None,None,ts,None,last_details,True))
 
     def add_request(self,req): 
         # print("|",req)
         self.req_q.append(req)
+
+    def get_stats(self): 
+        total_pos = self.pos 
+        total_neg = self.neg
+        t_p = self.correct_pos
+        f_p = total_pos - self.correct_pos
+        t_n = self.true_neg
+        f_n = total_neg - self.true_neg
+        acc = (t_p + t_n) / (t_p + t_n + f_p + f_n)
+        prec = t_p / (t_p + f_p)
+        rec = t_p / (t_p + f_n)
+        f1 = 2 * (prec * rec) / (prec + rec)
+        print("True positives:",t_p,"False postives:", f_p ,"True negatives:",t_n,"False negatives:",f_n)
+        print("Accuracy:", acc, "Precision:",prec,"Recall:",rec,"F1 Score:",f1)
+        return [t_p,f_p,t_n,f_n]

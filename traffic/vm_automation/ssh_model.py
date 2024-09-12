@@ -216,10 +216,13 @@ class SSHClient:
             elif atk_type == "s": 
                 self.run_internal(f)
 
-    def add_malicious(self):
+    def add_malicious(self,atk=None):
         try:
             if random.random() < 0.7: 
-                chosen_atk = random.choice(["f","b","c","s"])
+                choices = ["f","b","c","s"]
+                chosen_atk = random.choice(choices)
+                if atk is not None and atk in choices:
+                    chosen_atk = atk
                 print("Chose",chosen_atk)
                 self.client = paramiko.client.SSHClient()
                 self.client.set_missing_host_key_policy(paramiko.AutoAddPolicy())

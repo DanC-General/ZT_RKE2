@@ -3,11 +3,12 @@ import datetime
 import os
 import statistics
 
-def analyse_comparison(file_name):
+def analyse_comparison(file_name,atks):
     if not os.path.exists(file_name): 
         print("Invalid file for comparison.")
         return
     results = Analyser()
+    results.attacks = atks
     with open(file_name,'r') as f:
         for line in f:
             results.analyse_comp_line(line)

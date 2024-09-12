@@ -1,0 +1,11 @@
+
+Running ZT_RKE2 model...
+Attack file given at 31_8_mal.log
+31_8_py.log
+|st 1725113776.655127
+True positives: 11789 False postives: 104 True negatives: 15128 False negatives: 1918
+Accuracy: 0.9301288918069042 Precision: 0.9912553602959724 Recall: 0.8600714963157511 F1 Score: 0.9210156249999999
+
+Running Kitsune comparison...
+True positives: 29376 False postives: 4056 True negatives: 61065 False negatives: 23954
+Accuracy: 0.7635309115161544 Precision: 0.8786791098348887 Recall: 0.550834427151697 F1 Score: 0.6771628132131579

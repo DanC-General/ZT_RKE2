@@ -173,11 +173,8 @@ class Analyser:
             print("SYSCALL MAPPING:", line)
         elif re.match(r"(1:)|(\d+\.\d+):",line):
             self.total_count += 1
-            # return
-            # print("PACKET DETAILS:",line)
             one = line.split(": ")
             two = one[1].split("|")
-            # print(one,"Two is ",two)
             rmse = one[0]
             name = two[0].replace("svc->",'').strip()
             sip = two[3].replace("sip->",'').strip()
@@ -210,25 +207,12 @@ class Analyser:
             #   benign.
             elif sys_alert and not is_malicious_packet:
                 self.false_pos += 1
+
             f.seek(pos)
-            # If the last packet was benign and there was no alert
-            #  (alerts would set last_match to True, which would fail),
-            # it was correctly marked as benign. IDS evaluation happens 
-            # here for the previous packet, as evaluation depends on whether
-            # or not an alert was triggered (line starts with Request)
-            # if not self.last_match: 
-            #     self.true_neg += 1
-            # else: 
-            #     self.false_neg += 1
 
             self.last_match = is_malicious_packet
             self.last_details = [rmse,name,sip,dip]
         elif line.startswith("Request"):
-            # return
-            # print("REQUEST DETAILS",line)
-            # details = line.split(" ")
-            ## Parse request into request, syscalls and packet
-            # self.total_count += 1
             no_sysc = re.sub(r"[a-zA-Z]+:: {.*}",' ',line)
             sstr = re.search(r"[a-zA-Z]+:: {.*}",line).group()
             # print("NS",no_sysc)
@@ -254,15 +238,6 @@ class Analyser:
             # sip = re.sub(r'[a-zA-Z:]', '', req_dets[])
             datestr = req_dets[11] + " " + req_dets[12]
             # print("|",datestr)
-            # print(self.attacks.mark_packet)
-            # For a true positive, there should have been a malicious packet (mark_packet True)
-            # and an attack should have been raised (line starts with Request) 
-            # if self.attacks.mark_packet(pack_ts,[sip,dip]):
-            #     self.true_pos += 1
-            # # For a false positive, there should have been a benign packet (mark_packet True)
-            # # but an attack was raised (line starts with Request) 
-            # else: 
-            #     self.false_pos += 1
             # second = f.readline()
             # print("REQ_PACK COUNTS",second)
             # ben_c = second.split(" ")[0]

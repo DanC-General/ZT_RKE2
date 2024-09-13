@@ -11,8 +11,8 @@ class Attack:
         self.name = name
         self.ts = timestr_to_obj(ts)
         self.host = host
-        self.times = { "Symlink Attack": 5, "Dirty COW": 60, "Brute Force":60,"DoS": 60}
-        self.end_ts = self.ts + self.times[self.name]
+        self.times = { "Symlink Attack":5, "Dirty COW":30, "Brute Force":30,"DoS":30}
+        self.end_ts = float(self.ts + self.times[self.name])
         self.host_map = { "VM1":["10.1.2.5","10.1.2.1"],"VM2":["10.1.2.10","10.1.2.1"],"LOCAL":["127.0.0.1","10.1.1.241"]}
         if ts is None or host is None: 
             self.id = None
@@ -108,6 +108,7 @@ class Attacks:
         return relevant
 
     # Pass raw packet timestamp and [srcip,dstip]
+    # Returns True for malicious packets and False for benign
     def mark_packet(self,start,hosts):
         # print("FINDING ATTACKS NEAR",ts,hosts)
         for atk in self.all:
@@ -156,7 +157,8 @@ class Analyser:
         self.total_count = 0
         self.neg = 0
         self.pos = 0
-        self.correct_pos = 0
+        self.true_pos = 0
+        self.false_pos = 0
         self.false_neg = 0
         self.true_neg = 0
         self.last_match = False
@@ -181,14 +183,45 @@ class Analyser:
             sip = two[3].replace("sip->",'').strip()
             dip = two[4].replace("dip->",'').strip()
             ts = two[7].replace("ts->",'').strip()
-            mark = self.attacks.mark_packet(ts,[sip,dip])
-            if not self.last_match: 
-                self.true_neg += 1
-            self.last_match = mark
-            if mark:
+            is_malicious_packet = self.attacks.mark_packet(ts,[sip,dip])
+            if is_malicious_packet:
                 self.pos += 1
             else: 
                 self.neg += 1 
+            pos = f.tell()
+            next_line = f.readline()
+            sys_alert = False
+            if next_line.startswith("Request"):
+                # Alert was raised
+                sys_alert = True
+            # For a false negative, there would have been an attack (is_malicious_packet True) 
+            #   and no attack would have been raised (mark False)
+            if not sys_alert and is_malicious_packet: 
+                self.false_neg += 1
+            # For a true negative, there should have been no attack (is_malicious_packet False)
+            #   and no attack should have been raised (mark False)
+            elif not sys_alert and not is_malicious_packet: 
+                self.true_neg += 1
+            # For a true positive, the system would detect an alert and the packet would be 
+            #   malicious.
+            elif sys_alert and is_malicious_packet: 
+                self.true_pos += 1
+            # For a false positive, the system would detect an alert but the packet would be 
+            #   benign.
+            elif sys_alert and not is_malicious_packet:
+                self.false_pos += 1
+            f.seek(pos)
+            # If the last packet was benign and there was no alert
+            #  (alerts would set last_match to True, which would fail),
+            # it was correctly marked as benign. IDS evaluation happens 
+            # here for the previous packet, as evaluation depends on whether
+            # or not an alert was triggered (line starts with Request)
+            # if not self.last_match: 
+            #     self.true_neg += 1
+            # else: 
+            #     self.false_neg += 1
+
+            self.last_match = is_malicious_packet
             self.last_details = [rmse,name,sip,dip]
         elif line.startswith("Request"):
             # return
@@ -222,8 +255,14 @@ class Analyser:
             datestr = req_dets[11] + " " + req_dets[12]
             # print("|",datestr)
             # print(self.attacks.mark_packet)
-            if self.attacks.mark_packet(pack_ts,[sip,dip]):
-                self.correct_pos += 1
+            # For a true positive, there should have been a malicious packet (mark_packet True)
+            # and an attack should have been raised (line starts with Request) 
+            # if self.attacks.mark_packet(pack_ts,[sip,dip]):
+            #     self.true_pos += 1
+            # # For a false positive, there should have been a benign packet (mark_packet True)
+            # # but an attack was raised (line starts with Request) 
+            # else: 
+            #     self.false_pos += 1
             # second = f.readline()
             # print("REQ_PACK COUNTS",second)
             # ben_c = second.split(" ")[0]
@@ -267,11 +306,15 @@ class Analyser:
         if actual_mark:
             self.pos += 1
             if mark: 
-                self.correct_pos += 1
+                self.true_pos += 1
+            else: 
+                self.false_pos += 1 
         else:
             self.neg += 1
             if not mark: 
                 self.true_neg += 1
+            else: 
+                self.false_neg += 1 
             # print("added ",last_details, "from", det)
             # self.add_request(Request(None,rmse,None,None,None,ts,None,last_details,True))
 
@@ -282,14 +325,15 @@ class Analyser:
     def get_stats(self): 
         total_pos = self.pos 
         total_neg = self.neg
-        t_p = self.correct_pos
-        f_p = total_pos - self.correct_pos
+        t_p = self.true_pos
+        f_p = self.false_pos
         t_n = self.true_neg
-        f_n = total_neg - self.true_neg
+        f_n = self.false_neg
         acc = (t_p + t_n) / (t_p + t_n + f_p + f_n)
         prec = t_p / (t_p + f_p)
         rec = t_p / (t_p + f_n)
         f1 = 2 * (prec * rec) / (prec + rec)
+        print("Total positives:",total_pos, "Total negatives:",total_neg)
         print("True positives:",t_p,"False postives:", f_p ,"True negatives:",t_n,"False negatives:",f_n)
         print("Accuracy:", acc, "Precision:",prec,"Recall:",rec,"F1 Score:",f1)
         return [t_p,f_p,t_n,f_n]

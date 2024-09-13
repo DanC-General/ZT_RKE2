@@ -177,10 +177,14 @@ def parse_log_file(fname,atks):
         results.attacks = atks
         line = raw.readline()
         print("|st",timestr_to_obj(line))
-        results.set_start(line)        
-        for line in raw: 
-            # print(line)
+        results.set_start(line)     
+        line = raw.readline()
+        while line:   
+        # for line in raw: 
+        #     # print(line)
+            # print("Analysing",line)
             results.analyse_line(line,raw)
+            line = raw.readline()
         return results
 
 def get_average_atk_delay(atks):

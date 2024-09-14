@@ -16,7 +16,7 @@ class Attack:
         self.host = host
         self.times = { "Symlink Attack":1, "Dirty COW":3, "Brute Force":14,"DoS":12}
         self.end_ts = float(self.start_ts + self.times[self.name])
-        self.host_map = { "VM1":["10.1.2.5","10.1.2.1","10.1.1.241"],"VM2":["10.1.2.10","10.1.2.1","10.1.1.241"],"LOCAL":["127.0.0.1","10.1.1.241"]}
+        self.host_map = { "VM1":["10.1.2.5","10.1.2.1"],"VM2":["10.1.2.10","10.1.2.1"],"LOCAL":["127.0.0.1","10.1.1.241"]}
         if ts is None or host is None: 
             self.id = None
         else:
@@ -130,6 +130,7 @@ class Attacks:
                 if i in atk.get_ips(): 
                     num+= 1
             if num == 3 and atk.packet_in_attack(start): 
+            # if atk.packet_in_attack(start):
                 # print(str(atk))
                 return True, atk.get_class()
         return False, None
@@ -355,7 +356,7 @@ class Analyser:
         ground_truth_table = [int(float(x) - self.start_time) for x in self.ground_pos_times]
         host_gt_table = [int(float(x) - self.start_time) for x in self.host_gt]
         net_gt_table = [int(float(x) - self.start_time) for x in self.net_gt]
-        fn_table = [int(float(x) - self.start_time) for x in self.fntimes]
+        fn_table = [int(float(x) - self.start_time) for x in self.fptimes]
         tp_table = [int(float(x) - self.start_time) for x in self.tptimes]
 
         gt_vals = []

@@ -159,15 +159,18 @@ def parse_attack_file(file,start):
                     if atk_details.is_newer(start):
                         # print(atk_details)
                         atks.add_attack(atk_details)
+                    # else: 
+                    #     print("not adding",atk)
                     # print("Parsed ts:",ts.strip(),"atk:",atk.strip(),"host",host)
-                except:
+                except Exception as e:
+                    # print(e)
                     pass
     else: 
         return
     atks.order()
-    # for i in atks.all: 
-    #     print("((",i,end=")),  ")
-    # print("Found",len(atks.all),"attacks")
+    for i in atks.all: 
+        print("((",i,end=")),  ")
+    print("Found",len(atks.all),"attacks")
     return atks
     
 def parse_log_file(fname,atks):

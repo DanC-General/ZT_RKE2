@@ -51,6 +51,7 @@ class Service:
             #     #     subj_sysc_map[subject]["total"] = 1 * recency
             self.subj_sysc_map[subject]["total"] += 1 * recency
             if syscall not in self.subj_sysc_map[subject]:
+                print("Added syscall")
                 self.subj_sysc_map[subject][syscall] = 1 * recency
             else:
                 self.subj_sysc_map[subject][syscall] += 1 * recency

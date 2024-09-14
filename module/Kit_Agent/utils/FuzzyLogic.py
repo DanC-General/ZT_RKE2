@@ -121,7 +121,7 @@ class SRule:
         try:
             self.subj_trust_sim.compute()
             # print(l,s,y,"succeeded.")
-            print(l,s,y,"-->",self.subj_trust_sim.output['subject_trust'])
+            # print(l,s,y,"-->",self.subj_trust_sim.output['subject_trust'])
             # if log is not None: 
             #     log.write("Likelihood "+ str(l) + " sub malig "+ str(s) + "sysc malig "+ str(y) + "--->\n\t "+ str(self.subj_trust_sim.output) + "\n" )
             return self.subj_trust_sim.output['subject_trust']
@@ -223,7 +223,7 @@ class RRule:
 # for o in np.arange(0, 1.01, 0.01):
 #     for s in np.arange(0, 1.1, 0.1):
 #         r.simulate(o,s)
-sr = SRule()
+# sr = SRule()
 # # sleep(5)
 # # while True:
 # #     continue

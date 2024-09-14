@@ -31,7 +31,7 @@ class OnlineFE:
         # self.get_next_vector()
 
 # PACKET 
-    def get_next_vector(self):
+    def get_next_vector(self,f=None):
         while len(self.packets) == 0: 
             # Check error / null return
             # return []

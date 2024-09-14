@@ -5,15 +5,17 @@ import matplotlib.pyplot as plt
 from analysis_funcs import *
 
 #### python3 analyse_log.py 31_8_py.log -a 31_8_mal.log 
+#### pcapsampler -m COUNT_RAND_UNIFORM -r x input.pcap output.pcap
 def main(): 
     parser = ArgumentParser()
     parser.add_argument("file", help="Path of file to anlayse")
     parser.add_argument("-a","--attack-file",help="Path of file containing the attack logs")
     args = parser.parse_args()
     stime = get_start_time(args.file)
-    print("\nRunning ZT_RKE2 model...")
     atks = parse_attack_file(args.attack_file,stime)
+    # print("Attacks", [x for x in atks.all])
     results = parse_log_file(args.file,atks)
+    print("\nRunning ZT_RKE2 model...")
     results.get_stats()
     # print("Total negatives:",results.neg,"\nTotal positives:",results.pos)
     # print("True positives",results.correct_pos,"False postives", results.pos-results.correct_pos,"True negatives",results.true_neg,"False negatives",results.neg-results.true_neg)
@@ -25,7 +27,11 @@ def main():
     # zt_rke2_group = get_group_times(all_groups,results.start_time)
     print("\nRunning Kitsune comparison...")
     comp_analyser = analyse_comparison("../module/Kit_Agent/100k_minimal.log",atks)
+    comp_analyser.start_time = stime
     comp_analyser.get_stats()
+    results.get_visuals("ztrke2_31_8")
+    comp_analyser.get_visuals("comparison_nids_31_8")
+    # for i in 
     # comp_groups, comp_metrics = get_groups_from_analyser(comp_analyser,atks)
     # print("ANALYSER COUNT",comp_analyser.total_count)
     # kit_group = get_group_times(comp_groups,results.start_time)
@@ -41,7 +47,7 @@ def main():
     # values = range(0, 3600)
     # ground_truths = dict()
     # for atk in atks.all: 
-    #     ground_truths[int(atk.ts - results.start_time)] = atk.get_class()
+    #     ground_truths[int(atk.start_time() - results.start_time)] = atk.get_class()
     # # Create a list to store the corresponding values
     # plot_values = []
     # net_atks = []

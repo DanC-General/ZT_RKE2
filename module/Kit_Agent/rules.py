@@ -50,7 +50,6 @@ def get_connection(pack):
     # try: 
     p1 = subprocess.Popen(command1, stdout=subprocess.PIPE,stderr=subprocess.DEVNULL)
     output = subprocess.run(command2, stdin=p1.stdout,stdout=subprocess.PIPE,universal_newlines=True,check=False).stdout
-    # print("OUTPUT is " + output)
     if output is None or output == "": 
         return pack
     # except CalledProcessError: 
@@ -92,6 +91,8 @@ def get_lines(pipe):
             # print("Packet",pack.ts,"general time",time())
             orig_sip, orig_sport = pack.external_port(pod_cidr)
             get_connection(pack)
+            # print(orig_sip,":" ,orig_sport,"-->",pack.sip,pack.sport)
+            # continue
             # log.write(str(pack) + "\n")
             # log.write(str(pack.ts) + "\n")
 
@@ -257,8 +258,8 @@ if __name__ == "__main__":
     # maxAE = 10 #maximum size for any autoencoder in the ensemble layer
     # FMgrace = 100 #the number of instances taken to learn the feature mapping (the ensemble's architecture)
     # ADgrace = 1000 #the number of instances used to train the anomaly detector (ensemble itself)
-    threading.Thread(target=retrieve).start()
-    while True:
-        if not msg_q.empty():
-            a = msg_q.get()
-            print("recv alert",a,"at",time())
+    # threading.Thread(target=retrieve).start()
+    # while True:
+    #     if not msg_q.empty():
+    #         a = msg_q.get()
+    #         print("recv alert",a,"at",time())

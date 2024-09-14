@@ -168,9 +168,9 @@ def parse_attack_file(file,start):
     else: 
         return
     atks.order()
-    for i in atks.all: 
-        print("((",i,end=")),  ")
-    print("Found",len(atks.all),"attacks")
+    # for i in atks.all: 
+    #     print("((",i,end=")),  ")
+    # print("Found",len(atks.all),"attacks")
     return atks
     
 def parse_log_file(fname,atks):

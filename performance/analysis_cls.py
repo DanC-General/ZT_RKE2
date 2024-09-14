@@ -231,7 +231,7 @@ class Analyser:
             #   benign.
             elif sys_alert and not is_malicious_packet:
                 # print("False positive",[sip,dip,datetime.datetime.fromtimestamp(float(ts))])
-                # self.fptimes.append(ts)
+                self.fptimes.append(ts)
                 self.false_pos += 1
 
             f.seek(pos)
@@ -398,6 +398,6 @@ class Analyser:
         plt.legend()
         plt.title(f"Analysis of {name} model")
         plot_time = time.strftime("%Y%m%d-%H%M%S")
-        plt.savefig(f'out/{plot_time}_{name}.png')
-        # plt.show()
+        # plt.savefig(f'out/{plot_time}_{name}.png')
+        plt.show()
         

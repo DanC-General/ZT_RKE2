@@ -4,12 +4,14 @@ import numpy as np
 import matplotlib.pyplot as plt
 from analysis_funcs import *
 
-#### python3 analyse_log.py 31_8_py.log -a 31_8_mal.log 
+#### python3 analyse_log.py 31_8_py.log -a 31_8_mal.log -c ../module/Kit_Agent/100k_minimal.log
+#### python3 analyse_log.py v2_14_9_py.log -a v2_14_9_mal.log -c ../module/Kit_Agent/14_9_100_minimal.log
 #### pcapsampler -m COUNT_RAND_UNIFORM -r x input.pcap output.pcap
 def main(): 
     parser = ArgumentParser()
     parser.add_argument("file", help="Path of file to anlayse")
     parser.add_argument("-a","--attack-file",help="Path of file containing the attack logs")
+    parser.add_argument("-c","--comparison-file",help="Path of file containing the parsed data for Kitsune output")
     args = parser.parse_args()
     stime = get_start_time(args.file)
     atks = parse_attack_file(args.attack_file,stime)
@@ -26,7 +28,7 @@ def main():
     # print("ANALYSER COUNT",results.total_count)
     # zt_rke2_group = get_group_times(all_groups,results.start_time)
     print("\nRunning Kitsune comparison...")
-    comp_analyser = analyse_comparison("../module/Kit_Agent/100k_minimal.log",atks)
+    comp_analyser = analyse_comparison(args.comparison_file,atks)
     comp_analyser.start_time = stime
     comp_analyser.get_stats()
     results.get_visuals("ztrke2_31_8")

@@ -159,7 +159,7 @@ class SSHClient:
         self.client.connect(self.host, username=self.username, password=self.password, port=30002)
         first = random.choices(self.options,weights=first_actions)[0]
         first()
-        time.sleep(random.randint(60,90))
+        time.sleep(random.randint(0,120))
 
     def _bruteforce_thread(self): 
         try:
@@ -215,7 +215,7 @@ class SSHClient:
                 self.run_cve(f)
             elif atk_type == "s": 
                 self.run_internal(f)
-        time.sleep(random.randint(60,90))
+        # time.sleep(random.randint(60,90))
 
     def add_malicious(self,atk=None):
         try:
@@ -234,6 +234,7 @@ class SSHClient:
                 self.simulate_session()
         except Exception as e: 
             print("Something went wrong in malicious:", e)
+        time.sleep(random.randint(60,90))
 
 
 

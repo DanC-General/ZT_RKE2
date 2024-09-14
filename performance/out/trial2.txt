@@ -1,0 +1,13 @@
+Attack file given at v2_14_9_mal.log
+v2_14_9_py.log
+|st 1726294329.971877
+
+Running ZT_RKE2 model...
+Total positives: 12964 Total negatives: 34843
+True positives: 12827 False postives: 6197 True negatives: 28646 False negatives: 137
+Accuracy: 0.8675089422051164 Precision: 0.674253574432296 Recall: 0.9894322739895094 F1 Score: 0.8019882455920971
+
+Running Kitsune comparison...
+Total positives: 16016 Total negatives: 141033
+True positives: 13148 False postives: 14460 True negatives: 126573 False negatives: 2868
+Accuracy: 0.8896650090099268 Precision: 0.4762387713706172 Recall: 0.820929070929071 F1 Score: 0.602787456445993

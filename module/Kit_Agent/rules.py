@@ -229,8 +229,9 @@ def repeat_count():
 
 def repeat(): 
     # TODO Update for hour
-    s.enter(3600,1,adjust_trust)
-    s.enter(3600,1,repeat)
+    rep_time = 3600
+    s.enter(rep_time,1,adjust_trust)
+    s.enter(rep_time,1,repeat)
 
 def run_sched():
     # repeat_count()

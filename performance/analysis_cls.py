@@ -16,7 +16,7 @@ class Attack:
         self.host = host
         self.times = { "Symlink Attack":1, "Dirty COW":3, "Brute Force":14,"DoS":12}
         self.end_ts = float(self.start_ts + self.times[self.name])
-        self.host_map = { "VM1":["10.1.2.5","10.1.2.1"],"VM2":["10.1.2.10","10.1.2.1"],"LOCAL":["127.0.0.1","10.1.1.241"]}
+        self.host_map = { "VM1":["10.1.2.5","10.1.2.1","192.168.122.1","10.1.1.241"],"VM2":["10.1.2.10","10.1.2.1","192.168.122.1","10.1.1.241"],"LOCAL":["127.0.0.1","10.1.1.241"]}
         if ts is None or host is None: 
             self.id = None
         else:
@@ -56,66 +56,66 @@ class Attacks:
     def order(self):
         self.all = sorted(self.all, key=lambda x: x.start_time())
         
-    def get_closest_atk(self,ts):
-        # print("FINDING CLOSEST ATTACK TO",to_date(ts))
-        stored = None
-        lowest = None
-        for atk in self.all:
-            diff = abs(ts - atk.start_time())
-            if lowest is None: 
-                # print("NEW LOWEST",diff,atk)
-                lowest = diff
-                stored = atk
-            if diff < lowest: 
-                lowest = diff 
-                stored = atk
-        if stored is None: 
-            return None, Attack(None,None,None)
-        return lowest, stored
+    # def get_closest_atk(self,ts):
+    #     # print("FINDING CLOSEST ATTACK TO",to_date(ts))
+    #     stored = None
+    #     lowest = None
+    #     for atk in self.all:
+    #         diff = abs(ts - atk.start_time())
+    #         if lowest is None: 
+    #             # print("NEW LOWEST",diff,atk)
+    #             lowest = diff
+    #             stored = atk
+    #         if diff < lowest: 
+    #             lowest = diff 
+    #             stored = atk
+    #     if stored is None: 
+    #         return None, Attack(None,None,None)
+    #     return lowest, stored
     
-    def get_host_atks(self,req):
-        stored = None
-        lowest = math.inf
-        # print("Evaluating ", req)
-        for atk in self.all:
-            diff = req.ts - atk.start_time()
-            num = 0
-            if diff < lowest and diff > -5:
-            # if lowest is None: 
-            #     # print("NEW LOWEST",diff,atk)
-            #     lowest = diff
-            #     stored = atk
-                for i in req.hosts:
-                    if i.startswith("10.42"):
-                        num+=2
-                    if i in atk.get_ips(): 
-                        num+= 1
-                if num == 3:
-                    # print("Ips matched",i,req.hosts)
-                    lowest = diff 
-                    stored = atk
-            # if diff < lowest and atk.get_ip() in req.hosts: 
-        if stored is None: 
-            return None, Attack(None,None,None)
-        return lowest, stored
+    # def get_host_atks(self,req):
+    #     stored = None
+    #     lowest = math.inf
+    #     # print("Evaluating ", req)
+    #     for atk in self.all:
+    #         diff = req.ts - atk.start_time()
+    #         num = 0
+    #         if diff < lowest and diff > -5:
+    #         # if lowest is None: 
+    #         #     # print("NEW LOWEST",diff,atk)
+    #         #     lowest = diff
+    #         #     stored = atk
+    #             for i in req.hosts:
+    #                 if i.startswith("10.42"):
+    #                     num+=2
+    #                 if i in atk.get_ips(): 
+    #                     num+= 1
+    #             if num == 3:
+    #                 # print("Ips matched",i,req.hosts)
+    #                 lowest = diff 
+    #                 stored = atk
+    #         # if diff < lowest and atk.get_ip() in req.hosts: 
+    #     if stored is None: 
+    #         return None, Attack(None,None,None)
+    #     return lowest, stored
 
-    ### Input ts as the original ts: group timestamp + analyser start time 
-    def get_60s_ts(self,start,end,hosts):
-        # print("FINDING ATTACKS NEAR",ts,hosts)
-        relevant = []
-        for atk in self.all:
-            num = 0
-            diff = start - atk.start_time()
-            # print(atk.start_time(),diff)
-            if diff > -1 and diff < 60 or atk.start_time() > start and atk.start_time() < end : 
-                for i in hosts:
-                    if i.startswith("10.42"):
-                        num+=2
-                    if i in atk.get_ips(): 
-                        num+= 1
-                if num == 3:
-                    relevant.append(atk)
-        return relevant
+    # ### Input ts as the original ts: group timestamp + analyser start time 
+    # def get_60s_ts(self,start,end,hosts):
+    #     # print("FINDING ATTACKS NEAR",ts,hosts)
+    #     relevant = []
+    #     for atk in self.all:
+    #         num = 0
+    #         diff = start - atk.start_time()
+    #         # print(atk.start_time(),diff)
+    #         if diff > -1 and diff < 60 or atk.start_time() > start and atk.start_time() < end : 
+    #             for i in hosts:
+    #                 if i.startswith("10.42"):
+    #                     num+=2
+    #                 if i in atk.get_ips(): 
+    #                     num+= 1
+    #             if num == 3:
+    #                 relevant.append(atk)
+    #     return relevant
 
     # Pass raw packet timestamp and [srcip,dstip]
     # Returns True for malicious packets and False for benign
@@ -134,6 +134,25 @@ class Attacks:
                 # print(str(atk))
                 return True, atk.get_class()
         return False, None
+
+    def justify_exclusions(self,start,hosts):
+        reasons = []
+        for atk in self.all:
+            num = 0 
+            # for i in hosts:
+            #     if i.startswith("10.42"):
+            #         num += 2
+            #     if i in atk.get_ips(): 
+            #         num+= 1
+            # if num != 3: 
+            #     continue
+            start = float(start)
+            if atk.packet_in_attack(start):
+                reasons.append("TIME"+str(atk.start_time())+"::" + str(atk.get_ips()[0])+":"+str(atk.name))
+                # reasons.append("HOSTS-"+str(atk.get_ips()[0]))
+            # if not atk.packet_in_attack(start):
+            #     reasons.append("TIME"+str(atk.start_time()))
+        return reasons
 
 class Request: 
     def __init__(self,r_t,o_t,s_t,benign,alert_ts,timestr,sstr,pack,term=False): 
@@ -186,7 +205,6 @@ class Analyser:
 
     def analyse_line(self,line,f,nested=False): 
         if re.match(r"[a-zA-Z]+:",line): 
-            self.last_match = True
             return
             print("SYSCALL MAPPING:", line)
         elif re.match(r"(1:)|(\d+\.\d+):",line):
@@ -219,30 +237,35 @@ class Analyser:
             if not sys_alert and is_malicious_packet: 
                 self.false_neg += 1
                 self.fntimes.append(ts)
+                self.last_match = "FN"
             # For a true negative, there should have been no attack (is_malicious_packet False)
             #   and no attack should have been raised (mark False)
             elif not sys_alert and not is_malicious_packet: 
                 self.true_neg += 1
+                self.last_match = "TN"
             # For a true positive, the system would detect an alert and the packet would be 
             #   malicious.
             elif sys_alert and is_malicious_packet: 
                 self.true_pos += 1
                 self.tptimes.append(ts)
+                self.last_match = "TP"
             # For a false positive, the system would detect an alert but the packet would be 
             #   benign.
             elif sys_alert and not is_malicious_packet:
                 # print("False positive",[sip,dip,datetime.datetime.fromtimestamp(float(ts))])
                 self.fptimes.append(ts)
                 self.false_pos += 1
+                self.last_match = "FP"
 
             f.seek(pos)
 
-            self.last_match = is_malicious_packet
             self.last_details = [rmse,name,sip,dip]
         elif line.startswith("Request"):
             no_sysc = re.sub(r"[a-zA-Z]+:: {.*}",' ',line)
             sstr = re.search(r"[a-zA-Z]+:: {.*}",line).group()
             # print("NS",no_sysc)
+            if not self.last_match == "FP":
+                return
             one = no_sysc.split("svc->")
             # for i,e in enumerate(one): 
             #     print("ONE",i,e)
@@ -264,26 +287,24 @@ class Analyser:
             rmse = req_dets[-1].replace(':','')
             # sip = re.sub(r'[a-zA-Z:]', '', req_dets[])
             datestr = req_dets[11] + " " + req_dets[12]
-            # print("|",datestr)
-            # second = f.readline()
+            # print("|",datestr
+            second = f.readline()
             # print("REQ_PACK COUNTS",second)
-            # ben_c = second.split(" ")[0]
-            # third = f.readline()
+            # print(pack_ts,sip,dip,":",s_t,rmse,req_t,self.attacks.justify_exclusions(pack_ts,[sip,dip]))
+            ben_c = second.split(" ")[0]
+            third = f.readline()
             self.last_details = [rmse,name,sip,dip]
-            self.last_match = True
-            # if (third.startswith("Terminated")):
-            #     # print("REQUEST TERMINATED",line)
-            #     self.add_request(Request(req_t,o_t,s_t,ben_c,datestr,pack_ts,sstr,self.last_details,True))
-            # else:
-            #     self.add_request(Request(req_t,o_t,s_t,ben_c,datestr,pack_ts,sstr,self.last_details))
-            #     self.analyse_line(third,f)
+            if (third.startswith("Terminated")):
+                # print("REQUEST TERMINATED",line)
+                self.add_request(Request(req_t,o_t,s_t,ben_c,datestr,pack_ts,sstr,self.last_details,True))
+            else:
+                self.add_request(Request(req_t,o_t,s_t,ben_c,datestr,pack_ts,sstr,self.last_details))
+                self.analyse_line(third,f)
         elif re.match(r"\d+ packets processed.",line):
             # self.total_count += 1000
             # print("GENERAL PACKET COUNTS", line)
-            self.last_match = True
             pass
-        else:
-            self.last_match = True
+
 
     def analyse_comp_line(self,line):
         self.total_count += 1

@@ -22,7 +22,7 @@ import time
 
 
 # File location
-path = "../../performance/v2_14_100_sample.pcap" #the pcap, pcapng, or tsv file to process.
+path = "/home/dc/ZT_RKE2/performance/50_sample_14_9.pcap" #the pcap, pcapng, or tsv file to process.
 packet_limit = np.inf #the number of packets to process
 
 # KitNET params:
@@ -40,7 +40,7 @@ start = time.time()
 loop_time = time.time()
 # Here we process (train/execute) each individual packet.
 # In this way, each observation is discarded after performing process() method.
-with open("./14_9_100_minimal.log",'w') as f:
+with open("./v1_14_9_50_samp.log",'w') as f:
     while True:
         i+=1
         if i % 1000 == 0:
@@ -80,4 +80,4 @@ plt.xlabel("Time elapsed [min]")
 figbar=plt.colorbar()
 figbar.ax.set_ylabel('Log Probability\n ', rotation=270)
 # plt.show()
-plt.savefig("output_x.png")
+plt.savefig("output_y.png")

@@ -420,6 +420,6 @@ class Analyser:
         plt.legend()
         plt.title(f"Analysis of {name} model")
         plot_time = time.strftime("%Y%m%d-%H%M%S")
-        # plt.savefig(f'out/{plot_time}_{name}.png')
-        plt.show()
+        plt.savefig(f'out/{plot_time}_{name}.png')
+        # plt.show()
         

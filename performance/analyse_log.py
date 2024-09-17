@@ -19,7 +19,7 @@ def main():
     results = parse_log_file(args.file,atks)
     print("\nRunning ZT_RKE2 model...")
     results.get_stats()
-    results.get_visuals("ztrke2" + args.file.split("/")[-1])
+    # results.get_visuals(args.file.split("/")[-1]+"ztrke2")
     # print("Total negatives:",results.neg,"\nTotal positives:",results.pos)
     # print("True positives",results.correct_pos,"False postives", results.pos-results.correct_pos,"True negatives",results.true_neg,"False negatives",results.neg-results.true_neg)
     # print(results.total_count)
@@ -32,7 +32,7 @@ def main():
     comp_analyser = analyse_comparison(args.comparison_file,atks)
     comp_analyser.start_time = stime
     comp_analyser.get_stats()
-    comp_analyser.get_visuals("comparison"+args.comparison_file.split("/")[-1])
+    # comp_analyser.get_visuals(args.comparison_file.split("/")[-1]+"comparison")
 
 
     # for i in 

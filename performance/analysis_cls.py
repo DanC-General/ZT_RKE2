@@ -198,6 +198,8 @@ class Analyser:
         self.fptimes = []
         self.tptimes = []
         self.fntimes = []
+        # Net [TP,FN] : Host [TP,FN]
+        self.cls_detection = [ [0,0],[0,0]]
         self.last_match = False
 
     def set_start(self,timestr):
@@ -238,6 +240,10 @@ class Analyser:
                 self.false_neg += 1
                 self.fntimes.append(ts)
                 self.last_match = "FN"
+                if atk_type == "Host": 
+                    self.cls_detection[1][1] += 1
+                elif atk_type == "Network": 
+                    self.cls_detection[0][1] += 1
             # For a true negative, there should have been no attack (is_malicious_packet False)
             #   and no attack should have been raised (mark False)
             elif not sys_alert and not is_malicious_packet: 
@@ -249,6 +255,10 @@ class Analyser:
                 self.true_pos += 1
                 self.tptimes.append(ts)
                 self.last_match = "TP"
+                if atk_type == "Host": 
+                    self.cls_detection[1][0] += 1
+                elif atk_type == "Network": 
+                    self.cls_detection[0][0] += 1
             # For a false positive, the system would detect an alert but the packet would be 
             #   benign.
             elif sys_alert and not is_malicious_packet:
@@ -337,9 +347,17 @@ class Analyser:
             if mark: 
                 self.true_pos += 1
                 self.tptimes.append(ts)
+                if atk_type == "Host": 
+                    self.cls_detection[1][0] += 1
+                elif atk_type == "Network": 
+                    self.cls_detection[0][0] += 1
             else: 
                 self.false_neg += 1 
                 self.fntimes.append(ts)
+                if atk_type == "Host": 
+                    self.cls_detection[1][1] += 1
+                elif atk_type == "Network": 
+                    self.cls_detection[0][1] += 1
        
         else:
             self.neg += 1
@@ -371,13 +389,14 @@ class Analyser:
         rec = t_p / (t_p + f_n)
         f1 = 2 * (prec * rec) / (prec + rec)
         print("Accuracy:", acc, "Precision:",prec,"Recall:",rec,"F1 Score:",f1)
-        return [t_p,f_p,t_n,f_n]
+        print("Class detection",self.cls_detection,(self.cls_detection[0][1]/(self.cls_detection[0][0]+self.cls_detection[0][1])),(self.cls_detection[1][1]/(self.cls_detection[1][1]+self.cls_detection[1][0])))
+        return t_p,f_p,t_n,f_n,acc,prec,rec,f1,(self.cls_detection[0][1]/(self.cls_detection[0][0]+self.cls_detection[0][1])),(self.cls_detection[1][1]/(self.cls_detection[1][1]+self.cls_detection[1][0]))
 
     def get_visuals(self,name): 
         ground_truth_table = [int(float(x) - self.start_time) for x in self.ground_pos_times]
         host_gt_table = [int(float(x) - self.start_time) for x in self.host_gt]
         net_gt_table = [int(float(x) - self.start_time) for x in self.net_gt]
-        fn_table = [int(float(x) - self.start_time) for x in self.fptimes]
+        fn_table = [int(float(x) - self.start_time) for x in self.fntimes]
         tp_table = [int(float(x) - self.start_time) for x in self.tptimes]
 
         gt_vals = []
@@ -420,6 +439,6 @@ class Analyser:
         plt.legend()
         plt.title(f"Analysis of {name} model")
         plot_time = time.strftime("%Y%m%d-%H%M%S")
-        plt.savefig(f'out/{plot_time}_{name}.png')
+        plt.savefig(f'out/{name}_FN.png')
         # plt.show()
         

@@ -396,7 +396,7 @@ class Analyser:
         ground_truth_table = [int(float(x) - self.start_time) for x in self.ground_pos_times]
         host_gt_table = [int(float(x) - self.start_time) for x in self.host_gt]
         net_gt_table = [int(float(x) - self.start_time) for x in self.net_gt]
-        fn_table = [int(float(x) - self.start_time) for x in self.fntimes]
+        fn_table = [int(float(x) - self.start_time) for x in self.fptimes]
         tp_table = [int(float(x) - self.start_time) for x in self.tptimes]
 
         gt_vals = []
@@ -439,6 +439,6 @@ class Analyser:
         plt.legend()
         plt.title(f"Analysis of {name} model")
         plot_time = time.strftime("%Y%m%d-%H%M%S")
-        plt.savefig(f'out/{name}_FN.png')
+        plt.savefig(f'out/{name}_FP.png')
         # plt.show()
         

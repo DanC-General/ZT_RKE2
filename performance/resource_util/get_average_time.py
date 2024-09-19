@@ -1,6 +1,7 @@
 if __name__ == "__main__": 
     avg_times = list()
-    with open("./kit_proc.log",'r') as f:
+    metric_at_times = list()
+    with open("./ztrke2_output_py.log",'r') as f:
         for line in f: 
             if line.startswith("Time"):
                 # print(line,line.split(" "))
@@ -10,4 +11,5 @@ if __name__ == "__main__":
                 else:
                     proc_time = float(det[2]) 
                 avg_times.append(proc_time)
+        
     print(sum(avg_times)/float(len(avg_times)))

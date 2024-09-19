@@ -198,6 +198,7 @@ class Analyser:
         self.fptimes = []
         self.tptimes = []
         self.fntimes = []
+        self.avg_times = []
         # Net [TP,FN] : Host [TP,FN]
         self.cls_detection = [ [0,0],[0,0]]
         self.last_match = False
@@ -314,7 +315,16 @@ class Analyser:
             # self.total_count += 1000
             # print("GENERAL PACKET COUNTS", line)
             pass
-
+        elif line.startswith("Time"):
+            # print(line,line.split(" "))
+            det = line.split(" ") 
+            req_ts = None
+            if len(det) == 2: 
+                proc_time = float(det[1]) 
+            else:
+                proc_time = float(det[2]) 
+                req_ts = float(det[3]) - self.start_time
+            self.avg_times.append((proc_time,req_ts))
 
     def analyse_comp_line(self,line):
         self.total_count += 1
@@ -389,6 +399,8 @@ class Analyser:
         rec = t_p / (t_p + f_n)
         f1 = 2 * (prec * rec) / (prec + rec)
         print("Accuracy:", acc, "Precision:",prec,"Recall:",rec,"F1 Score:",f1)
+        if self.cls_detection[0][0] == 0:
+            self.cls_detection = [[1,1],[1,1]]
         print("Class detection",self.cls_detection,(self.cls_detection[0][1]/(self.cls_detection[0][0]+self.cls_detection[0][1])),(self.cls_detection[1][1]/(self.cls_detection[1][1]+self.cls_detection[1][0])))
         return t_p,f_p,t_n,f_n,acc,prec,rec,f1,(self.cls_detection[0][1]/(self.cls_detection[0][0]+self.cls_detection[0][1])),(self.cls_detection[1][1]/(self.cls_detection[1][1]+self.cls_detection[1][0]))
 
@@ -442,3 +454,23 @@ class Analyser:
         plt.savefig(f'out/{name}_FP.png')
         # plt.show()
         
+    def get_res_performance(self): 
+        # print(self.avg_times)
+        print([[x.alert_ts - self.start_time,0.8] for x in list(self.req_q)])
+        req_times = [x.alert_ts - self.start_time for x in list(self.req_q)]
+        req_val = [0.8] * len(req_times)
+        x, y = zip(*self.avg_times)
+        # print(x, y)
+        # Create the scatter plot
+        plt.scatter(y, x)
+        plt.scatter(req_times, req_val, label='Detected requests')
+        # Add labels and a title
+        plt.legend()
+        plt.xlabel('Time since start (seconds)')
+        plt.ylabel('Packet processing time')
+        plt.ylim(0,1)
+        plt.title('Comparison of ZT_RKE2 processing times.')
+
+        # Show the plot
+        # plt.show()
+        plt.savefig("resource_util/ztrke2_packet_processing.png")

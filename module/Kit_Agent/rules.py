@@ -80,6 +80,7 @@ def get_lines(pipe):
             #     if cur == '\n': 
             #         break 
             data = f.readline()
+            start_time = time()
             # print("read")
             # Split the string into a list with the necessary 
             #   fields for class parsing.
@@ -139,6 +140,8 @@ def get_lines(pipe):
             subj_trust = cur_svc.subject_trust(subject)
             # Pass if the model is still training
             if obj_trust == 0.0: 
+                end_time = time()
+                log.write("Time " + str(pack.ts) + " " + str(end_time - start_time) + " " + str(time()) + "\n")
                 continue
             # log.write(cur_svc.name + str(cur_svc.subj_sysc_map) + "\n")
             # Act on overall request trust
@@ -150,6 +153,8 @@ def get_lines(pipe):
             if req_trust < 5: 
                 log.write(" " + str(pack.sip) + " " + str(pack.dip) + cur_svc.name + ":: " + str(cur_svc.subj_sysc_map) + str(obj_trust) + ": " + str(pack) + "\n")
                 cur_svc.terminate(orig_sip,orig_sport,log)
+            end_time = time()
+            log.write("Time " + str(pack.ts) + " " + str(end_time - start_time) + " " + str(time()) + "\n")
             log.flush()
         log.close()
 def make_svcs(): 

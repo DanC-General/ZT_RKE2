@@ -22,7 +22,7 @@ import time
 
 
 # File location
-path = "/home/dc/ZT_RKE2/performance/50_sample_14_9.pcap" #the pcap, pcapng, or tsv file to process.
+path = "/home/dc/ZT_RKE2/performance/resource_util/sampled_benchmark.pcap" #the pcap, pcapng, or tsv file to process.
 packet_limit = np.inf #the number of packets to process
 
 # KitNET params:
@@ -40,9 +40,10 @@ start = time.time()
 loop_time = time.time()
 # Here we process (train/execute) each individual packet.
 # In this way, each observation is discarded after performing process() method.
-with open("./v1_14_9_50_samp.log",'w') as f:
+with open("/home/dc/ZT_RKE2/performance/resource_util/kit_proc.log",'w') as f:
     while True:
         i+=1
+        pack_time = time.time()
         if i % 1000 == 0:
             cur_time = time.time()
             print(i,"in",cur_time - loop_time)
@@ -56,8 +57,10 @@ with open("./v1_14_9_50_samp.log",'w') as f:
             break
         # elif rmse >= 0.4: 
         #     print("Error noticed ")
+        end_time = time.time()
         f.write(str(rmse) + "\n")
         RMSEs.append(rmse)
+        f.write("Time " + str(end_time - pack_time) + "\n")
 stop = time.time()
 print("Complete. Time elapsed: "+ str(stop - start))
 

@@ -1,7 +1,7 @@
 if __name__ == "__main__": 
     avg_times = list()
     metric_at_times = list()
-    with open("./ztrke2_output_py.log",'r') as f:
+    with open("./kit_proc.log",'r') as f:
         for line in f: 
             if line.startswith("Time"):
                 # print(line,line.split(" "))

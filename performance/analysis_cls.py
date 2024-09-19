@@ -462,15 +462,14 @@ class Analyser:
         x, y = zip(*self.avg_times)
         # print(x, y)
         # Create the scatter plot
+        plt.figure(figsize=(20,8))
         plt.scatter(y, x)
         plt.scatter(req_times, req_val, label='Detected requests')
-        # Add labels and a title
         plt.legend()
         plt.xlabel('Time since start (seconds)')
         plt.ylabel('Packet processing time')
         plt.ylim(0,1)
         plt.title('Comparison of ZT_RKE2 processing times.')
-
         # Show the plot
         # plt.show()
         plt.savefig("resource_util/ztrke2_packet_processing.png")

@@ -142,6 +142,7 @@ def get_lines(pipe):
             if obj_trust == 0.0: 
                 end_time = time()
                 log.write("Time " + str(pack.ts) + " " + str(end_time - start_time) + " " + str(time()) + "\n")
+                log.write("Count" + str(total_count) + "\n")
                 continue
             # log.write(cur_svc.name + str(cur_svc.subj_sysc_map) + "\n")
             # Act on overall request trust
@@ -155,6 +156,7 @@ def get_lines(pipe):
                 cur_svc.terminate(orig_sip,orig_sport,log)
             end_time = time()
             log.write("Time " + str(pack.ts) + " " + str(end_time - start_time) + " " + str(time()) + "\n")
+            log.write("Count" + str(total_count) + "\n")
             log.flush()
         log.close()
 def make_svcs(): 

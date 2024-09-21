@@ -1,4 +1,4 @@
-sudo sh -c "bash -c \"tcpdump -i any -w dump.pcap\"" &
+# sudo sh -c "bash -c \"tcpdump -i any -w dump.pcap\"" &
 sudo sh -c "bash -c \"cd module && make && ./scrape; bash\"" &
 sudo sh -c "bash -c \"cd module && source venv/bin/activate && cd Kit_Agent && python3 rules.py; bash\"" 
 

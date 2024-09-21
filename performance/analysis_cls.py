@@ -456,9 +456,11 @@ class Analyser:
         
     def get_res_performance(self): 
         # print(self.avg_times)
-        print([[x.alert_ts - self.start_time,0.8] for x in list(self.req_q)])
-        req_times = [x.alert_ts - self.start_time for x in list(self.req_q)]
-        req_val = [0.8] * len(req_times)
+        print([[x.alert_ts - self.start_time,x.r_trust] for x in list(self.req_q)])
+        alert_details = [[x.alert_ts - self.start_time,float(x.r_trust)/float(10)] for x in list(self.req_q)]
+        req_times = [x[0] for x in alert_details]
+        # req_val = [0.8] * len(req_times)
+        req_val = [x[1] for x in alert_details] 
         x, y = zip(*self.avg_times)
         # print(x, y)
         # Create the scatter plot
@@ -472,4 +474,4 @@ class Analyser:
         plt.title('Comparison of ZT_RKE2 processing times.')
         # Show the plot
         # plt.show()
-        plt.savefig("resource_util/ztrke2_packet_processing.png")
+        plt.savefig("resource_util/ztrke2_packet_processing_adj.png")

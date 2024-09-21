@@ -235,6 +235,7 @@ void on_packet(u_char *user,const struct pcap_pkthdr* head,const u_char*
  */
 void capture_interface(struct mapping *map){
     char errbuf[PCAP_ERRBUF_SIZE];
+    int buf_siz = 100;
     pcap_t *handle; 
     // char fnames[250];
     // snprintf(fnames,250,"./%s_svc.log",map->svc);
@@ -248,7 +249,7 @@ void capture_interface(struct mapping *map){
     fprintf(log_fp,"Args to interface thread: %s, %s: %d fd\n",map->svc,map->if_name,fileno(log_files));
     // Start a capture on the given interface.
     // TODO: Should return error or remap if no device is availables
-    handle = pcap_open_live(map->if_name, BUFSIZ, 0, 262144, errbuf); 
+    handle = pcap_open_live(map->if_name, buf_siz, 0, 1000, errbuf); 
     if (handle == NULL){ 
         fprintf(stderr, "Couldn't open device %s: %s___", map->if_name, errbuf); 
         exit(EXIT_FAILURE);
@@ -263,7 +264,7 @@ void capture_interface(struct mapping *map){
     fflush(stdout);
     // pcap_set_timeout(handle,100);
     // Sets the number of packets to capture at a time. Packets are dealt with in batches.
-    int BATCH_SIZE = 10; 
+    int BATCH_SIZE = 1; 
     while (1){
         fprintf(log_fp,"Loop %s : %d\n", map->svc,fileno(log_files));
         // This struct should have static references - all 10 packets should 
@@ -276,7 +277,7 @@ void capture_interface(struct mapping *map){
             printf("Interface unexpectedly closed: maybe pod died?");
             char* new_if = wait_for_service(map->svc);
             printf("Spinning up new capture on %s\n",new_if);
-            handle = pcap_open_live(new_if, BUFSIZ, 0, 262144, errbuf); 
+            handle = pcap_open_live(new_if, buf_siz, 0, 262144, errbuf); 
             if (handle == NULL){ 
                 fprintf(stderr, "Couldn't open device %s: %s___", map->if_name, errbuf); 
                 exit(EXIT_FAILURE);

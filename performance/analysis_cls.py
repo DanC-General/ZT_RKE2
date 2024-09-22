@@ -343,7 +343,7 @@ class Analyser:
         dip = det[2]
         last_details = [rmse,"compare",sip,dip]
         mark = False
-        if float(rmse) > 0.4:
+        if float(rmse) > 0.1:
             mark = True
         actual_mark, atk_type = self.attacks.mark_packet(ts,[sip,dip])
         if actual_mark:
@@ -401,8 +401,8 @@ class Analyser:
         print("Accuracy:", acc, "Precision:",prec,"Recall:",rec,"F1 Score:",f1)
         if self.cls_detection[0][0] == 0:
             self.cls_detection = [[1,1],[1,1]]
-        print("Class detection",self.cls_detection,(self.cls_detection[0][1]/(self.cls_detection[0][0]+self.cls_detection[0][1])),(self.cls_detection[1][1]/(self.cls_detection[1][1]+self.cls_detection[1][0])))
-        return t_p,f_p,t_n,f_n,acc,prec,rec,f1,(self.cls_detection[0][1]/(self.cls_detection[0][0]+self.cls_detection[0][1])),(self.cls_detection[1][1]/(self.cls_detection[1][1]+self.cls_detection[1][0]))
+        print("Class detection",self.cls_detection, 1 - (self.cls_detection[0][1]/(self.cls_detection[0][0]+self.cls_detection[0][1])), 1 - (self.cls_detection[1][1]/(self.cls_detection[1][1]+self.cls_detection[1][0])))
+        return t_p,f_p,t_n,f_n,acc,prec,rec,f1, 1 - (self.cls_detection[0][1]/(self.cls_detection[0][0]+self.cls_detection[0][1])), 1 - (self.cls_detection[1][1]/(self.cls_detection[1][1]+self.cls_detection[1][0]))
 
     def get_visuals(self,name): 
         ground_truth_table = [int(float(x) - self.start_time) for x in self.ground_pos_times]

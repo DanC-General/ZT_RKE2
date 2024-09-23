@@ -1,0 +1,39 @@
+
+Running ZT_RKE2 model...
+Total positives: 11843 Total negatives: 17096
+True positives: 11739 False postives: 1953 True negatives: 15143 False negatives: 104
+Accuracy: 0.9289194512595459 Precision: 0.8573619631901841 Recall: 0.991218441273326 F1 Score: 0.9194439005286862
+Class detection [[11612, 45], [127, 59]] 0.9961396585742472 0.6827956989247312
+
+Running Kitsune comparison...
+Total positives: 31047 Total negatives: 87404
+True positives: 30428 False postives: 26074 True negatives: 61330 False negatives: 619
+Accuracy: 0.7746494330989185 Precision: 0.5385296095713427 Recall: 0.9800624859084613 F1 Score: 0.6951078824429748
+Class detection [[30370, 454], [58, 165]] 0.9852712172333247 0.2600896860986547
+Attack file given at example_files/23_9_mal.log
+example_files/23_9_py.log
+|st 1727049747.087201
+
+Running ZT_RKE2 model...
+Total positives: 38522 Total negatives: 10399
+True positives: 38425 False postives: 5494 True negatives: 4905 False negatives: 97
+Accuracy: 0.8857137016823041 Precision: 0.8749060770964731 Recall: 0.9974819583614558 F1 Score: 0.9321818027437803
+Class detection [[38381, 97], [44, 0]] 0.9974790789542076 1.0
+
+Running Kitsune comparison...
+Total positives: 16016 Total negatives: 141033
+True positives: 13148 False postives: 14460 True negatives: 126573 False negatives: 2868
+Accuracy: 0.8896650090099268 Precision: 0.4762387713706172 Recall: 0.820929070929071 F1 Score: 0.602787456445993
+Class detection [[13108, 2290], [40, 578]] 0.8512793869333679  0.06472491909385114
+
+Running ZT_RKE2 model...
+Total positives: 30819 Total negatives: 40668
+True positives: 30686 False postives: 4599 True negatives: 36069 False negatives: 133
+Accuracy: 0.933806146572104 Precision: 0.869661329176704 Recall: 0.9956844803530289 F1 Score: 0.9284158296018394
+Class detection [[30500, 63], [186, 70]] 0.9979386840297091 0.7265625
+
+Running Kitsune comparison...
+Total positives: 29208 Total negatives: 69933
+True positives: 21889 False postives: 20274 True negatives: 49659 False negatives: 7319
+Accuracy: 0.7216792245387882 Precision: 0.5191518630078504 Recall: 0.7494179676800876 F1 Score: 0.6133863894298804
+Class detection [[21880, 7096], [9, 223]] 0.7551076753175041 0.03879310344827591

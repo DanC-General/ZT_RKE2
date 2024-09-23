@@ -184,7 +184,7 @@ class RRule:
         # print(rules_list)
         for oi,ot in enumerate(['low', 'moderate','high']):
             for si,st in enumerate(['low', 'moderate','high']):
-                # print(oi, si )
+                print(ot, st,"-->",request_trust[trust_list[oi][si]])
                 rules_list[oi][si] = (ot + "|" + st)
                 rules.append(ctrl.Rule(object_trust[ot] & subject_trust[st], request_trust[trust_list[oi][si]]))
         # print(rules)
@@ -219,7 +219,7 @@ class RRule:
     
 # SRule().simulate(1,0.8,0.8)
 # RRule().simulate(0.0,5.1)
-# r = RRule()
+r = RRule()
 # for o in np.arange(0, 1.01, 0.01):
 #     for s in np.arange(0, 1.1, 0.1):
 #         r.simulate(o,s)

@@ -22,7 +22,7 @@ import time
 
 
 # File location
-path = "/home/dc/ZT_RKE2/performance/resource_util/sampled_benchmark.pcap" #the pcap, pcapng, or tsv file to process.
+path = "/home/dc/ZT_RKE2/performance/23_9_125sample.pcap" #the pcap, pcapng, or tsv file to process.
 packet_limit = np.inf #the number of packets to process
 
 # KitNET params:
@@ -40,7 +40,7 @@ start = time.time()
 loop_time = time.time()
 # Here we process (train/execute) each individual packet.
 # In this way, each observation is discarded after performing process() method.
-with open("/home/dc/ZT_RKE2/performance/resource_util/kit_proc.log",'w') as f:
+with open("/home/dc/ZT_RKE2/performance/23_9_125sample_out.log",'w') as f:
     while True:
         i+=1
         pack_time = time.time()

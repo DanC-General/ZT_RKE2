@@ -16,7 +16,7 @@ class Attack:
         self.host = host
         self.times = { "Symlink Attack":1, "Dirty COW":3, "Brute Force":14,"DoS":12}
         self.end_ts = float(self.start_ts + self.times[self.name])
-        self.host_map = { "VM1":["10.1.2.5","10.1.2.1","192.168.122.1","10.1.1.241"],"VM2":["10.1.2.10","10.1.2.1","192.168.122.1","10.1.1.241"],"LOCAL":["127.0.0.1","10.1.1.241"]}
+        self.host_map = { "VM1":["10.1.2.5","10.1.2.1","192.168.122.1","10.1.1.241"],"VM2":["10.1.2.10","10.1.2.1","192.168.122.1","10.1.1.241"],"LOCAL":["127.0.0.1","10.1.1.241","10.1.2.1"]}
         if ts is None or host is None: 
             self.id = None
         else:

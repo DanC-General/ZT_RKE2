@@ -2,6 +2,7 @@ from argparse import ArgumentParser
 import statistics
 import numpy as np
 import matplotlib.pyplot as plt
+import pandas as pd 
 parser = ArgumentParser()
 parser.add_argument("file",help="Path of file to write to")
 args = parser.parse_args()
@@ -54,19 +55,62 @@ with open(args.file,'r') as f:
     data_kt = kitsune_means
     error_zt = ztrke2_stds
     error_kit = kitsune_stds
-    print(data_zt,error_zt)
+    #   A P R F 
+    # Mean
+    # Std
+    # Arc (1-ztrke2)
+    # dp = list()
+    # for i,_ in enumerate(data_zt): 
+    #     dp.append([data_zt[i],error_zt[i],'ZT_RKE2',labels[i]])
+    # for i,_ in enumerate(data_kt): 
+    #     dp.append([data_kt[i],error_kit[i],'KITSUNE',labels[i]])
+
+    # df = pd.DataFrame(dp)
+    # df.columns = ['MEAN','STD','MODEL','METRIC']
+    # kit_dat = df[df['MODEL'] == 'KITSUNE']
+    # zt_dat = df[df['MODEL'] == 'ZT_RKE2']
+    # print("DATA:\n",df)
+    # print(kit_dat)
+    # print(zt_dat)
+    # # print(data_zt,error_zt)
+    # fig, ax = plt.subplots()
+    # ax.bar(df,
+    #     x='MEAN',
+    #     yerr='STD',
+    #     color='MODEL',
+    #     height=1,
+    #     align='center',
+    #     alpha=0.5,
+    #     ecolor='black',
+    #     capsize=10
+    #     )
+
+    # Add some text for labels, title and custom x-axis tick labels, etc.
+    # Build the plot
     fig, ax = plt.subplots()
-    ax.bar(x_pos, data_zt,
-        yerr=error_zt,
-        align='center',
+    zt_bar = ax.bar(x_pos +0.25, ztrke2_means,
+        yerr=ztrke2_stds,
+        # align='center',
         alpha=0.5,
+        width=0.25,
+        label="ZT_RKE2",
         ecolor='black',
         capsize=10)
-
-    ax.set_ylabel("Proportion")
-    ax.set_xticks(x_pos)
+    # ax.bar_label(zt_bar, padding=3)
+    kt_bar = ax.bar(x_pos + 0.5, kitsune_means,
+        yerr=kitsune_stds,
+        # align='center',
+        alpha=0.5,
+        width=0.25,
+        label="KITSUNE",
+        ecolor='blue',
+        capsize=10)
+    # ax.bar_label(kt_bar,padding=3)
+    ax.set_ylabel('Metric')
+    ax.legend()
+    ax.set_xticks(x_pos + 0.375)
     ax.set_xticklabels(labels)
-    ax.set_title('Metric Comparisons - 15 trials')
+    ax.set_title('Metric Comparison - 15 Trials')
     ax.yaxis.grid(True)
 
 
@@ -74,3 +118,4 @@ with open(args.file,'r') as f:
     plt.tight_layout()
     plt.savefig('bar_plot_with_error_bars.png')
     plt.show()
+

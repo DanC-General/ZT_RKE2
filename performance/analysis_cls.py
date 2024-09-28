@@ -414,7 +414,7 @@ class Analyser:
         ground_truth_table = [int(float(x) - self.start_time) for x in self.ground_pos_times]
         host_gt_table = [int(float(x) - self.start_time) for x in self.host_gt]
         net_gt_table = [int(float(x) - self.start_time) for x in self.net_gt]
-        fn_table = [int(float(x) - self.start_time) for x in self.fptimes]
+        fn_table = [int(float(x) - self.start_time) for x in self.fntimes]
         tp_table = [int(float(x) - self.start_time) for x in self.tptimes]
 
         gt_vals = []
@@ -426,10 +426,10 @@ class Analyser:
         for value in values: 
             # if value in ground_truth_table:
             gt_vals.append(1 if value in ground_truth_table else None)
-            fn_vals.append(2.1 if value in fn_table else None)
-            tp_vals.append(1.9 if value in tp_table else None)
-            host_vals.append(1.1 if value in host_gt_table else None)
-            net_vals.append(0.9 if value in net_gt_table else None)
+            fn_vals.append(0.4 if value in fn_table else None)
+            tp_vals.append(0.35 if value in tp_table else None)
+            host_vals.append(0.2 if value in host_gt_table else None)
+            net_vals.append(0.2 if value in net_gt_table else None)
             # else:
             #     gt_vals.append(None)
             # if value in host_vals: 
@@ -444,20 +444,20 @@ class Analyser:
             #     tp_vals.append(None)
         plt.figure(figsize=(20,10))
         # print(gt_vals,"___",tp_vals,"___",fn_vals)
-        plt.plot(values, gt_vals, drawstyle='steps-post',markersize=3,marker='o',label="All Attacks")
-        plt.plot(values, tp_vals, drawstyle='steps-post',color="green",markersize=3,marker='o',label="True Positives")
-        plt.plot(values, fn_vals, drawstyle='steps-post',color="red",markersize=3,marker='o',label="False Negatives")
-        plt.plot(values, host_vals, drawstyle='steps-post',color="orange",markersize=3,marker='o',label="Host Attacks")
-        plt.plot(values, net_vals, drawstyle='steps-post',color="purple",markersize=3,marker='o',label="Network Attacks")
+        # plt.plot(values, gt_vals, drawstyle='steps-post',markersize=3,marker='o',label="All Attacks")
+        plt.plot(values, tp_vals, drawstyle='steps-post',color="green",markersize=7,marker='o',label="True Positives")
+        plt.plot(values, fn_vals, drawstyle='steps-post',color="red",markersize=7,marker='o',label="False Negatives")
+        plt.plot(values, host_vals, drawstyle='steps-post',color="orange",markersize=7,marker='o',label="Host Attacks")
+        plt.plot(values, net_vals, drawstyle='steps-post',color="purple",markersize=7,marker='o',label="Network Attacks")
         plt.xlabel("Time since start (seconds)")
 
         plt.ylabel("Attack Category")
         plt.xticks(np.arange(0,3600,step=600))
-        plt.yticks(np.arange(0,3,step=1))
+        plt.yticks(np.arange(0,0.6,step=0.1))
         plt.legend()
         plt.title(f"Analysis of {name} model")
         plot_time = time.strftime("%Y%m%d-%H%M%S")
-        plt.savefig(f'out/{name}_FP.png')
+        plt.savefig(f'{name}_FN.png')
         # plt.show()
         
     def get_res_performance(self): 

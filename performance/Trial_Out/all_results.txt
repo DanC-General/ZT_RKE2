@@ -1,0 +1,89 @@
+Trial_Out/0-26_9
+Attack file given at Trial_Out/0-26_9/mal.log
+Trial_Out/0-26_9/py.log
+|st 1727336249.216595
+
+Running ZT_RKE2 model...
+t_p: 33281,f_p: 3959,t_n: 10316,f_n: 471,acc: 0.9077602182105898,prec: 0.8936895810955962,rec: 0.9860452713913249,f1: 0.9375986026594546,net_det: 0.9860353415559773,host_det : 1.0
+
+Running Kitsune comparison...
+At RMSE 0.1:
+t_p: 14917,f_p: 16199,t_n: 63500,f_n: 7663,acc: 0.7666969759188104,prec: 0.4793996657668081,rec: 0.6606288751107174,f1: 0.5556093563766389,net_det: 0.6689543802987485,host_det : 0.013937282229965153
+Trial_Out/1-26_9
+Attack file given at Trial_Out/1-26_9/mal.log
+Trial_Out/1-26_9/py.log
+|st 1727342264.684112
+
+Running ZT_RKE2 model...
+t_p: 18722,f_p: 2314,t_n: 3541,f_n: 23,acc: 0.905,prec: 0.8899980984978133,rec: 0.9987730061349693,f1: 0.9412533621578141,net_det: 0.9987706451440483,host_det : 1.0
+
+Running Kitsune comparison...
+At RMSE 0.1:
+t_p: 19779,f_p: 31346,t_n: 50350,f_n: 1551,acc: 0.6806922524411314,prec: 0.3868753056234719,rec: 0.9272855133614627,f1: 0.545966461941895,net_det: 0.9307295853231832,host_det : 0.5248618784530387
+Trial_Out/2-27_9
+Attack file given at Trial_Out/2-27_9/mal.log
+Trial_Out/2-27_9/py.log
+|st 1727435422.390853
+
+Running ZT_RKE2 model...
+t_p: 17379,f_p: 3065,t_n: 26377,f_n: 409,acc: 0.9264450561084057,prec: 0.8500782625709254,rec: 0.9770069709916798,f1: 0.9091337099811676,net_det: 0.5,host_det : 0.5
+
+Running Kitsune comparison...
+At RMSE 0.1:
+t_p: 25421,f_p: 51395,t_n: 21974,f_n: 1296,acc: 0.4735427532322203,prec: 0.3309336596542387,rec: 0.9514915596811019,f1: 0.49107047994359293,net_det: 0.951199307150657,host_det : 1.0
+Trial_Out/3-27_9_v2
+Attack file given at Trial_Out/3-27_9_v2/mal.log
+Trial_Out/3-27_9_v2/py.log
+|st 1727441263.375052
+
+Running ZT_RKE2 model...
+t_p: 33446,f_p: 2238,t_n: 24872,f_n: 237,acc: 0.9592880759297946,prec: 0.937282815827822,rec: 0.9929638096369088,f1: 0.9643202098980784,net_det: 0.9939395766749081,host_det : 0.9303675048355899
+
+Running Kitsune comparison...
+At RMSE 0.2:
+t_p: 20343,f_p: 44485,t_n: 66982,f_n: 6949,acc: 0.629328548058144,prec: 0.3137995927685568,rec: 0.7453832624945039,f1: 0.4416630481980026,net_det: 0.7452389773990367,host_det : 0.7582781456953642
+Trial_Out/4-28_9
+Attack file given at Trial_Out/4-28_9/mal.log
+Trial_Out/4-28_9/py.log
+|st 1727479716.237301
+
+Running ZT_RKE2 model...
+t_p: 28398,f_p: 1288,t_n: 45614,f_n: 254,acc: 0.9795907562802764,prec: 0.9566125446338342,rec: 0.9911349993019685,f1: 0.9735678288594055,net_det: 0.9963256076879593,host_det : 0.5689655172413793
+
+Running Kitsune comparison...
+At RMSE 0.1:
+t_p: 3439,f_p: 55672,t_n: 30853,f_n: 3227,acc: 0.3679754482729019,prec: 0.05817868078699396,rec: 0.5159015901590159,f1: 0.10456542560469465,net_det: 0.5084427767354597,host_det : 0.6925925925925926
+Trial_Out/5-28_9_v2
+Attack file given at Trial_Out/5-28_9_v2/mal.log
+Trial_Out/5-28_9_v2/py.log
+|st 1727497834.507292
+
+Running ZT_RKE2 model...
+t_p: 21509,f_p: 1000,t_n: 20941,f_n: 0,acc: 0.9769850402761795,prec: 0.9555733262250655,rec: 1.0,f1: 0.9772820209914127,net_det: 1.0,host_det : 1.0
+
+Running Kitsune comparison...
+At RMSE 0.1:
+t_p: 19220,f_p: 84125,t_n: 21671,f_n: 237,acc: 0.32646723032582053,prec: 0.18597900237070009,rec: 0.9878192938274143,f1: 0.3130242178466149,net_det: 0.9876400963653503,host_det : 0.9972451790633609
+Trial_Out/6-28_9_v3
+Attack file given at Trial_Out/6-28_9_v3/mal.log
+Trial_Out/6-28_9_v3/py.log
+|st 1727502213.280054
+
+Running ZT_RKE2 model...
+t_p: 5580,f_p: 1371,t_n: 29960,f_n: 46,acc: 0.9616581432475579,prec: 0.8027621924902891,rec: 0.9918236757909705,f1: 0.8873340224218812,net_det: 0.9978142076502732,host_det : 0.75
+
+Running Kitsune comparison...
+At RMSE 0.2:
+t_p: 4395,f_p: 18156,t_n: 77526,f_n: 2853,acc: 0.7958904109589041,prec: 0.1948915790874019,rec: 0.6063741721854304,f1: 0.2949763414879694,net_det: 0.6249638832707309,host_det : 0.2116564417177914
+Trial_Out/7-28_9_v4
+Attack file given at Trial_Out/7-28_9_v4/mal.log
+Trial_Out/7-28_9_v4/py.log
+|st 1727507296.052495
+
+Running ZT_RKE2 model...
+t_p: 33313,f_p: 5855,t_n: 20410,f_n: 3,acc: 0.9016800657927863,prec: 0.850515727124183,rec: 0.9999099531756513,f1: 0.9191821643397163,net_det: 1.0,host_det : 0.9473684210526316
+
+Running Kitsune comparison...
+At RMSE 0.1:
+t_p: 20751,f_p: 57865,t_n: 23045,f_n: 1228,acc: 0.4256626072758021,prec: 0.2639539025134833,rec: 0.9441284862823605,f1: 0.41256523684079727,net_det: 0.9435843248954839,host_det : 1.0
+Trial_Out/all_results.txt

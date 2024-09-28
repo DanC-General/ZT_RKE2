@@ -326,7 +326,7 @@ class Analyser:
                 req_ts = float(det[3]) - self.start_time
             self.avg_times.append((proc_time,req_ts))
 
-    def analyse_comp_line(self,line):
+    def analyse_comp_line(self,line,rmse_cutoff=0.1):
         self.total_count += 1
         det = [x.strip() for x in line.strip().split(" ") if x.strip() != '']
         # print(line,det)
@@ -347,7 +347,7 @@ class Analyser:
         # print(rmse,sip,dip)
         last_details = [rmse,"compare",sip,dip]
         mark = False
-        if float(rmse) > 0.1:
+        if float(rmse) > rmse_cutoff:
             mark = True
         actual_mark, atk_type = self.attacks.mark_packet(ts,[sip,dip])
         if actual_mark:
@@ -390,23 +390,23 @@ class Analyser:
     def get_stats(self): 
         total_pos = self.pos 
         total_neg = self.neg
-        print("Total positives:",total_pos, "Total negatives:",total_neg)
+        # print("Total positives:",total_pos, "Total negatives:",total_neg)
         t_p = self.true_pos
         f_p = self.false_pos
         t_n = self.true_neg
         f_n = self.false_neg
         if t_p == 0:
             t_p = 1
-        print("True positives:",t_p,"False postives:", f_p ,"True negatives:",t_n,"False negatives:",f_n)
+        # print("True positives:",t_p,"False postives:", f_p ,"True negatives:",t_n,"False negatives:",f_n)
         acc = (t_p + t_n) / (t_p + t_n + f_p + f_n)
         prec = t_p / (t_p + f_p)
         rec = t_p / (t_p + f_n)
         f1 = 2 * (prec * rec) / (prec + rec)
-        print("Accuracy:", acc, "Precision:",prec,"Recall:",rec,"F1 Score:",f1)
-        print(self.cls_detection)
+        # print("Accuracy:", acc, "Precision:",prec,"Recall:",rec,"F1 Score:",f1)
+        # print(self.cls_detection)
         if self.cls_detection[0][0] == 0 or self.cls_detection[1][0] == 0:
             self.cls_detection = [[1,1],[1,1]]
-        print("Class detection",self.cls_detection, 1 - (self.cls_detection[0][1]/(self.cls_detection[0][0]+self.cls_detection[0][1])), 1 - (self.cls_detection[1][1]/(self.cls_detection[1][1]+self.cls_detection[1][0])))
+        # print("Class detection",self.cls_detection, 1 - (self.cls_detection[0][1]/(self.cls_detection[0][0]+self.cls_detection[0][1])), 1 - (self.cls_detection[1][1]/(self.cls_detection[1][1]+self.cls_detection[1][0])))
         return t_p,f_p,t_n,f_n,acc,prec,rec,f1, 1 - (self.cls_detection[0][1]/(self.cls_detection[0][0]+self.cls_detection[0][1])), 1 - (self.cls_detection[1][1]/(self.cls_detection[1][1]+self.cls_detection[1][0]))
         # return
 

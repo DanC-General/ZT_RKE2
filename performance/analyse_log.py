@@ -3,7 +3,7 @@ import time
 import numpy as np
 import matplotlib.pyplot as plt
 from analysis_funcs import *
-
+    
 #### python3 analyse_log.py 31_8_py.log -a 31_8_mal.log -c ../module/Kit_Agent/100k_minimal.log
 #### python3 analyse_log.py v2_14_9_py.log -a v2_14_9_mal.log -c ../module/Kit_Agent/14_9_100_minimal.log
 #### pcapsampler -m COUNT_RAND_UNIFORM -r x input.pcap output.pcap
@@ -18,7 +18,7 @@ def main():
     # print("Attacks", [x for x in atks.all])
     results = parse_log_file(args.file,atks)
     print("\nRunning ZT_RKE2 model...")
-    results.get_stats()
+    show_results(results.get_stats())
     # results.get_res_performance()
     # exit()
     # results.get_visuals(args.file.split("/")[-1]+"ztrke2")
@@ -30,10 +30,23 @@ def main():
     # all_groups,ztrke2_metrics = get_groups_from_analyser(results,atks)
     # print("ANALYSER COUNT",results.total_count)
     # zt_rke2_group = get_group_times(all_groups,results.start_time)
+    highest_f1 = 0
+    highest_stats = []
+    highest_rmse = 0
     print("\nRunning Kitsune comparison...")
-    comp_analyser = analyse_comparison(args.comparison_file,atks)
-    comp_analyser.start_time = stime
-    comp_analyser.get_stats()
+    for i in [x / 10.0 for x in range(1, 10, 1)]:
+        # print("\nRMSE",i,"\n")
+        comp_analyser = analyse_comparison(args.comparison_file,atks,rmse_val=i)
+        comp_analyser.start_time = stime
+        stats = comp_analyser.get_stats()
+        f1 = stats[-3]
+        if f1 > highest_f1: 
+            highest_f1 = f1
+            highest_stats = stats
+            highest_rmse = i
+    # print("t_p,f_p,t_n,f_n,acc,prec,rec,f1,net_det,host_det")
+    print(f"At RMSE {highest_rmse}:")
+    show_results(highest_stats)
 
     # comp_analyser.get_visuals(args.comparison_file.split("/")[-1]+"comparison")
 
@@ -121,6 +134,8 @@ def main():
     # ax.legend()
     # plt.savefig(f'out/metrics_31_8_{plot_time}.png')
     # plt.show()
+def show_results(stats): 
+    print(f"t_p: {stats[0]},f_p: {stats[1]},t_n: {stats[2]},f_n: {stats[3]},acc: {stats[4]},prec: {stats[5]},rec: {stats[6]},f1: {stats[7]},net_det: {stats[8]},host_det : {stats[9]}")
 
 if __name__ == "__main__": 
     # analyse_comparison("../module/Kit_Agent/50k_minimal.log")

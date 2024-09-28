@@ -3,7 +3,7 @@ import datetime
 import os
 import statistics
 
-def analyse_comparison(file_name,atks):
+def analyse_comparison(file_name,atks,rmse_val=0.1):
     if not os.path.exists(file_name): 
         print("Invalid file for comparison.")
         return
@@ -11,7 +11,7 @@ def analyse_comparison(file_name,atks):
     results.attacks = atks
     with open(file_name,'r') as f:
         for line in f:
-            results.analyse_comp_line(line)
+            results.analyse_comp_line(line,rmse_cutoff=rmse_val)
     # print(results.req_q)
     # all_grps = get_groups_from_analyser(results)
     return results

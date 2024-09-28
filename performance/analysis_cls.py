@@ -16,7 +16,7 @@ class Attack:
         self.host = host
         self.times = { "Symlink Attack":1, "Dirty COW":3, "Brute Force":14,"DoS":12}
         self.end_ts = float(self.start_ts + self.times[self.name])
-        self.host_map = { "VM1":["10.1.2.5","10.1.2.1","192.168.122.1","10.1.1.241"],"VM2":["10.1.2.10","10.1.2.1","192.168.122.1","10.1.1.241"],"LOCAL":["127.0.0.1","10.1.1.241","10.1.2.1"]}
+        self.host_map = { "VM1":["10.1.2.5","10.1.2.1","192.168.122.1","10.1.1.241"],"VM2":["10.1.2.10","10.1.2.1","192.168.122.1","10.1.1.241"],"LOCAL":["127.0.0.1","10.1.1.241","192.168.122.1","10.1.2.1"]}
         if ts is None or host is None: 
             self.id = None
         else:
@@ -330,7 +330,10 @@ class Analyser:
         self.total_count += 1
         det = [x.strip() for x in line.strip().split(" ") if x.strip() != '']
         # print(line,det)
-        if len(det) != 6:
+        if len(det) == 8: 
+            del det[2]
+            del det[3]
+        if len(det) != 6 :
             # print("Illegal line",line,det)
             return
         ts = det[0].replace("|",'').strip()
@@ -341,6 +344,7 @@ class Analyser:
         # else:
         sip = det[1]
         dip = det[2]
+        # print(rmse,sip,dip)
         last_details = [rmse,"compare",sip,dip]
         mark = False
         if float(rmse) > 0.1:
@@ -399,10 +403,12 @@ class Analyser:
         rec = t_p / (t_p + f_n)
         f1 = 2 * (prec * rec) / (prec + rec)
         print("Accuracy:", acc, "Precision:",prec,"Recall:",rec,"F1 Score:",f1)
-        if self.cls_detection[0][0] == 0:
+        print(self.cls_detection)
+        if self.cls_detection[0][0] == 0 or self.cls_detection[1][0] == 0:
             self.cls_detection = [[1,1],[1,1]]
         print("Class detection",self.cls_detection, 1 - (self.cls_detection[0][1]/(self.cls_detection[0][0]+self.cls_detection[0][1])), 1 - (self.cls_detection[1][1]/(self.cls_detection[1][1]+self.cls_detection[1][0])))
         return t_p,f_p,t_n,f_n,acc,prec,rec,f1, 1 - (self.cls_detection[0][1]/(self.cls_detection[0][0]+self.cls_detection[0][1])), 1 - (self.cls_detection[1][1]/(self.cls_detection[1][1]+self.cls_detection[1][0]))
+        # return
 
     def get_visuals(self,name): 
         ground_truth_table = [int(float(x) - self.start_time) for x in self.ground_pos_times]

@@ -19,6 +19,7 @@ def main():
     results = parse_log_file(args.file,atks)
     print("\nRunning ZT_RKE2 model...")
     show_results(results.get_stats())
+    print(results.get_stats())
     results.get_visuals(args.file+"_ztrke2",True)
 
     highest_f1 = 0
@@ -27,7 +28,8 @@ def main():
     best_comp = None
     print("\nRunning Kitsune comparison...")
     for i in [x / 10.0 for x in range(1, 10, 1)]:
-        comp_analyser = analyse_comparison(args.comparison_file,atks,rmse_val=i)
+        i = 0.4
+        comp_analyser = analyse_comparison(args.comparison_file,atks,rmse_val=i,stime=stime)
         comp_analyser.start_time = stime
         stats = comp_analyser.get_stats()
         f1 = stats[-3]
@@ -37,9 +39,11 @@ def main():
             highest_stats = stats
             highest_rmse = i
             best_comp = copy.deepcopy(comp_analyser)
+        break
     # print("t_p,f_p,t_n,f_n,acc,prec,rec,f1,net_det,host_det")
-    # print(f"At RMSE {highest_rmse}:")
+    print(f"At RMSE {highest_rmse}:")
     show_results(highest_stats)
+    print(best_comp.get_stats())
 
     best_comp.get_visuals(args.comparison_file+"_kitsune",False)
 

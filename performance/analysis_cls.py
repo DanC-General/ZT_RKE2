@@ -16,7 +16,10 @@ class Attack:
         self.host = host
         self.times = { "Symlink Attack":1, "Dirty COW":3, "Brute Force":14,"DoS":12}
         self.end_ts = float(self.start_ts + self.times[self.name])
-        self.host_map = { "VM1":["10.1.2.5","10.1.2.1","192.168.122.1","10.1.1.241"],"VM2":["10.1.2.10","10.1.2.1","192.168.122.1","10.1.1.241"],"LOCAL":["127.0.0.1","10.1.1.241","192.168.122.1","10.1.2.1"]}
+        # ,"10.1.2.1","192.168.122.1","10.1.1.241"
+        # "10.1.1.241","192.168.122.1","10.1.2.1"
+        # "10.1.2.10","10.1.2.1","192.168.122.1","10.1.1.241"
+        self.host_map = { "VM1":["10.1.2.5","10.1.2.1","192.168.122.1","10.1.1.241"],"VM2":["10.1.2.10","10.1.2.1","192.168.122.1","10.1.1.241"],"LOCAL":["127.0.0.1","10.1.2.1","192.168.122.1","10.1.1.241"]}
         if ts is None or host is None: 
             self.id = None
         else:
@@ -129,10 +132,11 @@ class Attacks:
                     num += 2
                 if i in atk.get_ips(): 
                     num+= 1
+
             if num == 3 and atk.packet_in_attack(start): 
             # if atk.packet_in_attack(start):
                 # print(str(atk))
-                return True, atk.get_class()
+                return True, atk
         return False, None
 
     def justify_exclusions(self,start,hosts):
@@ -219,8 +223,9 @@ class Analyser:
             sip = two[3].replace("sip->",'').strip()
             dip = two[4].replace("dip->",'').strip()
             ts = two[7].replace("ts->",'').strip()
-            is_malicious_packet, atk_type = self.attacks.mark_packet(ts,[sip,dip])
+            is_malicious_packet, actual_atk = self.attacks.mark_packet(ts,[sip,dip])
             if is_malicious_packet:
+                atk_type = actual_atk.get_class()
                 self.pos += 1
                 self.ground_pos_times.append(ts)
                 if atk_type == "Network": 
@@ -238,9 +243,11 @@ class Analyser:
             # For a false negative, there would have been an attack (is_malicious_packet True) 
             #   and no alert would have been raised (mark False)
             if not sys_alert and is_malicious_packet: 
+                atk_type = actual_atk.get_class()
                 self.false_neg += 1
                 self.fntimes.append(ts)
                 self.last_match = "FN"
+                # print("False neg",ts,[sip,dip],atk_type,actual_atk.host)
                 if atk_type == "Host": 
                     self.cls_detection[1][1] += 1
                 elif atk_type == "Network": 
@@ -344,13 +351,16 @@ class Analyser:
         # else:
         sip = det[1]
         dip = det[2]
+        sport = det[3]
+        dport = det[4]
         # print(rmse,sip,dip)
         last_details = [rmse,"compare",sip,dip]
         mark = False
         if float(rmse) > rmse_cutoff:
             mark = True
-        actual_mark, atk_type = self.attacks.mark_packet(ts,[sip,dip])
+        actual_mark, actual_atk = self.attacks.mark_packet(ts,[sip,dip])
         if actual_mark:
+            atk_type = actual_atk.get_class()
             self.pos += 1
             self.ground_pos_times.append(ts)
             if atk_type == "Network": 
@@ -361,13 +371,16 @@ class Analyser:
             if mark: 
                 self.true_pos += 1
                 self.tptimes.append(ts)
+                # print("True pos",ts,[sip,dip],sport,dport,rmse,float(ts)-self.start_time)
                 if atk_type == "Host": 
                     self.cls_detection[1][0] += 1
                 elif atk_type == "Network": 
                     self.cls_detection[0][0] += 1
             else: 
+                pass
                 self.false_neg += 1 
                 self.fntimes.append(ts)
+                # print("False neg",ts,[sip,dip],dport,sport,atk_type,actual_atk.host,rmse,float(ts)-self.start_time)
                 if atk_type == "Host": 
                     self.cls_detection[1][1] += 1
                 elif atk_type == "Network": 
@@ -380,6 +393,7 @@ class Analyser:
             else: 
                 self.false_pos += 1 
                 self.fptimes.append(ts) 
+                # print("False pos",ts,[sip,dip],rmse)
             # print("added ",last_details, "from", det)
             # self.add_request(Request(None,rmse,None,None,None,ts,None,last_details,True))
 
@@ -414,7 +428,7 @@ class Analyser:
         ground_truth_table = [int(float(x) - self.start_time) for x in self.ground_pos_times]
         host_gt_table = [int(float(x) - self.start_time) for x in self.host_gt]
         net_gt_table = [int(float(x) - self.start_time) for x in self.net_gt]
-        fn_table = [int(float(x) - self.start_time) for x in self.fntimes]
+        fn_table = [int(float(x) - self.start_time) for x in self.fptimes]
         tp_table = [int(float(x) - self.start_time) for x in self.tptimes]
 
         gt_vals = []
@@ -450,7 +464,7 @@ class Analyser:
         # print(gt_vals,"___",tp_vals,"___",fn_vals)
         # plt.plot(values, gt_vals, drawstyle='steps-post',markersize=3,marker='o',label="All Attacks")
         plt.plot(values, tp_vals, drawstyle='steps-post',color="green",markersize=7,marker='o',label="True Positives")
-        plt.plot(values, fn_vals, drawstyle='steps-post',color="red",markersize=7,marker='o',label="False Negatives")
+        plt.plot(values, fn_vals, drawstyle='steps-post',color="red",markersize=7,marker='o',label="False Positives")
         plt.plot(values, host_vals, drawstyle='steps-post',color="orange",markersize=7,marker='o',label="Host Attacks")
         plt.plot(values, net_vals, drawstyle='steps-post',color="purple",markersize=7,marker='o',label="Network Attacks")
         plt.xlabel("Time since start (seconds)",fontsize=18)
@@ -464,11 +478,11 @@ class Analyser:
             color='white'
         )
         plt.legend(fontsize=18,loc="upper left")
-        plt.title(f"Analysis of {name_str} Recall",fontsize=22)
+        plt.title(f"Analysis of {name_str} Accuracy",fontsize=22)
         plot_time = time.strftime("%Y%m%d-%H%M%S")
         print(name[:name.rfind("/")+1])
         out_dir = name[:name.rfind("/")+1]
-        plt.savefig(f'{out_dir}{name_str}_Recall.png')
+        plt.savefig(f'{out_dir}{name_str}_Accuracy.png')
         # plt.show()
         
     def get_res_performance(self): 

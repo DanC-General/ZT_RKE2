@@ -410,7 +410,7 @@ class Analyser:
         return t_p,f_p,t_n,f_n,acc,prec,rec,f1, 1 - (self.cls_detection[0][1]/(self.cls_detection[0][0]+self.cls_detection[0][1])), 1 - (self.cls_detection[1][1]/(self.cls_detection[1][1]+self.cls_detection[1][0]))
         # return
 
-    def get_visuals(self,name): 
+    def get_visuals(self,name,is_ztrke2): 
         ground_truth_table = [int(float(x) - self.start_time) for x in self.ground_pos_times]
         host_gt_table = [int(float(x) - self.start_time) for x in self.host_gt]
         net_gt_table = [int(float(x) - self.start_time) for x in self.net_gt]
@@ -423,6 +423,10 @@ class Analyser:
         host_vals = []
         net_vals = []
         values = range(0, 3600)
+        if is_ztrke2: 
+            name_str = "ZT_RKE2"
+        else:  
+            name_str = "Kitsune"
         for value in values: 
             # if value in ground_truth_table:
             gt_vals.append(1 if value in ground_truth_table else None)
@@ -455,9 +459,11 @@ class Analyser:
         plt.xticks(np.arange(0,3600,step=600))
         plt.yticks(np.arange(0,0.6,step=0.1))
         plt.legend()
-        plt.title(f"Analysis of {name} model")
+        plt.title(f"Analysis of {name_str} Recall")
         plot_time = time.strftime("%Y%m%d-%H%M%S")
-        plt.savefig(f'{name}_FN.png')
+        print(name[:name.rfind("/")+1])
+        out_dir = name[:name.rfind("/")+1]
+        plt.savefig(f'{out_dir}{name_str}_Recall.png')
         # plt.show()
         
     def get_res_performance(self): 

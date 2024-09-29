@@ -101,7 +101,7 @@ with open(args.file,'r') as f:
     # Add some text for labels, title and custom x-axis tick labels, etc.
     # Build the plot
     fig, ax = plt.subplots()
-    zt_bar = ax.bar(x_pos +0.25, ztrke2_means,
+    zt_bar = ax.bar(x_pos + 0.25, ztrke2_means,
         yerr=ztrke2_stds,
         # align='center',
         alpha=0.5,
@@ -124,12 +124,12 @@ with open(args.file,'r') as f:
     ax.set_ybound(0,1.1)
     ax.set_xticks(x_pos + 0.375)
     ax.set_xticklabels(labels)
-    ax.set_title('Metric Comparison - 14 Trials')
+    ax.set_title('Metric Comparison - 15 Trials')
     ax.yaxis.grid(True)
 
 
     # Save the figure and show
     plt.tight_layout()
-    plt.savefig('aggregated_14_trials.png')
+    plt.savefig('aggregated_15_trials.png')
     plt.show()
 

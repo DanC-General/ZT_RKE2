@@ -19,7 +19,7 @@ def main():
     results = parse_log_file(args.file,atks)
     print("\nRunning ZT_RKE2 model...")
     show_results(results.get_stats())
-    results.get_visuals(args.file+"_ztrke2")
+    results.get_visuals(args.file+"_ztrke2",True)
 
     highest_f1 = 0
     highest_stats = []
@@ -41,7 +41,7 @@ def main():
     # print(f"At RMSE {highest_rmse}:")
     show_results(highest_stats)
 
-    best_comp.get_visuals(args.comparison_file+"_kitsune")
+    best_comp.get_visuals(args.comparison_file+"_kitsune",False)
 
 def show_results(stats): 
     print(f"    ACC: {stats[4]}, PREC: {stats[5]}, REC: {stats[6]}, F1: {stats[7]}\n")

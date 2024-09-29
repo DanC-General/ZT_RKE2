@@ -7,10 +7,12 @@ Trial_Out/00-14_9/py.log
 Running ZT_RKE2 model...
     ACC: 0.8091761409558704, PREC: 0.6536619092300855, REC: 0.9947392153915526, F1: 0.788913723737148
 
+Trial_Out/00-14_9/
 
 Running Kitsune comparison...
     ACC: 0.6441223141913626, PREC: 0.38197552969262905, REC: 0.5515458364752774, F1: 0.4513598095825804
 
+Trial_Out/00-14_9/
 Trial_Out/01-14_9
 
 Attack file given at Trial_Out/01-14_9/mal.log
@@ -20,69 +22,12 @@ Trial_Out/01-14_9/py.log
 Running ZT_RKE2 model...
     ACC: 0.8675089422051164, PREC: 0.674253574432296, REC: 0.9894322739895094, F1: 0.8019882455920971
 
-
-Running Kitsune comparison...
-Trial_Out/00-14_9
-
-Attack file given at Trial_Out/00-14_9/mal.log
-Trial_Out/00-14_9/py.log
-|st 1726273159.057666
-
-Running ZT_RKE2 model...
-    ACC: 0.8091761409558704, PREC: 0.6536619092300855, REC: 0.9947392153915526, F1: 0.788913723737148
-
-
-Running Kitsune comparison...
-Trial_Out/00-14_9
-
-Attack file given at Trial_Out/00-14_9/mal.log
-Trial_Out/00-14_9/py.log
-|st 1726273159.057666
-
-Running ZT_RKE2 model...
-    ACC: 0.8091761409558704, PREC: 0.6536619092300855, REC: 0.9947392153915526, F1: 0.788913723737148
-
-
-Running Kitsune comparison...
-    ACC: 0.6441223141913626, PREC: 0.38197552969262905, REC: 0.5515458364752774, F1: 0.4513598095825804
-
-Trial_Out/01-14_9
-
-Attack file given at Trial_Out/01-14_9/mal.log
-Trial_Out/01-14_9/py.log
-|st 1726294329.971877
-
-Running ZT_RKE2 model...
-    ACC: 0.8675089422051164, PREC: 0.674253574432296, REC: 0.9894322739895094, F1: 0.8019882455920971
-
-
-Running Kitsune comparison...
-Trial_Out/00-14_9
-
-Attack file given at Trial_Out/00-14_9/mal.log
-Trial_Out/00-14_9/py.log
-|st 1726273159.057666
-
-Running ZT_RKE2 model...
-    ACC: 0.8091761409558704, PREC: 0.6536619092300855, REC: 0.9947392153915526, F1: 0.788913723737148
-
-
-Running Kitsune comparison...
-    ACC: 0.6441223141913626, PREC: 0.38197552969262905, REC: 0.5515458364752774, F1: 0.4513598095825804
-
-Trial_Out/01-14_9
-
-Attack file given at Trial_Out/01-14_9/mal.log
-Trial_Out/01-14_9/py.log
-|st 1726294329.971877
-
-Running ZT_RKE2 model...
-    ACC: 0.8675089422051164, PREC: 0.674253574432296, REC: 0.9894322739895094, F1: 0.8019882455920971
-
+Trial_Out/01-14_9/
 
 Running Kitsune comparison...
     ACC: 0.8896650090099268, PREC: 0.4762387713706172, REC: 0.820929070929071, F1: 0.602787456445993
 
+Trial_Out/01-14_9/
 Trial_Out/02-31_8
 
 Attack file given at Trial_Out/02-31_8/mal.log
@@ -92,10 +37,12 @@ Trial_Out/02-31_8/py.log
 Running ZT_RKE2 model...
     ACC: 0.9289194512595459, PREC: 0.8573619631901841, REC: 0.991218441273326, F1: 0.9194439005286862
 
+Trial_Out/02-31_8/
 
 Running Kitsune comparison...
     ACC: 0.9996854986276303, PREC: 0.043478260869565216, REC: 1.0, F1: 0.08333333333333333
 
+Trial_Out/02-31_8/
 Trial_Out/0-26_9
 
 Attack file given at Trial_Out/0-26_9/mal.log
@@ -105,10 +52,12 @@ Trial_Out/0-26_9/py.log
 Running ZT_RKE2 model...
     ACC: 0.9077602182105898, PREC: 0.8936895810955962, REC: 0.9860452713913249, F1: 0.9375986026594546
 
+Trial_Out/0-26_9/
 
 Running Kitsune comparison...
     ACC: 0.7666969759188104, PREC: 0.4793996657668081, REC: 0.6606288751107174, F1: 0.5556093563766389
 
+Trial_Out/0-26_9/
 Trial_Out/03-22_9
 
 Attack file given at Trial_Out/03-22_9/mal.log
@@ -118,169 +67,12 @@ Trial_Out/03-22_9/py.log
 Running ZT_RKE2 model...
     ACC: 0.933806146572104, PREC: 0.869661329176704, REC: 0.9956844803530289, F1: 0.9284158296018394
 
-
-Running Kitsune comparison...
-Trial_Out/00-14_9
-
-Attack file given at Trial_Out/00-14_9/mal.log
-Trial_Out/00-14_9/py.log
-|st 1726273159.057666
-
-Running ZT_RKE2 model...
-    ACC: 0.8091761409558704, PREC: 0.6536619092300855, REC: 0.9947392153915526, F1: 0.788913723737148
-
-
-Running Kitsune comparison...
-    ACC: 0.6441223141913626, PREC: 0.38197552969262905, REC: 0.5515458364752774, F1: 0.4513598095825804
-
-Trial_Out/01-14_9
-
-Attack file given at Trial_Out/01-14_9/mal.log
-Trial_Out/01-14_9/py.log
-|st 1726294329.971877
-
-Running ZT_RKE2 model...
-    ACC: 0.8675089422051164, PREC: 0.674253574432296, REC: 0.9894322739895094, F1: 0.8019882455920971
-
-
-Running Kitsune comparison...
-Trial_Out/00-14_9
-
-Attack file given at Trial_Out/00-14_9/mal.log
-Trial_Out/00-14_9/py.log
-|st 1726273159.057666
-
-Running ZT_RKE2 model...
-    ACC: 0.8091761409558704, PREC: 0.6536619092300855, REC: 0.9947392153915526, F1: 0.788913723737148
-
-
-Running Kitsune comparison...
-    ACC: 0.6441223141913626, PREC: 0.38197552969262905, REC: 0.5515458364752774, F1: 0.4513598095825804
-
-Trial_Out/01-14_9
-
-Attack file given at Trial_Out/01-14_9/mal.log
-Trial_Out/01-14_9/py.log
-|st 1726294329.971877
-
-Running ZT_RKE2 model...
-    ACC: 0.8675089422051164, PREC: 0.674253574432296, REC: 0.9894322739895094, F1: 0.8019882455920971
-
-
-Running Kitsune comparison...
-Trial_Out/00-14_9
-
-Attack file given at Trial_Out/00-14_9/mal.log
-Trial_Out/00-14_9/py.log
-|st 1726273159.057666
-
-Running ZT_RKE2 model...
-    ACC: 0.8091761409558704, PREC: 0.6536619092300855, REC: 0.9947392153915526, F1: 0.788913723737148
-
-
-Running Kitsune comparison...
-    ACC: 0.6441223141913626, PREC: 0.38197552969262905, REC: 0.5515458364752774, F1: 0.4513598095825804
-
-Trial_Out/01-14_9
-
-Attack file given at Trial_Out/01-14_9/mal.log
-Trial_Out/01-14_9/py.log
-|st 1726294329.971877
-
-Running ZT_RKE2 model...
-    ACC: 0.8675089422051164, PREC: 0.674253574432296, REC: 0.9894322739895094, F1: 0.8019882455920971
-
-
-Running Kitsune comparison...
-Trial_Out/00-14_9
-
-Attack file given at Trial_Out/00-14_9/mal.log
-Trial_Out/00-14_9/py.log
-|st 1726273159.057666
-
-Running ZT_RKE2 model...
-    ACC: 0.8091761409558704, PREC: 0.6536619092300855, REC: 0.9947392153915526, F1: 0.788913723737148
-
-
-Running Kitsune comparison...
-    ACC: 0.6441223141913626, PREC: 0.38197552969262905, REC: 0.5515458364752774, F1: 0.4513598095825804
-
-Trial_Out/01-14_9
-
-Attack file given at Trial_Out/01-14_9/mal.log
-Trial_Out/01-14_9/py.log
-|st 1726294329.971877
-
-Running ZT_RKE2 model...
-    ACC: 0.8675089422051164, PREC: 0.674253574432296, REC: 0.9894322739895094, F1: 0.8019882455920971
-
-
-Running Kitsune comparison...
-Trial_Out/00-14_9
-
-Attack file given at Trial_Out/00-14_9/mal.log
-Trial_Out/00-14_9/py.log
-|st 1726273159.057666
-
-Running ZT_RKE2 model...
-    ACC: 0.8091761409558704, PREC: 0.6536619092300855, REC: 0.9947392153915526, F1: 0.788913723737148
-
-
-Running Kitsune comparison...
-    ACC: 0.6441223141913626, PREC: 0.38197552969262905, REC: 0.5515458364752774, F1: 0.4513598095825804
-
-Trial_Out/01-14_9
-
-Attack file given at Trial_Out/01-14_9/mal.log
-Trial_Out/01-14_9/py.log
-|st 1726294329.971877
-
-Running ZT_RKE2 model...
-    ACC: 0.8675089422051164, PREC: 0.674253574432296, REC: 0.9894322739895094, F1: 0.8019882455920971
-
-
-Running Kitsune comparison...
-    ACC: 0.8896650090099268, PREC: 0.4762387713706172, REC: 0.820929070929071, F1: 0.602787456445993
-
-Trial_Out/02-31_8
-
-Attack file given at Trial_Out/02-31_8/mal.log
-Trial_Out/02-31_8/py.log
-|st 1725113776.655127
-
-Running ZT_RKE2 model...
-    ACC: 0.9289194512595459, PREC: 0.8573619631901841, REC: 0.991218441273326, F1: 0.9194439005286862
-
-
-Running Kitsune comparison...
-    ACC: 0.9996854986276303, PREC: 0.043478260869565216, REC: 1.0, F1: 0.08333333333333333
-
-Trial_Out/0-26_9
-
-Attack file given at Trial_Out/0-26_9/mal.log
-Trial_Out/0-26_9/py.log
-|st 1727336249.216595
-
-Running ZT_RKE2 model...
-    ACC: 0.9077602182105898, PREC: 0.8936895810955962, REC: 0.9860452713913249, F1: 0.9375986026594546
-
-
-Running Kitsune comparison...
-    ACC: 0.7666969759188104, PREC: 0.4793996657668081, REC: 0.6606288751107174, F1: 0.5556093563766389
-
-Trial_Out/03-22_9
-
-Attack file given at Trial_Out/03-22_9/mal.log
-Trial_Out/03-22_9/py.log
-|st 1726998049.304096
-
-Running ZT_RKE2 model...
-    ACC: 0.933806146572104, PREC: 0.869661329176704, REC: 0.9956844803530289, F1: 0.9284158296018394
-
+Trial_Out/03-22_9/
 
 Running Kitsune comparison...
     ACC: 0.7216792245387882, PREC: 0.5191518630078504, REC: 0.7494179676800876, F1: 0.6133863894298804
 
+Trial_Out/03-22_9/
 Trial_Out/04_23_9
 
 Attack file given at Trial_Out/04_23_9/mal.log
@@ -290,125 +82,12 @@ Trial_Out/04_23_9/py.log
 Running ZT_RKE2 model...
     ACC: 0.8857137016823041, PREC: 0.8749060770964731, REC: 0.9974819583614558, F1: 0.9321818027437803
 
-
-Running Kitsune comparison...
-Trial_Out/00-14_9
-
-Attack file given at Trial_Out/00-14_9/mal.log
-Trial_Out/00-14_9/py.log
-|st 1726273159.057666
-
-Running ZT_RKE2 model...
-    ACC: 0.8091761409558704, PREC: 0.6536619092300855, REC: 0.9947392153915526, F1: 0.788913723737148
-
-
-Running Kitsune comparison...
-    ACC: 0.6441223141913626, PREC: 0.38197552969262905, REC: 0.5515458364752774, F1: 0.4513598095825804
-
-Trial_Out/01-14_9
-
-Attack file given at Trial_Out/01-14_9/mal.log
-Trial_Out/01-14_9/py.log
-|st 1726294329.971877
-
-Running ZT_RKE2 model...
-    ACC: 0.8675089422051164, PREC: 0.674253574432296, REC: 0.9894322739895094, F1: 0.8019882455920971
-
-
-Running Kitsune comparison...
-Trial_Out/00-14_9
-
-Attack file given at Trial_Out/00-14_9/mal.log
-Trial_Out/00-14_9/py.log
-|st 1726273159.057666
-
-Running ZT_RKE2 model...
-    ACC: 0.8091761409558704, PREC: 0.6536619092300855, REC: 0.9947392153915526, F1: 0.788913723737148
-
-
-Running Kitsune comparison...
-    ACC: 0.6441223141913626, PREC: 0.38197552969262905, REC: 0.5515458364752774, F1: 0.4513598095825804
-
-Trial_Out/01-14_9
-
-Trial_Out/00-14_9
-
-Attack file given at Trial_Out/00-14_9/mal.log
-Trial_Out/00-14_9/py.log
-|st 1726273159.057666
-
-Running ZT_RKE2 model...
-    ACC: 0.8091761409558704, PREC: 0.6536619092300855, REC: 0.9947392153915526, F1: 0.788913723737148
-
-
-Running Kitsune comparison...
-    ACC: 0.6441223141913626, PREC: 0.38197552969262905, REC: 0.5515458364752774, F1: 0.4513598095825804
-
-Trial_Out/01-14_9
-
-Attack file given at Trial_Out/01-14_9/mal.log
-Trial_Out/01-14_9/py.log
-|st 1726294329.971877
-
-Running ZT_RKE2 model...
-    ACC: 0.8675089422051164, PREC: 0.674253574432296, REC: 0.9894322739895094, F1: 0.8019882455920971
-
-
-Running Kitsune comparison...
-    ACC: 0.8896650090099268, PREC: 0.4762387713706172, REC: 0.820929070929071, F1: 0.602787456445993
-
-Trial_Out/02-31_8
-
-Attack file given at Trial_Out/02-31_8/mal.log
-Trial_Out/02-31_8/py.log
-|st 1725113776.655127
-
-Running ZT_RKE2 model...
-    ACC: 0.9289194512595459, PREC: 0.8573619631901841, REC: 0.991218441273326, F1: 0.9194439005286862
-
-
-Running Kitsune comparison...
-    ACC: 0.9996854986276303, PREC: 0.043478260869565216, REC: 1.0, F1: 0.08333333333333333
-
-Trial_Out/0-26_9
-
-Attack file given at Trial_Out/0-26_9/mal.log
-Trial_Out/0-26_9/py.log
-|st 1727336249.216595
-
-Running ZT_RKE2 model...
-    ACC: 0.9077602182105898, PREC: 0.8936895810955962, REC: 0.9860452713913249, F1: 0.9375986026594546
-
-
-Running Kitsune comparison...
-    ACC: 0.7666969759188104, PREC: 0.4793996657668081, REC: 0.6606288751107174, F1: 0.5556093563766389
-
-Trial_Out/03-22_9
-
-Attack file given at Trial_Out/03-22_9/mal.log
-Trial_Out/03-22_9/py.log
-|st 1726998049.304096
-
-Running ZT_RKE2 model...
-    ACC: 0.933806146572104, PREC: 0.869661329176704, REC: 0.9956844803530289, F1: 0.9284158296018394
-
-
-Running Kitsune comparison...
-    ACC: 0.7216792245387882, PREC: 0.5191518630078504, REC: 0.7494179676800876, F1: 0.6133863894298804
-
-Trial_Out/04_23_9
-
-Attack file given at Trial_Out/04_23_9/mal.log
-Trial_Out/04_23_9/py.log
-|st 1727049747.087201
-
-Running ZT_RKE2 model...
-    ACC: 0.8857137016823041, PREC: 0.8749060770964731, REC: 0.9974819583614558, F1: 0.9321818027437803
-
+Trial_Out/04_23_9/
 
 Running Kitsune comparison...
     ACC: 0.33464537690308205, PREC: 0.11642899364563322, REC: 0.2975499221073502, F1: 0.16736812756409405
 
+Trial_Out/04_23_9/
 Trial_Out/1-26_9
 
 Attack file given at Trial_Out/1-26_9/mal.log
@@ -418,10 +97,12 @@ Trial_Out/1-26_9/py.log
 Running ZT_RKE2 model...
     ACC: 0.905, PREC: 0.8899980984978133, REC: 0.9987730061349693, F1: 0.9412533621578141
 
+Trial_Out/1-26_9/
 
 Running Kitsune comparison...
     ACC: 0.6806922524411314, PREC: 0.3868753056234719, REC: 0.9272855133614627, F1: 0.545966461941895
 
+Trial_Out/1-26_9/
 Trial_Out/2-27_9
 
 Attack file given at Trial_Out/2-27_9/mal.log
@@ -431,10 +112,12 @@ Trial_Out/2-27_9/py.log
 Running ZT_RKE2 model...
     ACC: 0.9264450561084057, PREC: 0.8500782625709254, REC: 0.9770069709916798, F1: 0.9091337099811676
 
+Trial_Out/2-27_9/
 
 Running Kitsune comparison...
     ACC: 0.4735427532322203, PREC: 0.3309336596542387, REC: 0.9514915596811019, F1: 0.49107047994359293
 
+Trial_Out/2-27_9/
 Trial_Out/3-27_9_v2
 
 Attack file given at Trial_Out/3-27_9_v2/mal.log
@@ -444,10 +127,12 @@ Trial_Out/3-27_9_v2/py.log
 Running ZT_RKE2 model...
     ACC: 0.9592880759297946, PREC: 0.937282815827822, REC: 0.9929638096369088, F1: 0.9643202098980784
 
+Trial_Out/3-27_9_v2/
 
 Running Kitsune comparison...
     ACC: 0.629328548058144, PREC: 0.3137995927685568, REC: 0.7453832624945039, F1: 0.4416630481980026
 
+Trial_Out/3-27_9_v2/
 Trial_Out/4-28_9
 
 Attack file given at Trial_Out/4-28_9/mal.log
@@ -457,10 +142,12 @@ Trial_Out/4-28_9/py.log
 Running ZT_RKE2 model...
     ACC: 0.9795907562802764, PREC: 0.9566125446338342, REC: 0.9911349993019685, F1: 0.9735678288594055
 
+Trial_Out/4-28_9/
 
 Running Kitsune comparison...
     ACC: 0.3679754482729019, PREC: 0.05817868078699396, REC: 0.5159015901590159, F1: 0.10456542560469465
 
+Trial_Out/4-28_9/
 Trial_Out/5-28_9_v2
 
 Attack file given at Trial_Out/5-28_9_v2/mal.log
@@ -470,10 +157,12 @@ Trial_Out/5-28_9_v2/py.log
 Running ZT_RKE2 model...
     ACC: 0.9769850402761795, PREC: 0.9555733262250655, REC: 1.0, F1: 0.9772820209914127
 
+Trial_Out/5-28_9_v2/
 
 Running Kitsune comparison...
     ACC: 0.32646723032582053, PREC: 0.18597900237070009, REC: 0.9878192938274143, F1: 0.3130242178466149
 
+Trial_Out/5-28_9_v2/
 Trial_Out/6-28_9_v3
 
 Attack file given at Trial_Out/6-28_9_v3/mal.log
@@ -483,10 +172,12 @@ Trial_Out/6-28_9_v3/py.log
 Running ZT_RKE2 model...
     ACC: 0.9616581432475579, PREC: 0.8027621924902891, REC: 0.9918236757909705, F1: 0.8873340224218812
 
+Trial_Out/6-28_9_v3/
 
 Running Kitsune comparison...
     ACC: 0.7958904109589041, PREC: 0.1948915790874019, REC: 0.6063741721854304, F1: 0.2949763414879694
 
+Trial_Out/6-28_9_v3/
 Trial_Out/7-28_9_v4
 
 Attack file given at Trial_Out/7-28_9_v4/mal.log
@@ -496,7 +187,39 @@ Trial_Out/7-28_9_v4/py.log
 Running ZT_RKE2 model...
     ACC: 0.9016800657927863, PREC: 0.850515727124183, REC: 0.9999099531756513, F1: 0.9191821643397163
 
+Trial_Out/7-28_9_v4/
 
 Running Kitsune comparison...
     ACC: 0.4256626072758021, PREC: 0.2639539025134833, REC: 0.9441284862823605, F1: 0.41256523684079727
 
+Trial_Out/7-28_9_v4/
+Trial_Out/8-29_9
+
+Attack file given at Trial_Out/8-29_9/mal.log
+Trial_Out/8-29_9/py.log
+|st 1727567899.412636
+
+Running ZT_RKE2 model...
+    ACC: 0.9790141633660286, PREC: 0.9616452850152096, REC: 0.9935322250056935, F1: 0.9773287333661902
+
+Trial_Out/8-29_9/
+
+Running Kitsune comparison...
+    ACC: 0.706962783980972, PREC: 0.2520998734322863, REC: 0.6345666497719209, F1: 0.36084405558414817
+
+Trial_Out/8-29_9/
+Trial_Out/9-29_9_v2
+
+Attack file given at Trial_Out/9-29_9_v2/mal.log
+Trial_Out/9-29_9_v2/py.log
+|st 1727581866.495551
+
+Running ZT_RKE2 model...
+    ACC: 0.9892316979654435, PREC: 0.9757623485146782, REC: 0.9952697576866437, F1: 0.9854195201696637
+
+Trial_Out/9-29_9_v2/
+
+Running Kitsune comparison...
+    ACC: 0.35219870493862954, PREC: 0.17025899967342428, REC: 0.9332828421922336, F1: 0.28798147400624613
+
+Trial_Out/9-29_9_v2/

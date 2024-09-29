@@ -10,13 +10,26 @@ kitsune = [list() for x in range(0,4)]
 ztrke2 = [list() for x in range(0,4)]
 cur_ztrke2 = True
 i = 0
-kit_count = 0
-zt_count = 0
+kit_count = 1
+zt_count = 1
+relevant_file = True
 with open(args.file,'r') as f: 
     for line in f: 
         line = line.strip()
-        print("COUNTS",zt_count,kit_count)
+        # if line.startswith('Trial_Out/0-'):
+        # # if line.startswith('Trial_Out/0-') or line.startswith('Trial_Out/01'):
+        #     relevant_file = True
+        #     pass
+        # elif line.startswith('Trial_Out/0'):
+        #     relevant_file = False
+        #     continue
+        # elif line.startswith('Trial_Out'): 
+        #     relevant_file = True
+        # print("COUNTS",zt_count,kit_count)
         if line.strip().startswith("ACC"):
+            if not relevant_file: 
+                continue
+            print("COUNT:",zt_count)
             if i > 6: 
                 break
             det = line.split(',')
@@ -106,16 +119,17 @@ with open(args.file,'r') as f:
         ecolor='blue',
         capsize=10)
     # ax.bar_label(kt_bar,padding=3)
-    ax.set_ylabel('Metric')
-    ax.legend()
+    ax.set_ylabel('Proportion')
+    ax.legend(loc='upper left',ncols=2)
+    ax.set_ybound(0,1.1)
     ax.set_xticks(x_pos + 0.375)
     ax.set_xticklabels(labels)
-    ax.set_title('Metric Comparison - 15 Trials')
+    ax.set_title('Metric Comparison - 14 Trials')
     ax.yaxis.grid(True)
 
 
     # Save the figure and show
     plt.tight_layout()
-    plt.savefig('bar_plot_with_error_bars.png')
+    plt.savefig('aggregated_14_trials.png')
     plt.show()
 

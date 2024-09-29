@@ -457,7 +457,12 @@ class Analyser:
 
         plt.ylabel("Attack Category",fontsize=18)
         plt.xticks(np.arange(0,3600,step=600),fontsize=18)
-        plt.yticks(np.arange(0,0.6,step=0.1),fontsize=18)
+        plt.yticks(np.arange(0,0.6,step=0.1),fontsize=18,color="white")
+        plt.tick_params(
+            axis='y',
+            which='both',
+            color='white'
+        )
         plt.legend(fontsize=18,loc="upper left")
         plt.title(f"Analysis of {name_str} Recall",fontsize=22)
         plot_time = time.strftime("%Y%m%d-%H%M%S")

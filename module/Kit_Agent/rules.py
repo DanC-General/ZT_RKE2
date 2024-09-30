@@ -126,18 +126,21 @@ def get_lines(pipe):
             while not msg_q.empty():
                 # TODO Could alter this to retrieve all messages from the queue
                 item = msg_q.get(block=False)
-                # print(item)
+                print("analysing",item)
                 cur_call = item[0]
                 alert_time = item[1]
                 rel_svc = svc_dict[item[2]]
                 # New subject trusts are made for the relevant subjects here
                 rel_svc.handle_alert(cur_call,alert_time)
+                # log.write(" " + str(pack.sip) + " " + str(pack.dip) + cur_svc.name + ":: " + str(cur_svc.subj_sysc_map)+"\n")
             # Evaluate system trust
             obj_trust = rmse
             # Clamp RMSE for fuzzy logic input
             if obj_trust > 1: 
                 obj_trust = 1
             subj_trust = cur_svc.subject_trust(subject)
+
+            log.write(str(obj_trust) + ": " + str(pack) + "\n")
             # Pass if the model is still training
             if obj_trust == 0.0: 
                 end_time = time()
@@ -146,7 +149,6 @@ def get_lines(pipe):
                 continue
             # log.write(cur_svc.name + str(cur_svc.subj_sysc_map) + "\n")
             # Act on overall request trust
-            log.write(str(obj_trust) + ": " + str(pack) + "\n")
             # print(obj_trust,"vs",subj_trust)
             req_trust = Rfuzz.simulate(obj_trust,subj_trust,log)
             # log.write("Subject trust " + str(subj_trust) + ", Object trust " +
@@ -194,6 +196,7 @@ def on_recv(channel,method,properties,body):
             # time_s = str(int(float(fields["output_fields"]["evt.time"]) / 1000000000))
 
             msg_q.put([fields["output_fields"]["syscall.type"],fields["output_fields"]["evt.rawtime.s"],fields["output_fields"]["container.name"]])
+            # print("Added",[fields["output_fields"]["syscall.type"],fields["output_fields"]["evt.rawtime.s"],fields["output_fields"]["container.name"]])
     except KeyError: 
         print("Error", fields)
         return 
@@ -249,6 +252,7 @@ def main():
     # Communication with scrape.c occurs
     #   through the "traffic_data" pipe. 
     threading.Thread(target=retrieve).start()
+    
     # Start the process to update subject trusts every hour. 
     threading.Thread(target=run_sched).start()
     pipe = "../traffic_data"

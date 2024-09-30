@@ -107,6 +107,8 @@ class FE:
             print("Loaded " + str(len(self.scapyin)) + " Packets.")
 
     def get_next_vector(self,f):
+        # if f is not None: 
+        #     f.write()
         if self.curPacketIndx == self.limit:
             if self.parse_type == 'tsv':
                 self.tsvinf.close()

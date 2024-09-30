@@ -60,6 +60,7 @@ class Service:
             self.subj_sysc_map[subject]["trust"] = self.make_trust(subject,syscall,i)
             i+=1
         # self.log.write(self.name + ":: " + str(self.subj_sysc_map) + "\n")
+        print(self.subj_sysc_map)
 
     def add_recent(self,subject,time): 
         cur_sysc_map = self.subj_sysc_map

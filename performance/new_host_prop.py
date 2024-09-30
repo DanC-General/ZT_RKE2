@@ -99,5 +99,5 @@ with open(args.file,'r') as f:
                       columns=["Packet Label","Subject Alert","Both","Object Alert"]
     )
     df.plot(stacked=True,x="Packet Label",kind='bar',rot=0,title="Trust Component Roles in Attack Detection")
-    plt.show()
     plt.savefig("Trust_Roles.png")
+    plt.show()

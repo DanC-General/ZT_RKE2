@@ -1,6 +1,7 @@
 from Kitsune import Kitsune
 import numpy as np
 import time
+from argparse import ArgumentParser
 
 ##############################################################################
 # Kitsune a lightweight online network intrusion detection system based on an ensemble of autoencoders (kitNET).
@@ -22,9 +23,17 @@ import time
 
 
 # File location
-path = "/home/dc/ZT_RKE2/performance/23_9_125sample.pcap" #the pcap, pcapng, or tsv file to process.
+path = "/home/dc/ZT_RKE2/performance/50_sample_14_9.pcap.tsv" #the pcap, pcapng, or tsv file to process.
 packet_limit = np.inf #the number of packets to process
-
+parser = ArgumentParser()
+# parser.add_argument("file", help="Path of file to anlayse")
+parser.add_argument("-f","--from_path",help="Path of file to analyse")
+parser.add_argument("-t","--to_path",help="Path of file to write to")
+args = parser.parse_args()
+print("From",args.from_path,"to",args.to_path)
+path = args.from_path
+to_path = args.to_path
+# exit()
 # KitNET params:
 maxAE = 10 #maximum size for any autoencoder in the ensemble layer
 FMgrace = 5000 #the number of instances taken to learn the feature mapping (the ensemble's architecture)
@@ -40,7 +49,7 @@ start = time.time()
 loop_time = time.time()
 # Here we process (train/execute) each individual packet.
 # In this way, each observation is discarded after performing process() method.
-with open("/home/dc/ZT_RKE2/performance/23_9_125sample_out.log",'w') as f:
+with open(to_path,'w') as f:
     while True:
         i+=1
         pack_time = time.time()

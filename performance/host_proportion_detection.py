@@ -50,13 +50,20 @@ with open(args.file,'r') as f:
         # FP
         if det[-1] == "FP":
             fp_count += 1
-            if float(det[-2]) > 0.2 and float(det[-3]) < 0.7:
-                both_fp += 1
-            elif float(det[-2]) > 0.4:
-                net_fp += 1 
-            # elif float(det[-3]) < 0.5: 
-            else:
-                host_fp += 1
+            if float(det[-3]) < 1: 
+                if float(det[-2]) < 0.4:
+                    host_fp += 1 
+                else:
+                    both_fp +=1 
+            elif float(det[-2]) > 0.4: 
+                net_fp += 1
+            # if float(det[-2]) > 0.2 and float(det[-3]) < 0.7:
+            #     both_fp += 1
+            # elif float(det[-2]) > 0.4:
+            #     net_fp += 1 
+            # # elif float(det[-3]) < 0.5: 
+            # else:
+            #     host_fp += 1
     # print(host_only_count,host_count,total_count,host_only_count/total_count,host_count/total_count)
     # print(net_count,host_count,total_count,net_count/total_count,host_count/total_count)
     subj_only = np.mean([x[-2] for x in all_results])

@@ -44,11 +44,11 @@ with open(args.file,'r') as f:
         if line.startswith("Attack file"):
             # print(line)
             for k,m in metrics.items(): 
-                if k == "HOST" or k == "NET":
-                    if m.host_count != 0: 
-                        m.results.append([m.host_count,m.both_count,m.net_count,m.total_count])
-                elif m.total_count != 0:
+                # if k == "HOST" or k == "NET":
+                if m.host_count != 0: 
                     m.results.append([m.host_count,m.both_count,m.net_count,m.total_count])
+                # elif m.total_count != 0:
+                #     m.results.append([m.host_count,m.both_count,m.net_count,m.total_count])
                 m.reset()
         line = line.strip()
         det = line.split(",")
@@ -68,13 +68,21 @@ with open(args.file,'r') as f:
         # FP
         if det[-1] == "FP":
             metrics["FP"].total_count += 1
-            if float(det[-2]) > 0.2 and float(det[-3]) < 0.7:
-                metrics["FP"].both_count += 1
-            elif float(det[-2]) > 0.4:
+            # if float(det[-2]) > 0.2 and float(det[-3]) < 0.7:
+            #     metrics["FP"].both_count += 1
+            # elif float(det[-2]) > 0.4:
+            #     metrics["FP"].net_count += 1 
+            # # elif float(det[-3]) < 0.5: 
+            # else:
+            #     metrics["FP"].host_count += 1
+            metrics["FP"].total_count += 1
+            if float(det[-3]) < 1: 
+                if float(det[-2]) < 0.4:
+                    metrics["FP"].host_count += 1
+                else:
+                    metrics["FP"].both_count += 1
+            elif float(det[-2]) > 0.4: 
                 metrics["FP"].net_count += 1 
-            # elif float(det[-3]) < 0.5: 
-            else:
-                metrics["FP"].host_count += 1
     # print(host_only_count,host_count,total_count,host_only_count/total_count,host_count/total_count)
     # print(net_count,host_count,total_count,net_count/total_count,host_count/total_count)
     print([[k,v.get_results()] for k,v in metrics.items()])

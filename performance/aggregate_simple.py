@@ -49,10 +49,10 @@ with open(args.file,'r') as f:
                 print(i,values)
             cur_ztrke2 = not cur_ztrke2
     print("COUNTS",zt_count,kit_count)
-    print("Kitsune")
-    print([statistics.mean(x) for x in kitsune])
-    print("ZT_RKE2",len(ztrke2[2]))
-    print([statistics.mean(x) for x in ztrke2])
+    # print("Kitsune")
+    # print([statistics.mean(x) for x in kitsune])
+    # print("ZT_RKE2",len(ztrke2[2]))
+    # print([statistics.mean(x) for x in ztrke2])
     # Calculate the average
     ztrke2_means = [np.mean(x) for x in ztrke2]
     kitsune_means = [np.mean(x) for x in kitsune]
@@ -97,7 +97,7 @@ with open(args.file,'r') as f:
     #     ecolor='black',
     #     capsize=10
     #     )
-
+    print(ztrke2_means,ztrke2_stds,kitsune_means,kitsune_stds)
     # Add some text for labels, title and custom x-axis tick labels, etc.
     # Build the plot
     fig, ax = plt.subplots()
@@ -127,9 +127,12 @@ with open(args.file,'r') as f:
     ax.set_title('Metric Comparison - 15 Trials')
     ax.yaxis.grid(True)
 
-
+    print("Kitsune")
+    print(f"{kitsune_means}\n{kitsune_stds}")
+    print("ZT_RKE2")
+    print(f"{ztrke2_means}\n{ztrke2_stds}")
     # Save the figure and show
     plt.tight_layout()
-    plt.savefig('aggregated_15_trials.png')
+    # plt.savefig('aggregated_15_trials.png')
     plt.show()
 

@@ -265,8 +265,10 @@ class Analyser:
                 self.last_match = "TP"
                 if atk_type == "Host": 
                     self.cls_detection[1][0] += 1
+                    self.last_match = "HOST"
                 elif atk_type == "Network": 
                     self.cls_detection[0][0] += 1
+                    self.last_match = "NET"
             # For a false positive, the system would detect an alert but the packet would be 
             #   benign.
             elif sys_alert and not is_malicious_packet:
@@ -282,7 +284,9 @@ class Analyser:
             no_sysc = re.sub(r"[a-zA-Z]+:: {.*}",' ',line)
             sstr = re.search(r"[a-zA-Z]+:: {.*}",line).group()
             # print("NS",no_sysc)
-            if not self.last_match == "FP":
+            if not (self.last_match == "HOST" or self.last_match == "NET" or self.last_match == "FP"): 
+            # if self.last_match == "FP":
+                # print("Match",self.last_match)
                 return
             one = no_sysc.split("svc->")
             # for i,e in enumerate(one): 
@@ -312,12 +316,14 @@ class Analyser:
             ben_c = second.split(" ")[0]
             third = f.readline()
             self.last_details = [rmse,name,sip,dip]
+            print(f"{req_t},{s_t},{o_t},{rmse},{self.last_match}")
             if (third.startswith("Terminated")):
                 # print("REQUEST TERMINATED",line)
                 self.add_request(Request(req_t,o_t,s_t,ben_c,datestr,pack_ts,sstr,self.last_details,True))
             else:
                 self.add_request(Request(req_t,o_t,s_t,ben_c,datestr,pack_ts,sstr,self.last_details))
                 self.analyse_line(third,f)
+            self.last_match = None
         elif re.match(r"\d+ packets processed.",line):
             # self.total_count += 1000
             # print("GENERAL PACKET COUNTS", line)
@@ -332,7 +338,6 @@ class Analyser:
                 proc_time = float(det[2]) 
                 req_ts = float(det[3]) - self.start_time
             self.avg_times.append((proc_time,req_ts))
-
     def analyse_comp_line(self,line,rmse_cutoff=0.1):
         self.total_count += 1
         det = [x.strip() for x in line.strip().split(" ") if x.strip() != '']

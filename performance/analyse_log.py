@@ -49,6 +49,7 @@ def main():
 
 def show_results(stats): 
     print(f"    ACC: {stats[4]}, PREC: {stats[5]}, REC: {stats[6]}, F1: {stats[7]}\n")
+    print(f"    HOST {stats[-1]}, NETWORK {stats[-2]}")
     # print(f"t_p: {stats[0]},f_p: {stats[1]},t_n: {stats[2]},f_n: {stats[3]},acc: {stats[4]},prec: {stats[5]},rec: {stats[6]},f1: {stats[7]},net_det: {stats[8]},host_det : {stats[9]}")
 
 if __name__ == "__main__": 

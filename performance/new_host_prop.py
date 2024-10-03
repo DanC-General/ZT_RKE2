@@ -8,6 +8,8 @@ parser.add_argument("file",help="Path of file to write to")
 args = parser.parse_args()
 kitsune = [list() for x in range(0,4)]
 ztrke2 = [list() for x in range(0,4)]
+is_ztrke2 = False
+cat_counts = list()
 # host_only_count = 0
 # host_count = 0
 # net_count = 0
@@ -41,14 +43,21 @@ class Metric():
 metrics = {"NET": Metric("NET"),"HOST":Metric("HOST"),"FP": Metric("FP")}
 with open(args.file,'r') as f: 
     for line in f: 
+        if line.startswith("Running ZT_RKE2"):
+            is_ztrke2 = True
+        elif line.startswith("Running Kitsune"):   
+            is_ztrke2 = False
+
+        if line.startswith("    HOST"):
+            det = line.strip().split(" ")
+            if not is_ztrke2: 
+                print("ZTRKE2",det)
+                cat_counts.append([det[1],det[3]])
         if line.startswith("Attack file"):
             # print(line)
             for k,m in metrics.items(): 
-                # if k == "HOST" or k == "NET":
                 if m.host_count != 0: 
                     m.results.append([m.host_count,m.both_count,m.net_count,m.total_count])
-                # elif m.total_count != 0:
-                #     m.results.append([m.host_count,m.both_count,m.net_count,m.total_count])
                 m.reset()
         line = line.strip()
         det = line.split(",")
@@ -86,6 +95,11 @@ with open(args.file,'r') as f:
     # print(host_only_count,host_count,total_count,host_only_count/total_count,host_count/total_count)
     # print(net_count,host_count,total_count,net_count/total_count,host_count/total_count)
     print([[k,v.get_results()] for k,v in metrics.items()])
+#     print("Host mean",statistics.mean(list([float(x[0].replace(",","")) for x in cat_counts if float(x[0].replace(",","")) !=  0.5])))
+#     print("Net mean",statistics.mean(list([float(x[1].replace(",","")) for x in cat_counts if float(x[1].replace(",","")) !=  0.5]))
+# )
+#     print("Host averages",statistics.mean([float(x[0].replace(",","")) for x in cat_counts if x[0] !=  0.5]),"network averages",np.mean([x[1] for x in cat_counts]))
+
     # subj_only = np.mean([x[-2] for x in all_results])
     # both = np.mean([x[-1] for x in all_results])
     # print("Only subject trust:",np.mean([x[-2] for x in all_results]))
@@ -102,10 +116,18 @@ with open(args.file,'r') as f:
     df = pd.DataFrame([
                         ['Host TP',hres[0],hres[1]-hres[0],1-hres[1]],
                         ["Net TP",nres[0],nres[1]-nres[0],1-nres[1]],
+                        # ['All FP',fpres[0],fpres[1]-fpres[0],1-fpres[1]]
+                      ],
+                      columns=["Packet Label","Subject Alert","Both","Object Alert"],
+    )
+    df.plot(stacked=True,x="Packet Label",kind='bar',rot=0,title="Trust Component Roles in True Positives")
+    plt.savefig("Trust_Roles_TP.png")
+    plt.show()
+    df = pd.DataFrame([
                         ['All FP',fpres[0],fpres[1]-fpres[0],1-fpres[1]]
                       ],
-                      columns=["Packet Label","Subject Alert","Both","Object Alert"]
+                      columns=["Packet Label","Subject Alert","Both","Object Alert"],
     )
-    df.plot(stacked=True,x="Packet Label",kind='bar',rot=0,title="Trust Component Roles in Attack Detection")
-    plt.savefig("Trust_Roles.png")
+    df.plot(figsize=(4,5),stacked=True,x="Packet Label",kind='bar',rot=0,width=0.2,title="Trust Component Roles in False Positives")
+    plt.savefig("Trust_Roles_FP.png")
     plt.show()

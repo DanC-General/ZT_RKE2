@@ -113,7 +113,7 @@ def get_lines(pipe):
             # Train relevant ML instance
             cur_svc.ml.FE.packets.append(pack)
             rmse =  cur_svc.ml.proc_next_packet()
-            # log.write("RMSE for " + pack.svc + str(cur_svc.ml.FE.curPacketIndx) +  ":" + str(rmse) +"\n")
+            log.write("RMSE for " + pack.svc + str(cur_svc.ml.FE.curPacketIndx) +  ":" + str(rmse) +"\n")
             
             # Add subject to list of recent for tagging
             subject = pack.external_port(pod_cidr)[0]

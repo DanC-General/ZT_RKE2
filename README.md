@@ -69,7 +69,8 @@ sudo apt install gnome-terminal -->
 # Project Structure
 
 ```
-.
+├── rke2_install.sh - Automates installation of RKE2
+├── run_vm.sh - Deploys ZT_RKE2
 ├── app - Application Setup
 │   ├── db - SQL database and endpoint 
 │   ├── http - HTTP endpoint 
@@ -77,15 +78,19 @@ sudo apt install gnome-terminal -->
 │   └── ssh - SSH endpoint
 ├── module - Main ZT_RKE2 code 
 │   ├── Kit_Agent - Kitsune source code + online FE
+│   │   ├── KitNET - Original Kitsune Source
+│   │   └── utils - Supporting code for our implementation
+│   │   └── rules.py - Main ZT_RKE2 logic
 │   ├── logs - Logs for system activation
 │   ├── policy - Generates system call profiles
 │   ├── scripts - Assorted scripts
-│   ├── syscall-monitor - Live syscall monitoring
-│   └── venv
+│   └── syscall-monitor - Live syscall monitoring
 ├── performance - Analysis/comparison files
 │   ├── example_files - Some example python for analysis
 │   ├── resource_util - Resource utilisation performance tools
 │   └── Trial_Out - Trial examples
 └── traffic
     └── vm_automation - Scripts for SSH traffic generation 
+        └── ssh_model.py - Start SSH traffic emulation
+
 ```

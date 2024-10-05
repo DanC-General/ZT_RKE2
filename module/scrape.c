@@ -13,14 +13,6 @@
 #include <unistd.h>
 #include <locale.h>
 
-// struct tcp_head { 
-//     unsigned short sport; 
-//     unsigned short dport; 
-//     unsigned int seq; 
-//     unsigned int ack; 
-//     unsigned char thl : 4; 
-//     unsigned char reserved: 4; 
-// };
 FILE* log_fp;
 struct outputs { 
     // MAC addresses should be max 16 char representation

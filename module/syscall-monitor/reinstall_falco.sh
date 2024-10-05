@@ -1,4 +1,5 @@
 #/bin/bash
+# For the installation of Falco, the eBPF tool necessary for system call analysis.
 helm repo add falcosecurity https://falcosecurity.github.io/charts
 helm repo update
 helm install --replace falco --namespace falco --create-namespace --set tty=true falcosecurity/falco

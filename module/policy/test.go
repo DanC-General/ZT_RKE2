@@ -1,5 +1,4 @@
 package main
-
 // Import necessary libraries
 import (
 	"context"
@@ -26,7 +25,11 @@ func main() {
 	capture_syscalls()
 }
 
-// TODO: Currently capture all pod syscalls, not just service endpoint pods.
+// TODO: Currently captures all pod syscalls, not just service endpoint pods.
+/*
+	Automatically runs gadget traces on each pod in the cluster,
+	and writes them to sec_pols/<deployment>/<pod_name>.
+*/
 func capture_syscalls() {
 	if n_to_gad == nil {
 		n_to_gad = make(map[string]string)
@@ -111,7 +114,10 @@ func handlePod(pod *cv1.Pod) string {
 	// return pod.Name
 	return pod.Name
 }
-
+/*
+	Gets the Process ID of a container 
+	from its Container ID.
+*/
 func get_cid_pid(cid string) string {
 
 	cmd := "ps -ef | grep " + cid + " | tr -s [:space:]"
@@ -123,7 +129,9 @@ func get_cid_pid(cid string) string {
 	fmt.Println(pid)
 	return pid
 }
-
+/*
+	Given the name of a pod, starts a new gadget trace on that pod.
+*/
 func start_capture(pName string) string {
 	fmt.Println("Started capturing " + pName)
 	cmd := "kubectl gadget advise seccomp-profile start -p " + pName
@@ -134,8 +142,11 @@ func start_capture(pName string) string {
 	}
 	return string(out)
 }
+/*
+	Terminates a capture on a given pod and writes the 
+	trace output to the appropriate file. 
+*/
 func end_capture(pName string, capID string) {
-	// This is very inefficient and could easily rewrite to store map differently.
 	var cName string
 	for k, m := range pid_stores {
 		// fmt.Println(k, m)

@@ -1,5 +1,7 @@
 import pika
-
+"""
+Starts the message queue server for the system call alerts.
+"""
 class AMQPConnection:
     def __init__(self):
         credentials = pika.PlainCredentials("ztrke2", "ztrke2")

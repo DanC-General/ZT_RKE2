@@ -27,9 +27,12 @@ type SyscallAction struct {
 	Names  []string `json:"names"`
 }
 
-// containerName : set (sys1, sys2)
 var mappedSyscalls map[string]map[string]struct{}
 
+/* 
+	Automatically creates strings of the system call profiles 
+	in the required Falco format. 
+*/
 func getSyscalls() string {
 	complete := ""
 	for cName, set := range mappedSyscalls {
@@ -52,6 +55,11 @@ func getSyscalls() string {
 	fmt.Println(complete)
 	return complete
 }
+/*
+	Automatically writes out the system calls rules to 
+	the falco.yaml file used to configure the Falco 
+	monitoring. 
+*/
 func writeRules() {
 	f, err := os.OpenFile("../falco.yaml", os.O_APPEND|os.O_WRONLY, 0644)
 	check(err)
@@ -77,6 +85,11 @@ func writeRules() {
 		check(err)
 	}
 }
+/*
+	Reads all the captured system call profiles 
+	from a deployments, and combines them into 
+	a single list of expected pod system calls.
+*/
 func recRead(dir string) {
 	files, err := os.ReadDir(dir)
 	if err != nil {
@@ -131,6 +144,11 @@ func recRead(dir string) {
 		}
 	}
 }
+/*
+	For each deployment, combines all the pod profiles into 
+	a single list and writes them to the falco configuration file
+	in the correct format. 
+*/
 func main() {
 	mappedSyscalls = make(map[string]map[string]struct{})
 	recRead("../../policy/sec_pols")

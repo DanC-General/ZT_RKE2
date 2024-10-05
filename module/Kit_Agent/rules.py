@@ -21,6 +21,10 @@ svc_dict = dict()
 pod_cidr = ""
 
 def parse_conntrack(conn_str,packet):
+    """
+    Reverses conntrack mappings used by Calico to retrieve endpoint 
+    host addresses from the Calico SNAT.
+    """
 # tcp      6 82684 ESTABLISHED src=192.168.122.10 dst=10.43.238.254 sport=51682 dport=8003 src=10.42.0.62 dst=10.1.1.243 sport=22 dport=59424 [ASSURED] mark=0 use=1
     # print("SEARCHING FOR ", conn_str)
     patterns = ["src","dst","sport","dport"]
@@ -45,6 +49,9 @@ def parse_conntrack(conn_str,packet):
     return conn_str + "\n"
 
 def get_connection(pack): 
+    """
+    Converts a NAT packet to the endpoint addresses.
+    """
     command1 = ["conntrack","-L"]
     command2 = ["grep",pack.external_port(pod_cidr)[0]+".*"+pack.external_port(pod_cidr)[1]]  
     # try: 
@@ -59,6 +66,9 @@ def get_connection(pack):
 count_q = queue.Queue()
 
 def get_lines(pipe): 
+    """
+    Main function for handling packets
+    """
     global svc_dict
     global count_q
     total_count = 0 
@@ -72,16 +82,8 @@ def get_lines(pipe):
         st = time()
         while True: 
             # Read in data as bytes from pipe 
-            #    - readline had encoding issues on other OSs
-            # data = ""
-            # while True: 
-            #     cur = f.read(1)
-            #     data += cur
-            #     if cur == '\n': 
-            #         break 
             data = f.readline()
             start_time = time()
-            # print("read")
             # Split the string into a list with the necessary 
             #   fields for class parsing.
             # log.write(data + "\n")

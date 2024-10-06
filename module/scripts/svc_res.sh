@@ -9,9 +9,8 @@ is an implementation relying on the calico utilisation of iptables to redirect t
 
 First, we identify all services present on the host machine using the kubectl. These 
 service names are then related to the ports on which they are hosted, and combined into 
-a svc:port string. This string is used to find the iptables rule relevant to the service, 
-which is then used to get the ip of the underlying pod. This ip can be mapped back to the 
-pod's name, which can be used to get the name of the interface it uses.  
+a svc:port string. The endpoints of the pods can be obtained through the Kubernetes CLI, 
+and the interface names can then be determined from those names. 
 
 description
 # Find user-defined services in the default namespace.

@@ -12,6 +12,7 @@ def main():
     parser.add_argument("file", help="Path of file to anlayse")
     parser.add_argument("-a","--attack-file",help="Path of file containing the attack logs")
     parser.add_argument("-c","--comparison-file",help="Path of file containing the parsed data for Kitsune output")
+    parser.add_argument("-n","--next-file",help="Alternative file for kitsune output")
     args = parser.parse_args()
     stime = get_start_time(args.file)
     atks = parse_attack_file(args.attack_file,stime)
@@ -28,7 +29,6 @@ def main():
     best_comp = None
     print("\nRunning Kitsune comparison...")
     for i in [x / 10.0 for x in range(1, 10, 1)]:
-        i = 0.4
         comp_analyser = analyse_comparison(args.comparison_file,atks,rmse_val=i,stime=stime)
         comp_analyser.start_time = stime
         stats = comp_analyser.get_stats()
@@ -39,7 +39,18 @@ def main():
             highest_stats = stats
             highest_rmse = i
             best_comp = copy.deepcopy(comp_analyser)
-        break
+    if args.next_file:
+        for i in [x / 10.0 for x in range(1, 10, 1)]:
+            comp_analyser = analyse_comparison(args.next_file,atks,rmse_val=i,stime=stime)
+            comp_analyser.start_time = stime
+            stats = comp_analyser.get_stats()
+            f1 = stats[-3]
+            # print("\nRMSE",i,f1,"\n")
+            if f1 > highest_f1: 
+                highest_f1 = f1
+                highest_stats = stats
+                highest_rmse = i
+                best_comp = copy.deepcopy(comp_analyser)
     # print("t_p,f_p,t_n,f_n,acc,prec,rec,f1,net_det,host_det")
     print(f"At RMSE {highest_rmse}:")
     show_results(highest_stats)

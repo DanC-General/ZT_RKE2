@@ -8,5 +8,8 @@ echo "Moving /home/dc/ZT_RKE2/dump.pcap"
 sudo tcpdump -r "/home/dc/ZT_RKE2/dump.pcap" -c 20000 -w "/home/dc/ZT_RKE2/performance/$dir/head.pcap" 
 pcapsampler -m COUNT_RAND_UNIFORM -r 150 "/home/dc/ZT_RKE2/dump.pcap" "/home/dc/ZT_RKE2/performance/$dir/sample.pcap"
 mergecap -w "/home/dc/ZT_RKE2/performance/$dir/sample_combined.pcap" "/home/dc/ZT_RKE2/performance/$dir/head.pcap" "/home/dc/ZT_RKE2/performance/$dir/sample.pcap"
+pcapsampler -m COUNT_RAND_UNIFORM -r 130 "/home/dc/ZT_RKE2/dump.pcap" "/home/dc/ZT_RKE2/performance/$dir/no_train.pcap"
+
 
 source /home/dc/ZT_RKE2/module/venv/bin/activate && python3 /home/dc/ZT_RKE2/module/Kit_Agent/example.py -f "/home/dc/ZT_RKE2/performance/$dir/sample_combined.pcap" -t "/home/dc/ZT_RKE2/performance/$dir/sample_output.log"
+source /home/dc/ZT_RKE2/module/venv/bin/activate && python3 /home/dc/ZT_RKE2/module/Kit_Agent/example.py -f "/home/dc/ZT_RKE2/performance/$dir/no_train.pcap" -t "/home/dc/ZT_RKE2/performance/$dir/nt_out.log"

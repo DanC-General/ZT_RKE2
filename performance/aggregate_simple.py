@@ -16,13 +16,15 @@ relevant_file = True
 with open(args.file,'r') as f: 
     for line in f: 
         line = line.strip()
-        # if line.startswith('Trial_Out/0-'):
+        # if line.startswith('Trial_Out/00-14'):
         # # if line.startswith('Trial_Out/0-') or line.startswith('Trial_Out/01'):
-        #     relevant_file = True
-        #     pass
-        # elif line.startswith('Trial_Out/0'):
         #     relevant_file = False
-        #     continue
+        #     pass
+        # elif line.startswith('Trial_Out/01-14'):
+        #     relevant_file = False
+        #     pass
+        # # else: 
+        # #     relevant_file= True
         # elif line.startswith('Trial_Out'): 
         #     relevant_file = True
         # print("COUNTS",zt_count,kit_count)
@@ -30,8 +32,8 @@ with open(args.file,'r') as f:
             if not relevant_file: 
                 continue
             print("COUNT:",zt_count)
-            if i > 6: 
-                break
+            # if i > 6: 
+            #     break
             det = line.split(',')
             print("Detail ",det)
             if cur_ztrke2:
@@ -40,6 +42,9 @@ with open(args.file,'r') as f:
             else: 
                 print("Adding kitsune")  
                 kit_count += 1             
+            if float(det[-1].split(":")[-1].strip()) < 0.2:
+                cur_ztrke2 = not cur_ztrke2
+                continue
             for i,item in enumerate(det):
                 values = [x.strip() for x in item.split(':')]
                 if cur_ztrke2:
@@ -49,7 +54,9 @@ with open(args.file,'r') as f:
                 print(i,values)
             cur_ztrke2 = not cur_ztrke2
     print("COUNTS",zt_count,kit_count)
+    print("zt raw",ztrke2)
     # print("Kitsune")
+    print("kit raw",kitsune)
     # print([statistics.mean(x) for x in kitsune])
     # print("ZT_RKE2",len(ztrke2[2]))
     # print([statistics.mean(x) for x in ztrke2])
@@ -124,7 +131,7 @@ with open(args.file,'r') as f:
     ax.set_ybound(0,1.1)
     ax.set_xticks(x_pos + 0.375)
     ax.set_xticklabels(labels)
-    ax.set_title('Metric Comparison - 15 Trials')
+    ax.set_title('Metric Comparison - 25 Trials')
     ax.yaxis.grid(True)
 
     print("Kitsune")
@@ -132,7 +139,7 @@ with open(args.file,'r') as f:
     print("ZT_RKE2")
     print(f"{ztrke2_means}\n{ztrke2_stds}")
     # Save the figure and show
-    plt.tight_layout()
-    # plt.savefig('aggregated_15_trials.png')
+    plt.tight_layout() 
+    plt.savefig('aggregated_25_trials.png')
     plt.show()
 

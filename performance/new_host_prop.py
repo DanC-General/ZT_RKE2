@@ -43,6 +43,7 @@ class Metric():
 metrics = {"NET": Metric("NET"),"HOST":Metric("HOST"),"FP": Metric("FP")}
 with open(args.file,'r') as f: 
     for line in f: 
+        # is_ztrke2 = True
         if line.startswith("Running ZT_RKE2"):
             is_ztrke2 = True
         elif line.startswith("Running Kitsune"):   
@@ -50,29 +51,36 @@ with open(args.file,'r') as f:
 
         if line.startswith("    HOST"):
             det = line.strip().split(" ")
-            if not is_ztrke2: 
+            if is_ztrke2: 
                 print("ZTRKE2",det)
                 cat_counts.append([det[1],det[3]])
         if line.startswith("Attack file"):
             # print(line)
             for k,m in metrics.items(): 
+                # if m.total_count != 0:
+                # Account for failed trials - mq server not running for some.
                 if m.host_count != 0: 
                     m.results.append([m.host_count,m.both_count,m.net_count,m.total_count])
                 m.reset()
         line = line.strip()
         det = line.split(",")
         if det[-1] == "NET" or det[-1] == "HOST":
+            print("Analysing",det)
             metrics[det[-1]].total_count += 1
             add = False
-            if float(det[-2]) < 0.4:
-                metrics[det[-1]].host_count += 1 
-                add = True
             if float(det[-3]) != 1: 
+                ## Both count includes host count
                 metrics[det[-1]].both_count += 1
-                add = True
-            if not add: 
+                # add = True
+                print("Add both")
+                if float(det[-2]) < 0.4:
+                    metrics[det[-1]].host_count += 1
+                    print("Add host")
+                # add = True
+            # if not add: 
+            else:
                 metrics[det[-1]].net_count += 1 
-
+                print("Add net ")
                 
         # FP
         if det[-1] == "FP":
@@ -94,7 +102,14 @@ with open(args.file,'r') as f:
                 metrics["FP"].net_count += 1 
     # print(host_only_count,host_count,total_count,host_only_count/total_count,host_count/total_count)
     # print(net_count,host_count,total_count,net_count/total_count,host_count/total_count)
-    print([[k,v.get_results()] for k,v in metrics.items()])
+    # for k,m in metrics.items(): 
+    #     # if m.total_count != 0:
+    #     if m.host_count != 0: 
+    #         m.results.append([m.host_count,m.both_count,m.net_count,m.total_count])
+    #     m.reset()
+    print([[k,v] for k,v in metrics.items()])
+    print([[k,[x for x in v.results]] for k,v in metrics.items()])
+    print(list(cat_counts))
 #     print("Host mean",statistics.mean(list([float(x[0].replace(",","")) for x in cat_counts if float(x[0].replace(",","")) !=  0.5])))
 #     print("Net mean",statistics.mean(list([float(x[1].replace(",","")) for x in cat_counts if float(x[1].replace(",","")) !=  0.5]))
 # )
@@ -121,13 +136,13 @@ with open(args.file,'r') as f:
                       columns=["Packet Label","Subject Alert","Both","Object Alert"],
     )
     df.plot(stacked=True,x="Packet Label",kind='bar',rot=0,title="Trust Component Roles in True Positives")
-    plt.savefig("Trust_Roles_TP.png")
+    # plt.savefig("Trust_Roles_TP.png")
     plt.show()
     df = pd.DataFrame([
                         ['All FP',fpres[0],fpres[1]-fpres[0],1-fpres[1]]
                       ],
                       columns=["Packet Label","Subject Alert","Both","Object Alert"],
     )
-    df.plot(figsize=(4,5),stacked=True,x="Packet Label",kind='bar',rot=0,width=0.2,title="Trust Component Roles in False Positives")
-    plt.savefig("Trust_Roles_FP.png")
-    plt.show()
+    # df.plot(figsize=(4,5),stacked=True,x="Packet Label",kind='bar',rot=0,width=0.2,title="Trust Component Roles in False Positives")
+    # # plt.savefig("Trust_Roles_FP.png")
+    # plt.show()

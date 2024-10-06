@@ -126,10 +126,10 @@ def get_lines(pipe):
             while not msg_q.empty():
                 # TODO Could alter this to retrieve all messages from the queue
                 item = msg_q.get(block=False)
-                print("analysing",item)
                 cur_call = item[0]
                 alert_time = item[1]
                 rel_svc = svc_dict[item[2]]
+                print("analysing",item,list(rel_svc.prev_subj.more_recent(0)))
                 # New subject trusts are made for the relevant subjects here
                 rel_svc.handle_alert(cur_call,alert_time)
                 # log.write(" " + str(pack.sip) + " " + str(pack.dip) + cur_svc.name + ":: " + str(cur_svc.subj_sysc_map)+"\n")

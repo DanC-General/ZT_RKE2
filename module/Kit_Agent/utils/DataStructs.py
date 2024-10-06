@@ -107,15 +107,16 @@ class PrioQ:
         ts = float(ts)
         for i in self.store: 
             delta = ts - i[0]
-            # print(delta)
-            # print("    ||",ts, "<->",i, " =",delta)
-            # self.log.write("    || "+str(ts) + " <-> " + str(i) + " = "+str(delta) + "\n")
-            # Might need to check above 0 
-            if delta <= 5: 
-                # self.log.write("       added\n")
-                # print("     added")
-                # print("    -->",i[1], " has relevant delta",delta,": added!")
-                rec.append(i[1])
+            # # print(delta)
+            # # print("    ||",ts, "<->",i, " =",delta)
+            # # self.log.write("    || "+str(ts) + " <-> " + str(i) + " = "+str(delta) + "\n")
+            # Checks if the alert came within the last 5 seconds to mitigate False Positives.
+            # if delta <= 5: 
+            # #     self.log.write("       added\n")
+            # #     print("     added")
+            # #     print("    -->",i[1], " has relevant delta",delta,": added!")
+            #     rec.append(i[1])
+            rec.append(i[1])
         # print(rec)
         rec.reverse()
         # print(rec,"\n")

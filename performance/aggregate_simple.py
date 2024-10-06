@@ -140,6 +140,6 @@ with open(args.file,'r') as f:
     print(f"{ztrke2_means}\n{ztrke2_stds}")
     # Save the figure and show
     plt.tight_layout() 
-    plt.show()
     plt.savefig('aggregated_25_trials.png')
+    plt.show()
 

@@ -136,13 +136,13 @@ with open(args.file,'r') as f:
                       columns=["Packet Label","Subject Alert","Both","Object Alert"],
     )
     df.plot(stacked=True,x="Packet Label",kind='bar',rot=0,title="Trust Component Roles in True Positives")
-    # plt.savefig("Trust_Roles_TP.png")
+    plt.savefig("Trust_Roles_TP_25.png")
     plt.show()
     df = pd.DataFrame([
                         ['All FP',fpres[0],fpres[1]-fpres[0],1-fpres[1]]
                       ],
                       columns=["Packet Label","Subject Alert","Both","Object Alert"],
     )
-    # df.plot(figsize=(4,5),stacked=True,x="Packet Label",kind='bar',rot=0,width=0.2,title="Trust Component Roles in False Positives")
-    # # plt.savefig("Trust_Roles_FP.png")
+    df.plot(figsize=(4,5),stacked=True,x="Packet Label",kind='bar',rot=0,width=0.2,title="Trust Component Roles in False Positives")
+    plt.savefig("Trust_Roles_FP_25.png")
     # plt.show()

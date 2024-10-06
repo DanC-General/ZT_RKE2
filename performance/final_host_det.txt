@@ -1,2 +1,0 @@
-Only subject trust: 0.49393128932045816
-Lowered subject trust: 0.9401380195795217

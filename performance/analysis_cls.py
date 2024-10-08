@@ -433,7 +433,7 @@ class Analyser:
         ground_truth_table = [int(float(x) - self.start_time) for x in self.ground_pos_times]
         host_gt_table = [int(float(x) - self.start_time) for x in self.host_gt]
         net_gt_table = [int(float(x) - self.start_time) for x in self.net_gt]
-        fn_table = [int(float(x) - self.start_time) for x in self.fptimes]
+        fn_table = [int(float(x) - self.start_time) for x in self.fntimes]
         tp_table = [int(float(x) - self.start_time) for x in self.tptimes]
 
         gt_vals = []
@@ -465,7 +465,7 @@ class Analyser:
             #     tp_vals.append(1.5)
             # else:
             #     tp_vals.append(None)
-        plt.figure(figsize=(20,10))
+        plt.figure(figsize=(18,9))
         # print(gt_vals,"___",tp_vals,"___",fn_vals)
         # plt.plot(values, gt_vals, drawstyle='steps-post',markersize=3,marker='o',label="All Attacks")
         plt.plot(values, tp_vals, drawstyle='steps-post',color="green",markersize=7,marker='o',label="True Positives")
@@ -483,11 +483,11 @@ class Analyser:
             color='white'
         )
         plt.legend(fontsize=18,loc="upper left")
-        plt.title(f"Analysis of {name_str} Accuracy",fontsize=22)
+        plt.title(f"Analysis of {name_str} Recall",fontsize=22)
         plot_time = time.strftime("%Y%m%d-%H%M%S")
         print(name[:name.rfind("/")+1])
         out_dir = name[:name.rfind("/")+1]
-        plt.savefig(f'{out_dir}{name_str}_Accuracy.png')
+        plt.savefig(f'{out_dir}{name_str}_Recall.pdf',format="pdf",dpi=300)
         # plt.show()
         
     def get_res_performance(self): 
@@ -510,4 +510,4 @@ class Analyser:
         plt.title('Comparison of ZT_RKE2 processing times.',fontsize=18)
         # Show the plot
         # plt.show()
-        plt.savefig("resource_util/ztrke2_packet_processing_adj.png")
+        plt.savefig("resource_util/ztrke2_packet_processing_adj.pdf",format="pdf",dpi=300)

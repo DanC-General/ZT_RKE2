@@ -3,6 +3,22 @@ import statistics
 import numpy as np
 import matplotlib.pyplot as plt
 import pandas as pd 
+font = {
+    # 'weight' : 'bold',
+        'size'   : 15}
+
+plt.rc('font', **font)
+SMALL_SIZE = 14
+MEDIUM_SIZE = 16
+BIGGER_SIZE = 18
+
+plt.rc('font', size=SMALL_SIZE)          # controls default text sizes
+plt.rc('axes', titlesize=MEDIUM_SIZE)     # fontsize of the axes title
+plt.rc('axes', labelsize=MEDIUM_SIZE, titlesize=BIGGER_SIZE)    # fontsize of the x and y labels
+plt.rc('xtick', labelsize=SMALL_SIZE)    # fontsize of the tick labels
+plt.rc('ytick', labelsize=SMALL_SIZE)    # fontsize of the tick labels
+plt.rc('legend', fontsize=SMALL_SIZE)    # legend fontsize
+# plt.rc('figure', titlesize=BIGGER_SIZE)
 parser = ArgumentParser()
 parser.add_argument("file",help="Path of file to write to")
 args = parser.parse_args()
@@ -135,7 +151,7 @@ with open(args.file,'r') as f:
                       ],
                       columns=["Packet Label","Subject Alert","Both","Object Alert"],
     )
-    df.plot(stacked=True,x="Packet Label",kind='bar',rot=0,title="Trust Component Roles in True Positives")
+    df.plot(stacked=True,x="Packet Label",kind='bar',rot=0,title="True Positive Trusts")
     plt.savefig("Trust_Roles_TP_25.pdf",format="pdf",dpi=300)
     plt.show()
     df = pd.DataFrame([
@@ -143,6 +159,6 @@ with open(args.file,'r') as f:
                       ],
                       columns=["Packet Label","Subject Alert","Both","Object Alert"],
     )
-    df.plot(figsize=(4,5),stacked=True,x="Packet Label",kind='bar',rot=0,width=0.2,title="Trust Component Roles in False Positives")
+    df.plot(figsize=(4,5),stacked=True,x="Packet Label",kind='bar',rot=0,width=0.2,title="False Positive Trusts")
     plt.savefig("Trust_Roles_FP_25.pdf",format="pdf",dpi=300)
     # plt.show()

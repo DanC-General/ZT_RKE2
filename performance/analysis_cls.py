@@ -465,30 +465,30 @@ class Analyser:
             #     tp_vals.append(1.5)
             # else:
             #     tp_vals.append(None)
-        plt.figure(figsize=(18,9))
+        plt.figure(figsize=(18,11))
         # print(gt_vals,"___",tp_vals,"___",fn_vals)
         # plt.plot(values, gt_vals, drawstyle='steps-post',markersize=3,marker='o',label="All Attacks")
         plt.plot(values, tp_vals, drawstyle='steps-post',color="green",markersize=7,marker='o',label="True Positives")
         plt.plot(values, fn_vals, drawstyle='steps-post',color="red",markersize=7,marker='o',label="False Negatives")
         plt.plot(values, host_vals, drawstyle='steps-post',color="orange",markersize=7,marker='o',label="Host Attacks")
         plt.plot(values, net_vals, drawstyle='steps-post',color="purple",markersize=7,marker='o',label="Network Attacks")
-        plt.xlabel("Time since start (seconds)",fontsize=18)
+        plt.xlabel("Time since start (seconds)",fontsize=26)
 
-        plt.ylabel("Attack Category",fontsize=18)
-        plt.xticks(np.arange(0,3600,step=600),fontsize=18)
-        plt.yticks(np.arange(0,0.6,step=0.1),fontsize=18,color="white")
+        plt.ylabel("Attack Category",fontsize=26)
+        plt.xticks(np.arange(0,3600,step=600),fontsize=26)
+        plt.yticks(np.arange(0,0.6,step=0.1),fontsize=26,color="white")
         plt.tick_params(
             axis='y',
             which='both',
             color='white'
         )
-        plt.legend(fontsize=18,loc="upper left")
-        plt.title(f"Analysis of {name_str} Recall",fontsize=22)
+        plt.legend(fontsize=22,loc="upper left",ncol=2)
+        plt.title(f"Analysis of {name_str} Recall",fontsize=30)
         plot_time = time.strftime("%Y%m%d-%H%M%S")
         print(name[:name.rfind("/")+1])
         out_dir = name[:name.rfind("/")+1]
         plt.savefig(f'{out_dir}{name_str}_Recall.pdf',format="pdf",dpi=300)
-        # plt.show()
+        plt.show()
         
     def get_res_performance(self): 
         # print(self.avg_times)

@@ -450,9 +450,9 @@ class Analyser:
             # if value in ground_truth_table:
             gt_vals.append(1 if value in ground_truth_table else None)
             fn_vals.append(0.4 if value in fn_table else None)
-            tp_vals.append(0.35 if value in tp_table else None)
-            host_vals.append(0.2 if value in host_gt_table else None)
-            net_vals.append(0.2 if value in net_gt_table else None)
+            tp_vals.append(0.32 if value in tp_table else None)
+            host_vals.append(0.15 if value in host_gt_table else None)
+            net_vals.append(0.15 if value in net_gt_table else None)
             # else:
             #     gt_vals.append(None)
             # if value in host_vals: 
@@ -465,25 +465,25 @@ class Analyser:
             #     tp_vals.append(1.5)
             # else:
             #     tp_vals.append(None)
-        plt.figure(figsize=(18,11))
+        plt.figure(figsize=(18,9))
         # print(gt_vals,"___",tp_vals,"___",fn_vals)
         # plt.plot(values, gt_vals, drawstyle='steps-post',markersize=3,marker='o',label="All Attacks")
-        plt.plot(values, tp_vals, drawstyle='steps-post',color="green",markersize=7,marker='o',label="True Positives")
-        plt.plot(values, fn_vals, drawstyle='steps-post',color="red",markersize=7,marker='o',label="False Negatives")
-        plt.plot(values, host_vals, drawstyle='steps-post',color="orange",markersize=7,marker='o',label="Host Attacks")
-        plt.plot(values, net_vals, drawstyle='steps-post',color="purple",markersize=7,marker='o',label="Network Attacks")
+        plt.plot(values, tp_vals, drawstyle='steps-post',color="green",markersize=8,marker='o',label="True Positives")
+        plt.plot(values, fn_vals, drawstyle='steps-post',color="red",markersize=8,marker='o',label="False Negatives")
+        plt.plot(values, host_vals, drawstyle='steps-post',color="orange",markersize=8,marker='o',label="Host Attacks")
+        plt.plot(values, net_vals, drawstyle='steps-post',color="purple",markersize=8,marker='o',label="Network Attacks")
         plt.xlabel("Time since start (seconds)",fontsize=26)
-
         plt.ylabel("Attack Category",fontsize=26)
-        plt.xticks(np.arange(0,3600,step=600),fontsize=26)
-        plt.yticks(np.arange(0,0.6,step=0.1),fontsize=26,color="white")
+        plt.xticks(np.arange(0,3600,step=600),fontsize=22)
+        plt.yticks(np.arange(0,0.7,step=0.1),fontsize=22,color="white")
         plt.tick_params(
             axis='y',
             which='both',
             color='white'
         )
-        plt.legend(fontsize=22,loc="upper left",ncol=2)
-        plt.title(f"Analysis of {name_str} Recall",fontsize=30)
+        # plt.figlegend()
+        plt.legend(fontsize=24,loc="upper left",ncol=2)
+        plt.title(f"Analysis of {name_str} Recall",fontsize=34)
         plot_time = time.strftime("%Y%m%d-%H%M%S")
         print(name[:name.rfind("/")+1])
         out_dir = name[:name.rfind("/")+1]

@@ -449,10 +449,10 @@ class Analyser:
         for value in values: 
             # if value in ground_truth_table:
             gt_vals.append(1 if value in ground_truth_table else None)
-            fn_vals.append(0.4 if value in fn_table else None)
-            tp_vals.append(0.32 if value in tp_table else None)
-            host_vals.append(0.15 if value in host_gt_table else None)
-            net_vals.append(0.15 if value in net_gt_table else None)
+            fn_vals.append(0.43 if value in fn_table else None)
+            tp_vals.append(0.38 if value in tp_table else None)
+            host_vals.append(0.18 if value in host_gt_table else None)
+            net_vals.append(0.18 if value in net_gt_table else None)
             # else:
             #     gt_vals.append(None)
             # if value in host_vals: 

@@ -469,7 +469,7 @@ class Analyser:
         # print(gt_vals,"___",tp_vals,"___",fn_vals)
         # plt.plot(values, gt_vals, drawstyle='steps-post',markersize=3,marker='o',label="All Attacks")
         plt.plot(values, tp_vals, drawstyle='steps-post',color="green",markersize=7,marker='o',label="True Positives")
-        plt.plot(values, fn_vals, drawstyle='steps-post',color="red",markersize=7,marker='o',label="False Positives")
+        plt.plot(values, fn_vals, drawstyle='steps-post',color="red",markersize=7,marker='o',label="False Negatives")
         plt.plot(values, host_vals, drawstyle='steps-post',color="orange",markersize=7,marker='o',label="Host Attacks")
         plt.plot(values, net_vals, drawstyle='steps-post',color="purple",markersize=7,marker='o',label="Network Attacks")
         plt.xlabel("Time since start (seconds)",fontsize=18)
